@@ -1,0 +1,566 @@
+package org.cherubim.common.util;
+
+import com.alibaba.fastjson.JSON;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.http.*;
+import org.apache.http.client.HttpRequestRetryHandler;
+import org.apache.http.client.ServiceUnavailableRetryStrategy;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.conn.ConnectTimeoutException;
+import org.apache.http.conn.HttpHostConnectException;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.conn.ssl.TrustStrategy;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HttpContext;
+import org.apache.http.ssl.SSLContextBuilder;
+import org.apache.http.util.EntityUtils;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLHandshakeException;
+import java.io.*;
+import java.net.*;
+import java.nio.charset.StandardCharsets;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+/**
+ * @author huangxiaohu
+ */
+@Slf4j
+public class HttpUtil {
+
+    private static final int CONN_TIME_OUT = 60000;
+    private static final int READ_TIME_OUT = 60000;
+    private static final int EXECUTION_COUNT = 3;
+    private static final int RETRY_INTERVAL = 10000;
+
+    private static final RequestConfig REQUEST_CONFIG_TIME_OUT = RequestConfig.custom()
+            .setSocketTimeout(CONN_TIME_OUT)
+            .setConnectTimeout(CONN_TIME_OUT)
+            .setConnectionRequestTimeout(CONN_TIME_OUT)
+            .build();
+
+    public static String doGet(String url, Map<String, Object> param) throws Exception {
+        StringBuffer buffer = new StringBuffer(url);
+        if (url.endsWith("/")) {
+            buffer.deleteCharAt(buffer.length() - 1);
+        }
+        buffer.append("?");
+        buffer.append(getParams(param));
+        StringBuffer result = new StringBuffer();
+        BufferedReader in = null;
+        try {
+
+            log.info("data:{}", buffer.toString());
+            URL realUrl = new URL(buffer.toString());
+            // 打开和URL之间的连接
+            HttpURLConnection connection = (HttpURLConnection) realUrl.openConnection();
+            // 设置通用的请求属性
+            connection.setRequestProperty("accept", "*/*");
+
+            // 设置超时时间
+            connection.setConnectTimeout(CONN_TIME_OUT);
+            connection.setReadTimeout(READ_TIME_OUT);
+
+            // 建立实际的连接
+            connection.connect();
+            // 定义 BufferedReader输入流来读取URL的响应
+            in = new BufferedReader(new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
+            String line;
+            while ((line = in.readLine()) != null) {
+                result.append(line);
+            }
+        } catch (Exception e) {
+            throw e;
+        }
+        // 使用finally块来关闭输入流
+        finally {
+            try {
+                if (in != null) {
+                    in.close();
+                }
+            } catch (Exception e2) {
+                log.error("释放资源异常", e2);
+            }
+        }
+        return result.toString();
+    }
+
+    public static String doClientGet(String url, Map<String, Object> params, boolean isHttps) {
+        HttpResponse response = null;
+        String apiUrl = url;
+        StringBuffer param = new StringBuffer();
+        int i = 0;
+        for (String key : params.keySet()) {
+            if (i == 0) {
+                param.append("?");
+            } else {
+                param.append("&");
+            }
+            param.append(key).append("=").append(params.get(key));
+            i++;
+        }
+        apiUrl += param;
+        String result = null;
+        CloseableHttpClient httpclient;
+        if (isHttps) {
+            httpclient = createSSLClientDefault();
+        } else {
+            httpclient = HttpClients.createDefault();
+        }
+        try {
+            HttpGet httpGet = new HttpGet(apiUrl);
+            response = httpclient.execute(httpGet);
+            HttpEntity entity = response.getEntity();
+            if (entity != null) {
+                result = EntityUtils.toString(entity, "UTF-8");
+            }
+        } catch (IOException e) {
+            log.error("HttpClientUtil-doGet,error:", e);
+        } finally {
+            if (response != null) {
+                try {
+                    EntityUtils.consume(response.getEntity());
+                } catch (IOException e) {
+                    log.error("HttpClientUtil-doGet,error:", e);
+                }
+            }
+            if (httpclient != null) {
+                try {
+                    httpclient.close();
+                } catch (IOException e) {
+                    log.error("httpclient close error:", e);
+                }
+            }
+        }
+        return result;
+    }
+
+    public static String sendPostJson(String url, Map<String, Object> param) throws Exception {
+        System.out.println(url);
+        System.out.println(JSON.toJSONString(param));
+
+        return sendPostJson(url, JSON.toJSONString(param));
+    }
+
+    public static String sendPostJson(String url, String jsonParam) throws Exception {
+
+        OutputStream out = null;
+        InputStream in = null;
+        HttpURLConnection conn = null;
+        StringBuffer result = new StringBuffer();
+        try {
+            URL realUrl = new URL(url);
+            // open connect
+            conn = (HttpURLConnection) realUrl.openConnection();
+            // set property
+            conn.setRequestProperty("accept", "*/*");
+            conn.setRequestProperty("connection", "Keep-Alive");
+            conn.setRequestProperty("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36");
+            conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+
+            // set timeout
+            conn.setConnectTimeout(CONN_TIME_OUT);
+            conn.setReadTimeout(READ_TIME_OUT);
+
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            conn.connect();
+
+            // send
+            out = conn.getOutputStream();
+            out.write(jsonParam.getBytes(StandardCharsets.UTF_8));
+            // flush
+            out.flush();
+            // read response
+            if (conn.getResponseCode() < HttpStatus.SC_BAD_REQUEST) {
+                in = conn.getInputStream();
+            } else {
+                in = conn.getErrorStream();
+            }
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                result.append(line);
+            }
+            System.out.println(result.toString());
+            return result.toString();
+
+        } catch (Exception e) {
+            throw e;
+        }
+        // 使用finally块来关闭输出流、输入流
+        finally {
+            if (out != null) {
+                out.close();
+            }
+            if (in != null) {
+                in.close();
+            }
+
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+    }
+
+    private static StringBuffer getParams(Map<String, Object> param) throws UnsupportedEncodingException {
+        StringBuffer buffer = new StringBuffer();
+        if (param != null && !param.isEmpty()) {
+            for (Entry<String, Object> entry : param.entrySet()) {
+                buffer.append(entry.getKey()).append("=").append(URLEncoder.encode(String.valueOf(entry.getValue()), "UTF-8"))
+                        .append("&");
+            }
+            buffer.deleteCharAt(buffer.length() - 1);
+        }
+        return buffer;
+    }
+
+    public static String sendSSLPost(String url, String params, String contentType) throws Exception {
+        CloseableHttpClient httpClient = createSSLClientDefault();
+        HttpPost httpPost = new HttpPost(url);
+        CloseableHttpResponse response = null;
+        String httpStr = null;
+        try {
+            StringEntity jsonParams = new StringEntity(params, "utf-8");
+            httpPost.addHeader("content-type", contentType);
+            httpPost.setEntity(jsonParams);
+            RequestConfig defaultRequestConfig = RequestConfig.custom()
+                    .setSocketTimeout(CONN_TIME_OUT)
+                    .setConnectTimeout(CONN_TIME_OUT)
+                    .setConnectionRequestTimeout(CONN_TIME_OUT).build();
+            httpPost.setConfig(defaultRequestConfig);
+            response = httpClient.execute(httpPost);
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode == HttpStatus.SC_OK) {
+                httpStr = EntityUtils.toString(response.getEntity(), "utf-8");
+            }
+        } catch (Exception e) {
+            throw e;
+        } finally {
+            if (response != null) {
+                try {
+                    EntityUtils.consume(response.getEntity());
+                } catch (IOException e) {
+                    log.error("HttpClientUtil-sendSSLPost,error:", e);
+                }
+            }
+        }
+        return httpStr;
+    }
+
+    public static String sendSSLPost2(String url, Map<String, Object> params) throws Exception {
+        CloseableHttpClient httpClient = createSSLClientDefault();
+        HttpPost httpPost = new HttpPost(url);
+        CloseableHttpResponse response = null;
+        String httpStr = null;
+        try {
+            List<NameValuePair> paramsList = new ArrayList<NameValuePair>();
+            for (String key : params.keySet()) {
+                paramsList.add(new BasicNameValuePair(key, String.valueOf(params.get(key))));
+            }
+            httpPost.setEntity(new UrlEncodedFormEntity(paramsList, "utf-8"));
+            ;
+            httpPost.setConfig(REQUEST_CONFIG_TIME_OUT);
+            response = httpClient.execute(httpPost);
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode == HttpStatus.SC_OK) {
+                httpStr = EntityUtils.toString(response.getEntity(), "utf-8");
+            }
+        } catch (Exception e) {
+            throw e;
+        } finally {
+            if (response != null) {
+                try {
+                    EntityUtils.consume(response.getEntity());
+                } catch (IOException e) {
+                    log.error("HttpClientUtil-sendSSLPost2,error:", e);
+                }
+            }
+            if (httpClient != null) {
+                try {
+                    httpClient.close();
+                } catch (IOException e) {
+                    log.error("httpclient close error:", e);
+                }
+            }
+        }
+        return httpStr;
+    }
+
+    public static String doClientGet(String url, Map<String, Object> params) throws Exception {
+        String result = "";
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        try {
+            if (params != null) {
+                if (url.contains("?")) {
+                    url += "&" + getParams(params).toString();
+                } else {
+                    url += "?" + getParams(params).toString();
+                }
+            }
+            HttpGet httpGet = new HttpGet(url);
+            CloseableHttpResponse httpResponse = httpClient.execute(httpGet);
+
+            //判断网络连接状态码是否正常(0--200都数正常)
+            if (httpResponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+                System.out.println("GET Response Status: " + httpResponse.getStatusLine().getStatusCode());
+                System.out.println("httpClient request result:" + result);
+            }
+            HttpEntity resEntity = httpResponse.getEntity();
+            if (resEntity != null) {
+                result = EntityUtils.toString(resEntity, "utf-8");
+            }
+            httpClient.close();
+        } catch (Exception e) {
+            log.error("HttpClientUtil-sendClientGet,error:", e);
+            throw e;
+        } finally {
+            if (httpClient != null) {
+                try {
+                    httpClient.close();
+                } catch (IOException e) {
+                    log.error("httpclient close error:", e);
+                }
+            }
+        }
+        return result;
+    }
+
+    public static String doClientPost(String url, Map<String, Object> params) throws Exception {
+        String result = null;
+        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+            HttpPost httpPost = new HttpPost(url);
+            if (params != null && !params.isEmpty()) {
+                // 设置参数
+                List<NameValuePair> list = new ArrayList<>();
+                Iterator<Entry<String, Object>> iterator = params.entrySet().iterator();
+                while (iterator.hasNext()) {
+                    Entry<String, Object> elem = iterator.next();
+                    if (elem.getValue() != null) {
+                        list.add(new BasicNameValuePair(elem.getKey(), String.valueOf(elem.getValue())));
+                    }
+
+                }
+                if (list.size() > 0) {
+                    UrlEncodedFormEntity entity = new UrlEncodedFormEntity(list, "utf-8");
+                    httpPost.setEntity(entity);
+                }
+            }
+
+            httpPost.setConfig(REQUEST_CONFIG_TIME_OUT);
+            CloseableHttpResponse response = httpClient.execute(httpPost);
+            if (response != null) {
+                HttpEntity resEntity = response.getEntity();
+                if (resEntity != null) {
+                    result = EntityUtils.toString(resEntity, "utf-8");
+                }
+                // 判断网络连接状态码是否正常(0--200都数正常)
+                if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+                    System.out.println("GET Response Status: " + response.getStatusLine().getStatusCode());
+                    System.out.println("httpClient request result:" + result);
+                }
+            }
+        } catch (Exception e) {
+            log.error("HttpClientUtil-sendClientPost,error:", e);
+            throw e;
+        }
+        return result;
+    }
+
+    /**
+     * 获取httpClient对象，包含重试机制
+     *
+     * @return httClient
+     */
+    private static CloseableHttpClient getHttpClient() {
+
+        ServiceUnavailableRetryStrategy serviceUnavailableRetryStrategy = new CustomServiceUnavailableRetryStrategy.Builder()
+                .executionCount(EXECUTION_COUNT)
+                .retryInterval(RETRY_INTERVAL)
+                .build();
+        return HttpClientBuilder.create()
+                .setServiceUnavailableRetryStrategy(serviceUnavailableRetryStrategy)
+                .setConnectionManager(new PoolingHttpClientConnectionManager())
+                .setDefaultRequestConfig(RequestConfig.DEFAULT)
+                .setRetryHandler(getHttpRequestRetryHandler())
+                .build();
+    }
+
+    public static String postForm(String url, Map<String, Object> param) throws Exception {
+
+        StringBuffer buffer = getParams(param);
+        OutputStream out = null;
+        InputStream in = null;
+        StringBuffer result = new StringBuffer();
+        HttpURLConnection conn = null;
+        try {
+            URL realUrl = new URL(url);
+            // 打开和URL之间的连接
+            conn = (HttpURLConnection) realUrl.openConnection();
+            // 设置通用的请求属性
+            conn.setRequestProperty("accept", "*/*");
+            conn.setRequestProperty("connection", "Keep-Alive");
+            conn.setRequestProperty("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;SV1)");
+            conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+            // 设置超时时间
+            conn.setConnectTimeout(CONN_TIME_OUT);
+            conn.setReadTimeout(READ_TIME_OUT);
+
+            // 发送POST请求必须设置如下两行
+            conn.setDoOutput(true);
+            conn.setDoInput(true);
+            conn.connect();
+            // 获取URLConnection对象对应的输出流
+            out = conn.getOutputStream();
+            // 发送请求参数
+            out.write(buffer.toString().getBytes("utf-8"));
+            // flush输出流的缓冲
+            out.flush();
+            // 定义BufferedReader输入流来读取URL的响应
+
+            if (conn.getResponseCode() < HttpStatus.SC_BAD_REQUEST) {
+                in = conn.getInputStream();
+            } else {
+                in = conn.getErrorStream();
+            }
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                result.append(line);
+            }
+            System.out.println(result.toString());
+            return result.toString();
+
+        } catch (Exception e) {
+            throw e;
+        }
+        // 使用finally块来关闭输出流、输入流
+        finally {
+            try {
+                if (out != null) {
+                    out.close();
+                }
+                if (in != null) {
+                    in.close();
+                }
+                if (conn != null) {
+                    conn.disconnect();
+                }
+            } catch (IOException ex) {
+                log.error("释放资源异常", ex);
+            }
+        }
+    }
+
+    /**
+     * 请求异常,获取重试控制器
+     *
+     * @return
+     */
+    private static HttpRequestRetryHandler getHttpRequestRetryHandler() {
+        return new HttpRequestRetryHandler() {
+            @Override
+            public boolean retryRequest(IOException exception, int executionCount, HttpContext context) {
+                if (executionCount > EXECUTION_COUNT) {
+                    return false;
+                }
+                if (exception instanceof NoHttpResponseException) {
+                    log.error("没有响应异常");
+                    return true;
+                } else if (exception instanceof ConnectTimeoutException) {
+                    log.error("连接超时，重试");
+                    return true;
+                } else if (exception instanceof SSLHandshakeException) {
+                    log.error("本地证书异常");
+                    return false;
+                } else if (exception instanceof InterruptedIOException) {
+                    log.error("IO中断异常");
+                    return false;
+                } else if (exception instanceof UnknownHostException) {
+                    log.error("找不到服务器异常");
+                    return false;
+                } else if (exception instanceof SSLException) {
+                    log.error("SSL异常");
+                    return false;
+                } else if (exception instanceof HttpHostConnectException) {
+                    log.error("主机连接异常");
+                    return false;
+                } else if (exception instanceof SocketException) {
+                    log.error("socket异常");
+                    return false;
+                } else {
+                    log.error("未记录的请求异常：" + exception.getClass());
+                }
+                HttpClientContext clientContext = HttpClientContext.adapt(context);
+                HttpRequest request = clientContext.getRequest();
+                // 如果请求被认为是幂等的，那么就重试。即重复执行不影响程序其他效果的
+                if (!(request instanceof HttpEntityEnclosingRequest)) {
+                    return true;
+                }
+                return false;
+            }
+        };
+    }
+
+    /**
+     * 请求异常,重试机制
+     *
+     * @return HttpRequestRetryHandler
+     */
+    private static HttpRequestRetryHandler getRetryHandler() {
+
+        return (e, retryTimes, httpContext) -> {
+            if (retryTimes > EXECUTION_COUNT) {
+                return false;
+            }
+            if (e instanceof UnknownHostException || e instanceof ConnectTimeoutException
+                    || !(e instanceof SSLException) || e instanceof NoHttpResponseException) {
+                return true;
+            }
+
+            HttpClientContext clientContext = HttpClientContext.adapt(httpContext);
+            HttpRequest request = clientContext.getRequest();
+            boolean idempotent = !(request instanceof HttpEntityEnclosingRequest);
+            if (idempotent) {
+                // 如果请求被认为是幂等的，那么就重试。即重复执行不影响程序其他效果的
+                return true;
+            }
+            return false;
+        };
+    }
+
+    private static CloseableHttpClient createSSLClientDefault() {
+        try {
+            SSLContext sslContext = new SSLContextBuilder().loadTrustMaterial(null, new TrustStrategy() {
+                // 信任所有
+                @Override
+                public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                    return true;
+                }
+            }).build();
+            SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext);
+            return HttpClients.custom().setSSLSocketFactory(sslsf).build();
+        } catch (Exception e) {
+            log.error("HttpClientUtil-createSSLClientDefault,error:", e);
+        }
+        return HttpClients.createDefault();
+    }
+
+}
