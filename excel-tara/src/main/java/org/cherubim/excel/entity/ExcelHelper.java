@@ -1,15 +1,19 @@
 package org.cherubim.excel.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import org.cherubim.excel.common.Constant;
+
+import java.io.Serializable;
 
 /**
  * @author huangxiaohu
  */
 @Builder
 @Data
-public class ExcelHelper {
+@AllArgsConstructor
+public class ExcelHelper implements Serializable {
     /**
      * 文件名称
      */
@@ -32,4 +36,8 @@ public class ExcelHelper {
      * @see Constant#DEFAULT_PAGE_SIZE
      */
     private Integer pageSize;
+    /**
+     * 文件生成路径
+     */
+    private String workspace;
 }

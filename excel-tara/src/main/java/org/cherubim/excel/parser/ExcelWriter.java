@@ -30,7 +30,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.cherubim.excel.common.Constant.CHARSET;
-import static org.cherubim.excel.common.Constant.FILE_PATH;
 
 /**
  * 导出具体实现类
@@ -48,6 +47,8 @@ public class ExcelWriter {
     private XSSFCellStyle headCellStyle;
     private Map<Integer, Integer> columnWidthMap = new HashMap<Integer, Integer>();
 
+    private String workPath;
+
     public ExcelWriter(ExcelEntity excelEntity, Integer pageSize, Integer rowAccessWindowSize, Integer recordCountPerSheet) {
         this.excelEntity = excelEntity;
         this.pageSize = pageSize;
@@ -55,15 +56,16 @@ public class ExcelWriter {
         this.recordCountPerSheet = recordCountPerSheet;
     }
 
-    public ExcelWriter(ExcelEntity excelEntity) {
+    public ExcelWriter(ExcelEntity excelEntity, String workPath) {
         this.excelEntity = excelEntity;
+        this.workPath = workPath;
     }
 
-    public void generateCsv(String email) {
+    public void generateCsv() {
 
 
         try {
-            File path = new File(FILE_PATH + email);
+            File path = new File(workPath);
 
             List<File> fileList = new ArrayList<File>();
             if (path.exists()) {
@@ -75,9 +77,11 @@ public class ExcelWriter {
                     fileList.add(file);
                 }
                 final List<File> collect = fileList.stream().sorted(Comparator.comparing(File::getName)).collect(Collectors.toList());
-                File csvFile = new File(FILE_PATH + email + File.separator + excelEntity.getFileName() + ".csv");
+                File csvFile = new File(workPath + excelEntity.getFileName() + ".csv");
 
-                if (!csvFile.exists()) {
+                if (csvFile.exists()) {
+                    csvFile.delete();
+                } else {
                     csvFile.createNewFile();
                 }
                 Appendable printWriter = new PrintWriter(csvFile, CHARSET);

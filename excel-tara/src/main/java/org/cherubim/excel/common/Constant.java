@@ -46,7 +46,12 @@ public final class Constant {
      * 生成文件目录
      */
     public static final String FILE_PATH = System.getProperties().getProperty("user.dir") + File.separator + "export" + File.separator;
-
-    public static int PRODUCER_COUNT = 2;
-    public static int CONSUMER_COUNT = 4;
+    /**
+     * 生产线程数
+     */
+    public static final int PRODUCER_COUNT = 2;
+    /**
+     * 消费线程数
+     */
+    public static final int CONSUMER_COUNT = 4;
 }

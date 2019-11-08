@@ -26,7 +26,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.cherubim.excel.common.Constant.CHARSET;
-import static org.cherubim.excel.common.Constant.FILE_PATH;
 
 /**
  * 生成excel任务
@@ -50,7 +49,7 @@ public class ExcelGenerateTask<P, T> implements ExcelRunnable {
 
     private ExcelHelper helper;
 
-    public ExcelGenerateTask(P param, ExportFunction<P, T> exportFunction, ExcelEntity e, ExcelHelper helper) {
+    public ExcelGenerateTask(P param, ExportFunction<P, T> exportFunction, ExcelEntity e, final ExcelHelper helper) {
         this.param = param;
         this.exportFunction = exportFunction;
 
@@ -58,6 +57,7 @@ public class ExcelGenerateTask<P, T> implements ExcelRunnable {
         this.helper = helper;
         queue = new LinkedBlockingQueue<>(8);
         page.set(helper.getPageStart());
+        log.info("current dir is {}", helper.getWorkspace());
     }
 
     @Override
@@ -123,17 +123,14 @@ public class ExcelGenerateTask<P, T> implements ExcelRunnable {
             if (null == excelQueryEntity) {
                 return;
             }
-            String path = FILE_PATH;
-
-            log.info("current dir is {}", path);
 
             log.info("处理第{}页", excelQueryEntity.getPage());
             try {
-                File file = new File(path + helper.getReceiptUser());
+                File file = new File(helper.getWorkspace() + helper.getReceiptUser());
                 if (!file.exists()) {
                     file.mkdirs();
                 }
-                Appendable printWriter = new PrintWriter(path + helper.getReceiptUser() + File.separator + excelQueryEntity.getPage() + ".csv", CHARSET);
+                Appendable printWriter = new PrintWriter(helper.getWorkspace() + excelQueryEntity.getPage() + ".csv", CHARSET);
                 CSVPrinter csvPrinter = CSVFormat.EXCEL.print(printWriter);
 
                 final List<T> list = excelQueryEntity.getData();

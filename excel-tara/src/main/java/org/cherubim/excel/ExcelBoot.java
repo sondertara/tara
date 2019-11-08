@@ -5,14 +5,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.cherubim.common.util.StringUtil;
 import org.cherubim.excel.common.Constant;
-import org.cherubim.excel.entity.ExcelHelper;
 import org.cherubim.excel.entity.ExcelEntity;
-import org.cherubim.excel.parser.ExcelReader;
-import org.cherubim.excel.parser.ExcelWriter;
+import org.cherubim.excel.entity.ExcelHelper;
 import org.cherubim.excel.exception.ExcelBootException;
 import org.cherubim.excel.factory.ExcelMappingFactory;
 import org.cherubim.excel.function.ExportFunction;
 import org.cherubim.excel.function.ImportFunction;
+import org.cherubim.excel.parser.ExcelReader;
+import org.cherubim.excel.parser.ExcelWriter;
 import org.cherubim.excel.task.ExcelGenerateTask;
 import org.cherubim.excel.task.ExcelRunnable;
 
@@ -26,7 +26,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static org.cherubim.excel.common.Constant.FILE_PATH;
+import static org.cherubim.excel.common.Constant.CONSUMER_COUNT;
+import static org.cherubim.excel.common.Constant.PRODUCER_COUNT;
 
 
 /**
@@ -38,7 +39,7 @@ import static org.cherubim.excel.common.Constant.FILE_PATH;
 public class ExcelBoot {
 
 
-    private static ThreadPoolExecutor taskPool = new ThreadPoolExecutor(4, 16, 60,
+    private ThreadPoolExecutor taskPool = new ThreadPoolExecutor(8, 16, 60,
             TimeUnit.SECONDS,
             new LinkedBlockingQueue<>(10),
             new ThreadPoolExecutor.CallerRunsPolicy());
@@ -203,27 +204,29 @@ public class ExcelBoot {
         try {
             verifyAndBuildParams();
             ExcelEntity excelMapping = ExcelMappingFactory.loadExportExcelClass(excelClass, helper.getFileName());
+            final String workPath = Constant.FILE_PATH + helper.getReceiptUser() + File.separator + helper.getFileName() + File.separator;
+            helper.setWorkspace(workPath);
             ExcelRunnable excelRunnable = new ExcelGenerateTask<R, T>(param, exportFunction, excelMapping, helper);
-
-            for (int i = 0; i < 3; i++) {
+            for (int i = 0; i < PRODUCER_COUNT; i++) {
+                taskPool.submit((excelRunnable.newRunnableProducer()));
+            }
+            for (int i = 0; i < CONSUMER_COUNT; i++) {
                 taskPool.submit(excelRunnable.newRunnableConsumer());
             }
-            taskPool.submit((excelRunnable.newRunnableProducer()));
-
             taskPool.shutdown();
             while (true) {
                 if (taskPool.isTerminated()) {
 
                     log.info("文件处理结束");
                     //合并文件
-                    ExcelWriter excelWriter = new ExcelWriter(excelMapping);
-                    excelWriter.generateCsv(helper.getReceiptUser());
+                    ExcelWriter excelWriter = new ExcelWriter(excelMapping, workPath);
+                    excelWriter.generateCsv();
                     log.info("csv生成完毕");
                     break;
                 }
             }
             //返回文件path
-            return FILE_PATH + helper.getReceiptUser() + File.separator + helper.getFileName() + ".csv";
+            return workPath + helper.getFileName() + ".csv";
         } catch (Exception e) {
             throw new ExcelBootException(e);
         }
