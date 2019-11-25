@@ -1,6 +1,7 @@
 
 package org.cherubim.excel.parser;
 
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -29,8 +30,6 @@ import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.cherubim.excel.common.Constant.CHARSET;
-
 /**
  * 导出具体实现类
  *
@@ -46,7 +45,6 @@ public class ExcelWriter {
     private Integer recordCountPerSheet;
     private XSSFCellStyle headCellStyle;
     private Map<Integer, Integer> columnWidthMap = new HashMap<Integer, Integer>();
-
     private String workPath;
 
     public ExcelWriter(ExcelEntity excelEntity, Integer pageSize, Integer rowAccessWindowSize, Integer recordCountPerSheet) {
@@ -84,7 +82,7 @@ public class ExcelWriter {
                 } else {
                     csvFile.createNewFile();
                 }
-                Appendable printWriter = new PrintWriter(csvFile, CHARSET);
+                Appendable printWriter = new PrintWriter(csvFile, Constant.CHARSET);
                 final List<String> excelColNames = excelEntity.getPropertyList().stream().map(ExcelPropertyEntity::getColumnName).collect(Collectors.toList());
                 CSVPrinter csvPrinter = CSVFormat.EXCEL.withHeader(excelColNames.toArray(new String[excelColNames.size()])).print(printWriter);
 
@@ -343,7 +341,7 @@ public class ExcelWriter {
                 cell.setCellValue((((BigDecimal) cellValue).setScale(property.getScale(), property.getRoundingMode())).toString());
             }
         } else if (cellValue instanceof Date) {
-            cell.setCellValue(DateUtil.format(property.getDateFormat(), (Date) cellValue));
+            cell.setCellValue(DateUtil.formatDate((Date) cellValue, property.getDateFormat()));
         } else {
             cell.setCellValue(cellValue.toString());
         }

@@ -65,6 +65,24 @@ public class StringUtil {
         return str.toString();
     }
 
+    /**
+     * 格式化字符串为数字
+     *
+     * @param str
+     * @return
+     */
+    public static String convertToNumber(Object str) {
+        if (str == null || "".equals(str.toString().trim()) || "null".equalsIgnoreCase(str.toString().trim())) {
+            return "0";
+        }
+        String s = org.apache.commons.lang3.StringUtils.deleteWhitespace(str.toString());
+        if (s.endsWith("%")) {
+            final double v = Double.parseDouble(s.substring(0, s.length() - 1)) / 100;
+            return String.valueOf(v);
+        }
+        return String.valueOf(str);
+    }
+
     public static boolean isNumeric(CharSequence cs) {
         if (isBlank(cs)) {
             return false;
@@ -91,8 +109,9 @@ public class StringUtil {
 
     public static String convertEncode(String strIn, String encoding, String targetEncoding) {
         String strOut = strIn;
-        if (strIn == null)
+        if (strIn == null) {
             return strOut;
+        }
 
         try {
             if (encoding != null && targetEncoding != null) {

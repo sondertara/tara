@@ -26,6 +26,10 @@ public class ExcelPropertyEntity {
      */
     private String columnName;
     /**
+     * 对应excel中列序
+     */
+    private Integer index;
+    /**
      * 默认单元格值
      *
      * @return

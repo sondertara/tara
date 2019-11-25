@@ -15,6 +15,14 @@ import java.math.BigDecimal;
 public @interface ImportField {
 
     /**
+     * 对应excel中的列
+     *
+     * @return
+     */
+    int index() default -1;
+
+
+    /**
      * @return 是否必填
      */
     boolean required() default false;

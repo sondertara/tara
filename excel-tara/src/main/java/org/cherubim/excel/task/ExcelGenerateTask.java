@@ -1,9 +1,9 @@
 package org.cherubim.excel.task;
 
-
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.cherubim.common.util.DateUtil;
+import org.cherubim.excel.common.Constant;
 import org.cherubim.excel.entity.ExcelEntity;
 import org.cherubim.excel.entity.ExcelHelper;
 import org.cherubim.excel.entity.ExcelPropertyEntity;
@@ -24,8 +24,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.cherubim.excel.common.Constant.CHARSET;
 
 /**
  * 生成excel任务
@@ -52,25 +50,23 @@ public class ExcelGenerateTask<P, T> implements ExcelRunnable {
     public ExcelGenerateTask(P param, ExportFunction<P, T> exportFunction, ExcelEntity e, final ExcelHelper helper) {
         this.param = param;
         this.exportFunction = exportFunction;
-
         this.excelEntity = e;
         this.helper = helper;
         queue = new LinkedBlockingQueue<>(8);
         page.set(helper.getPageStart());
-        log.info("current dir is {}", helper.getWorkspace());
     }
 
     @Override
     public Runnable newRunnableConsumer() {
-        return new ExcelConsumer();
+        return new ExcelQueryDataConsumer();
     }
 
     @Override
     public Runnable newRunnableProducer() {
-        return new ExcelProducer();
+        return new ExcelQueryDataProducer();
     }
 
-    private class ExcelProducer extends AbstractProducer {
+    private class ExcelQueryDataProducer extends AbstractProducer {
 
         @Override
         public void produce() throws InterruptedException {
@@ -82,7 +78,7 @@ public class ExcelGenerateTask<P, T> implements ExcelRunnable {
             log.info("开始查询 pageSize[{}]", helper.getPageSize());
 
             final int queryPage = page.getAndIncrement();
-            if (queryPage >= helper.getPageEnd()) {
+            if (queryPage > helper.getPageEnd()) {
                 log.warn("分页查询结束");
                 super.isDone = true;
                 flag.set(false);
@@ -110,7 +106,7 @@ public class ExcelGenerateTask<P, T> implements ExcelRunnable {
         }
     }
 
-    private class ExcelConsumer extends AbstractConsumer {
+    private class ExcelQueryDataConsumer extends AbstractConsumer {
         @Override
         public void consume() throws InterruptedException {
 
@@ -124,13 +120,15 @@ public class ExcelGenerateTask<P, T> implements ExcelRunnable {
                 return;
             }
 
+            log.info("current dir is {}", helper.getWorkspace());
+
             log.info("处理第{}页", excelQueryEntity.getPage());
             try {
-                File file = new File(helper.getWorkspace() + helper.getReceiptUser());
+                File file = new File(helper.getWorkspace());
                 if (!file.exists()) {
                     file.mkdirs();
                 }
-                Appendable printWriter = new PrintWriter(helper.getWorkspace() + excelQueryEntity.getPage() + ".csv", CHARSET);
+                Appendable printWriter = new PrintWriter(helper.getWorkspace() + excelQueryEntity.getPage() + ".csv", Constant.CHARSET);
                 CSVPrinter csvPrinter = CSVFormat.EXCEL.print(printWriter);
 
                 final List<T> list = excelQueryEntity.getData();
@@ -177,7 +175,7 @@ public class ExcelGenerateTask<P, T> implements ExcelRunnable {
                     cell = (((BigDecimal) cellValue).setScale(property.getScale(), property.getRoundingMode())).toString();
                 }
             } else if (cellValue instanceof Date) {
-                cell = DateUtil.format(property.getDateFormat(), (Date) cellValue);
+                cell = DateUtil.formatDate((Date) cellValue, property.getDateFormat());
             } else {
                 cell = cellValue.toString();
             }

@@ -34,6 +34,7 @@ public class ExcelMappingFactory {
                 field.setAccessible(true);
                 ExcelPropertyEntity excelPropertyEntity = ExcelPropertyEntity.builder()
                         .fieldEntity(field)
+                        .index(importField.index() - 1)
                         .required(importField.required())
                         .dateFormat(importField.dateFormat().trim())
                         .regex(importField.regex().trim())

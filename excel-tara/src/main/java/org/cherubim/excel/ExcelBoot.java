@@ -1,5 +1,5 @@
-
 package org.cherubim.excel;
+
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
@@ -26,9 +26,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static org.cherubim.excel.common.Constant.CONSUMER_COUNT;
-import static org.cherubim.excel.common.Constant.PRODUCER_COUNT;
-
 
 /**
  * excel构造器
@@ -39,10 +36,7 @@ import static org.cherubim.excel.common.Constant.PRODUCER_COUNT;
 public class ExcelBoot {
 
 
-    private ThreadPoolExecutor taskPool = new ThreadPoolExecutor(8, 16, 60,
-            TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>(10),
-            new ThreadPoolExecutor.CallerRunsPolicy());
+    private ThreadPoolExecutor taskPool;
     private HttpServletResponse httpServletResponse;
     private OutputStream outputStream;
     private InputStream inputStream;
@@ -80,8 +74,7 @@ public class ExcelBoot {
     }
 
     protected ExcelBoot(ExcelHelper helper, Class clazz) {
-        this.excelClass = clazz;
-        this.helper = helper;
+        this(null, null, null, helper, clazz, null, null, null);
     }
 
     /**
@@ -101,6 +94,11 @@ public class ExcelBoot {
         this.rowAccessWindowSize = rowAccessWindowSize;
         this.recordCountPerSheet = recordCountPerSheet;
         this.openAutoColumWidth = openAutoColumWidth;
+
+        this.taskPool = new ThreadPoolExecutor(8, 16, 60,
+                TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(10),
+                new ThreadPoolExecutor.CallerRunsPolicy());
     }
 
     /**
@@ -149,8 +147,8 @@ public class ExcelBoot {
     /**
      * 导入Excel文件数据
      */
-    public static ExcelBoot ImportBuilder(InputStream inputStreamm, Class clazz) {
-        return new ExcelBoot(inputStreamm, clazz);
+    public static ExcelBoot builder(InputStream inputStream, Class clazz) {
+        return new ExcelBoot(inputStream, clazz);
     }
 
     /**
@@ -207,16 +205,18 @@ public class ExcelBoot {
             final String workPath = Constant.FILE_PATH + helper.getReceiptUser() + File.separator + helper.getFileName() + File.separator;
             helper.setWorkspace(workPath);
             ExcelRunnable excelRunnable = new ExcelGenerateTask<R, T>(param, exportFunction, excelMapping, helper);
-            for (int i = 0; i < PRODUCER_COUNT; i++) {
+            for (int i = 0; i < Constant.PRODUCER_COUNT; i++) {
+
                 taskPool.submit((excelRunnable.newRunnableProducer()));
             }
-            for (int i = 0; i < CONSUMER_COUNT; i++) {
+
+            for (int i = 0; i < Constant.CONSUMER_COUNT; i++) {
                 taskPool.submit(excelRunnable.newRunnableConsumer());
             }
+
             taskPool.shutdown();
             while (true) {
                 if (taskPool.isTerminated()) {
-
                     log.info("文件处理结束");
                     //合并文件
                     ExcelWriter excelWriter = new ExcelWriter(excelMapping, workPath);
@@ -345,7 +345,7 @@ public class ExcelBoot {
     /**
      * 导入excel全部sheet
      */
-    public void importExcel(ImportFunction importFunction) {
+    public void importExcel(Boolean enableIndex, ImportFunction importFunction) {
         try {
             if (importFunction == null) {
                 throw new ExcelBootException("excelReadHandler参数为空!");
@@ -355,7 +355,7 @@ public class ExcelBoot {
             }
 
             ExcelEntity excelMapping = ExcelMappingFactory.loadImportExcelClass(excelClass);
-            ExcelReader excelReader = new ExcelReader(excelClass, excelMapping, importFunction);
+            ExcelReader excelReader = new ExcelReader(excelClass, excelMapping, importFunction, enableIndex);
             excelReader.process(inputStream);
         } catch (Exception e) {
             throw new ExcelBootException(e);

@@ -1,10 +1,16 @@
 package org.cherubim.excel.parser;
 
+
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
+import org.apache.poi.ss.usermodel.BuiltinFormats;
+import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
 import org.apache.poi.xssf.model.SharedStringsTable;
+import org.apache.poi.xssf.model.StylesTable;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.cherubim.common.util.DateUtil;
 import org.cherubim.common.util.RegexUtil;
@@ -28,10 +34,7 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -39,41 +42,112 @@ import java.util.concurrent.ExecutionException;
  */
 @Slf4j
 public class ExcelReader extends DefaultHandler {
+
+    /**
+     * 格式化formatter
+     */
+    private static final DataFormatter FORMATTER = new DataFormatter();
+    /**
+     * 当前sheet
+     */
     private Integer currentSheetIndex = -1;
+    /**
+     * Excel当前行
+     */
     private Integer currentRowIndex = 0;
-    private Integer excelCurrentCellIndex = 0;
-    private ExcelCellType cellFormatStr;
-    private String currentCellLocation;
+    /**
+     * Excel当前列
+     */
+    private Integer currentCellIndex = -1;
+    /**
+     * 行数据索引
+     */
+    private Integer dataCurrentCellIndex = 0;
+    /**
+     * 下一个cell数据类型
+     */
+    private ExcelCellType excelCellType;
+    /**
+     * 定义前一个元素和当前元素的位置，用来计算其中空的单元格数量，如A6和A8等
+     */
     private String previousCellLocation;
+    private String currentCellLocation;
+    /**
+     * 最后一列坐标
+     */
     private String endCellLocation;
+    /**
+     * 共享字符串索引
+     */
     private SharedStringsTable mSharedStringsTable;
+    /**
+     * 当前cell值
+     */
     private String currentCellValue;
+    /**
+     * 是否需要查共享字符串
+     */
     private Boolean isNeedSharedStrings = false;
+    /**
+     * excel映射
+     */
     private ExcelEntity excelMapping;
+    /**
+     * 导入方法
+     */
     private ImportFunction importFunction;
+    /**
+     * 导入pojo
+     */
     private Class excelClass;
+    /**
+     * 一行记录
+     */
     private List<String> cellsOnRow = new ArrayList<String>();
+    /**
+     * 开始读取行号
+     */
     private Integer beginReadRowIndex;
-    private Integer dataCurrentCellIndex = -1;
+    /**
+     * 是否启用列index对应关系
+     */
+    private Boolean enableIndex = false;
+    /**
+     * 单元格格式
+     */
+    private StylesTable stylesTable;
+    /**
+     * 单元格number格式化信息
+     */
+    private short formatIndex;
+    private String formatString;
+
 
     public ExcelReader(Class entityClass,
                        ExcelEntity excelMapping,
-                       ImportFunction importFunction) {
-        this(entityClass, excelMapping, 1, importFunction);
+                       ImportFunction importFunction, Boolean enableIndex) {
+        this(entityClass, excelMapping, 1, importFunction, enableIndex);
     }
 
     public ExcelReader(Class entityClass,
                        ExcelEntity excelMapping,
                        Integer beginReadRowIndex,
-                       ImportFunction importFunction) {
+                       ImportFunction importFunction, Boolean enableIndex) {
         this.excelClass = entityClass;
         this.excelMapping = excelMapping;
         this.beginReadRowIndex = beginReadRowIndex;
         this.importFunction = importFunction;
+        this.enableIndex = enableIndex;
     }
 
     public void process(InputStream in)
             throws IOException, OpenXML4JException, SAXException {
+
+        for (ExcelPropertyEntity entity : excelMapping.getPropertyList()) {
+            if (enableIndex && entity.getIndex() < 0) {
+                throw new ExcelBootException("Excel导入启动了列对应关系，请标注注解属性对应的index值", entity.getFieldEntity().getName());
+            }
+        }
         OPCPackage opcPackage = null;
         InputStream sheet = null;
         InputSource sheetSource;
@@ -81,6 +155,7 @@ public class ExcelReader extends DefaultHandler {
             opcPackage = OPCPackage.open(in);
             XSSFReader xssfReader = new XSSFReader(opcPackage);
             XMLReader parser = this.fetchSheetParser(xssfReader.getSharedStringsTable());
+            this.stylesTable = xssfReader.getStylesTable();
 
             Iterator<InputStream> sheets = xssfReader.getSheetsData();
             while (sheets.hasNext()) {
@@ -95,7 +170,7 @@ public class ExcelReader extends DefaultHandler {
                     } catch (AllEmptyRowException e) {
                         log.warn(e.getMessage());
                     } catch (Exception e) {
-                        throw new ExcelBootException(e, "第{}个Sheet,第{}行,第{}列,系统发生异常! ", currentSheetIndex + 1, currentRowIndex + 1, dataCurrentCellIndex + 1);
+                        throw new ExcelBootException(e, "第{}个Sheet,第{}行,第{}列,系统发生异常! ", currentSheetIndex + 1, currentRowIndex + 1, currentCellIndex);
                     }
                 } finally {
                     if (sheet != null) {
@@ -135,12 +210,15 @@ public class ExcelReader extends DefaultHandler {
     @Override
     public void startElement(String uri, String localName, String name, Attributes attributes) {
         if (Constant.CELL.equals(name)) {
+            excelCellType = null;
             String xyzLocation = attributes.getValue(Constant.XYZ_LOCATION);
             previousCellLocation = null == previousCellLocation ? xyzLocation : currentCellLocation;
             currentCellLocation = xyzLocation;
             String cellType = attributes.getValue(Constant.CELL_T_PROPERTY);
+            String cellStyleStr = attributes.getValue(Constant.CELL_S_VALUE);
             isNeedSharedStrings = (null != cellType && cellType.equals(Constant.CELL_S_VALUE));
-            setCellType(cellType);
+            setCellType(cellType, cellStyleStr);
+
         }
         currentCellValue = "";
     }
@@ -168,33 +246,37 @@ public class ExcelReader extends DefaultHandler {
     @Override
     public void endElement(String uri, String localName, String name) {
         if (Constant.CELL.equals(name)) {
-            if (isNeedSharedStrings && !StringUtil.isBlank(currentCellValue) && StringUtil.isNumeric(currentCellValue)) {
+            if (isNeedSharedStrings && !StringUtils.isBlank(currentCellValue) && StringUtils.isNumeric(currentCellValue)) {
                 int index = Integer.parseInt(currentCellValue);
-                currentCellValue = mSharedStringsTable.getItemAt(index).toString();
+//                currentCellValue = mSharedStringsTable.getItemAt(index).getString();
+                currentCellValue = mSharedStringsTable.getItemAt(index).getString();
             }
             if (!currentCellLocation.equals(previousCellLocation) && currentRowIndex != 0) {
                 for (int i = 0; i < countNullCell(currentCellLocation, previousCellLocation); i++) {
-                    cellsOnRow.add(excelCurrentCellIndex, "");
-                    excelCurrentCellIndex++;
+                    cellsOnRow.add(dataCurrentCellIndex, "");
+                    dataCurrentCellIndex++;
                 }
             }
             if (currentRowIndex != 0 || !"".equals(currentCellValue.trim())) {
                 String value = this.getCellValue(currentCellValue.trim());
-                cellsOnRow.add(excelCurrentCellIndex, value);
-                excelCurrentCellIndex++;
+                cellsOnRow.add(dataCurrentCellIndex, value);
+                dataCurrentCellIndex++;
             }
         } else if (Constant.ROW.equals(name)) {
             if (currentRowIndex == 0) {
                 endCellLocation = currentCellLocation;
                 int propertySize = excelMapping.getPropertyList().size();
-                if (cellsOnRow.size() != propertySize) {
+                if (!enableIndex && cellsOnRow.size() != propertySize) {
                     throw new ExcelBootException("Excel有效列数不等于标注注解的属性数量!Excel列数:{},标注注解的属性数量:{}", cellsOnRow.size(), propertySize);
+                }
+                if (cellsOnRow.size() < propertySize) {
+                    throw new ExcelBootException("Excel有效列数小于标注注解的属性数量!Excel列数:{},标注注解的属性数量:{}", cellsOnRow.size(), propertySize);
                 }
             }
             if (null != endCellLocation) {
                 for (int i = 0; i <= countNullCell(endCellLocation, currentCellLocation); i++) {
-                    cellsOnRow.add(excelCurrentCellIndex, "");
-                    excelCurrentCellIndex++;
+                    cellsOnRow.add(dataCurrentCellIndex, "");
+                    dataCurrentCellIndex++;
                 }
             }
             try {
@@ -206,10 +288,11 @@ public class ExcelReader extends DefaultHandler {
             }
             cellsOnRow.clear();
             currentRowIndex++;
-            dataCurrentCellIndex = -1;
-            excelCurrentCellIndex = 0;
+            currentCellIndex = -1;
+            dataCurrentCellIndex = 0;
             previousCellLocation = null;
             currentCellLocation = null;
+            excelCellType = null;
         }
 
     }
@@ -220,14 +303,40 @@ public class ExcelReader extends DefaultHandler {
      *
      * @param cellType xml中单元格格式属性
      */
-    private void setCellType(String cellType) {
+    private void setCellType(String cellType, String cellStyleStr) {
         if ("inlineStr".equals(cellType)) {
-            cellFormatStr = ExcelCellType.INLINESTR;
-        } else if ("s".equals(cellType) || cellType == null) {
-            cellFormatStr = ExcelCellType.STRING;
+            excelCellType = ExcelCellType.INLINESTR;
+        } else if (cellType == null) {
+            excelCellType = ExcelCellType.SSTINDEX;
+        } else if ("s".equals(cellType)) {
+            excelCellType = ExcelCellType.SSTINDEX;
+        } else if ("b".equals(cellType)) {
+            excelCellType = ExcelCellType.BOOL;
+        } else if ("e".equals(cellType)) {
+            excelCellType = ExcelCellType.ERROR;
+        } else if ("str".equals(cellType)) {
+            excelCellType = ExcelCellType.FORMULA;
+        } else if (cellStyleStr != null) {
+            // It's a number, but almost certainly one
+            // with a special style or format
+            int styleIndex = Integer.parseInt(cellStyleStr);
+            XSSFCellStyle style = stylesTable.getStyleAt(styleIndex);
+            this.formatIndex = style.getDataFormat();
+            this.formatString = style.getDataFormatString();
+            excelCellType = ExcelCellType.NUMBER;
+            if (this.formatString == null) {
+                excelCellType = ExcelCellType.NULL;
+                this.formatString = BuiltinFormats.getBuiltinFormat(this.formatIndex);
+            }
+
+        } else if (null == cellType) {
+            excelCellType = ExcelCellType.NULL;
+
         } else {
             throw new ExcelBootException("Excel单元格格式未设置成文本或者常规!单元格格式:{}", cellType);
         }
+
+
     }
 
     /**
@@ -237,15 +346,21 @@ public class ExcelReader extends DefaultHandler {
      * @return
      */
     private String getCellValue(String value) {
-        switch (cellFormatStr) {
+        switch (excelCellType) {
             case INLINESTR:
                 return new XSSFRichTextString(value).toString();
+            case NUMBER:
+                if (this.formatString != null) {
+                    return FORMATTER.formatRawCellContents(Double
+                            .parseDouble(value), this.formatIndex, this.formatString);
+                }
             default:
                 return String.valueOf(value);
         }
     }
 
     private void assembleData() throws Exception {
+
         if (currentRowIndex >= beginReadRowIndex) {
             List<ExcelPropertyEntity> propertyList = excelMapping.getPropertyList();
             for (int i = 0; i < propertyList.size() - cellsOnRow.size(); i++) {
@@ -257,15 +372,23 @@ public class ExcelReader extends DefaultHandler {
             Object entity = excelClass.newInstance();
             ErrorEntity errorEntity = ErrorEntity.builder().build();
             for (int i = 0; i < propertyList.size(); i++) {
-                dataCurrentCellIndex = i;
-                Object cellValue = cellsOnRow.get(i);
                 ExcelPropertyEntity property = propertyList.get(i);
+                //  dataCurrentCellIndex = i;
+                currentCellIndex = enableIndex ? property.getIndex() : i;
+                Object cellValue = cellsOnRow.get(currentCellIndex);
 
-                errorEntity = checkCellValue(i, property, cellValue);
+
+                errorEntity = checkCellValue(currentCellIndex, property, cellValue);
                 if (errorEntity.getErrorMessage() != null) {
                     break;
                 }
-                cellValue = convertCellValue(property, cellValue);
+                try {
+                    cellValue = convertCellValue(property, cellValue);
+                } catch (Exception e) {
+                    log.error("convertCellValue error...", e);
+                    errorEntity = buildErrorMsg(currentCellIndex, cellValue, "解析错误");
+                    break;
+                }
                 if (cellValue != null) {
                     Field field = property.getFieldEntity();
                     field.set(entity, cellValue);
@@ -289,11 +412,17 @@ public class ExcelReader extends DefaultHandler {
         return emptyCellCount == cellsOnRow.size();
     }
 
-    private Object convertCellValue(ExcelPropertyEntity mappingProperty, Object cellValue) throws ParseException, ExecutionException {
+    private Object convertCellValue(ExcelPropertyEntity mappingProperty, Object cellValue) throws
+            ParseException, ExecutionException {
         Class filedClazz = mappingProperty.getFieldEntity().getType();
         if (filedClazz == Date.class) {
             if (!StringUtil.isBlank(cellValue)) {
-                cellValue = DateUtil.parse(mappingProperty.getDateFormat(), cellValue.toString());
+                try {
+                    double parseDouble = Double.parseDouble(cellValue.toString());
+                    cellValue = org.apache.poi.ss.usermodel.DateUtil.getJavaDate(parseDouble, TimeZone.getDefault());
+                } catch (NumberFormatException e) {
+                    cellValue = DateUtil.parse(cellValue.toString());
+                }
             } else {
                 cellValue = null;
             }
@@ -302,25 +431,28 @@ public class ExcelReader extends DefaultHandler {
         } else if (filedClazz == Integer.class || filedClazz == int.class) {
             cellValue = Integer.valueOf(StringUtil.convertNullTOZERO(cellValue));
         } else if (filedClazz == Double.class || filedClazz == double.class) {
-            cellValue = Double.valueOf(StringUtil.convertNullTOZERO(cellValue));
+            cellValue = Double.valueOf(StringUtil.convertToNumber(cellValue));
         } else if (filedClazz == Long.class || filedClazz == long.class) {
             cellValue = Long.valueOf(StringUtil.convertNullTOZERO(cellValue));
         } else if (filedClazz == Float.class || filedClazz == float.class) {
-            cellValue = Float.valueOf(StringUtil.convertNullTOZERO(cellValue));
+            cellValue = Float.valueOf(StringUtil.convertToNumber(cellValue));
         } else if (filedClazz == BigDecimal.class) {
             if (mappingProperty.getScale() == -1) {
-                cellValue = new BigDecimal(StringUtil.convertNullTOZERO(cellValue));
+                cellValue = new BigDecimal(StringUtil.convertToNumber(cellValue));
             } else {
-                cellValue = new BigDecimal(StringUtil.convertNullTOZERO(cellValue)).setScale(mappingProperty.getScale(), mappingProperty.getRoundingMode());
+                cellValue = new BigDecimal(StringUtil.convertToNumber(cellValue)).setScale(mappingProperty.getScale(), mappingProperty.getRoundingMode());
             }
+        } else if (filedClazz == String.class) {
+            cellValue = String.valueOf(cellValue);
+
         } else if (filedClazz != String.class) {
             throw new ExcelBootException("不支持的属性类型:{},导入失败!", filedClazz);
         }
-
         return cellValue;
     }
 
-    private ErrorEntity checkCellValue(Integer cellIndex, ExcelPropertyEntity mappingProperty, Object cellValue) throws Exception {
+    private ErrorEntity checkCellValue(Integer cellIndex, ExcelPropertyEntity mappingProperty, Object cellValue) throws
+            Exception {
         Boolean required = mappingProperty.getRequired();
         if (null != required && required) {
             if (null == cellValue || StringUtil.isBlank(cellValue)) {
@@ -331,7 +463,7 @@ public class ExcelReader extends DefaultHandler {
         }
 
         String regex = mappingProperty.getRegex();
-        if (!StringUtil.isBlank(cellValue) && !StringUtil.isBlank(regex)) {
+        if (!StringUtil.isBlank(cellValue) && !StringUtils.isBlank(regex)) {
             boolean matches = RegexUtil.isMatch(regex, cellValue.toString());
             if (!matches) {
                 String regularExpMessage = mappingProperty.getRegexMessage();
@@ -363,6 +495,7 @@ public class ExcelReader extends DefaultHandler {
      * @return
      */
     public int countNullCell(String refA, String refB) {
+        // excel2007最大行数是1048576，最大列数是16384，最后一列列名是XFD
         String xfdA = refA.replaceAll("\\d+", "");
         String xfdB = refB.replaceAll("\\d+", "");
 
@@ -399,7 +532,9 @@ public class ExcelReader extends DefaultHandler {
      * 单元格中的数据可能的数据类型
      */
     enum ExcelCellType {
-        INLINESTR, STRING, NULL
+        BOOL, ERROR, FORMULA, INLINESTR, NULL, NUMBER, SSTINDEX
+
     }
+
 
 }

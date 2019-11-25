@@ -2,7 +2,6 @@
 
 package org.cherubim.excel.function;
 
-
 import org.cherubim.excel.entity.ErrorEntity;
 
 /**
