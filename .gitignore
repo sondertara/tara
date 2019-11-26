@@ -163,3 +163,12 @@ target/
 
 # End of https://www.gitignore.io/api/java,java-web,intellij,code-java
 export/
+.DS_Store
+baidu.png
+common-tara/.DS_Store
+common-tara/pom.xml.versionsBackup
+common-tara/src/test/
+excel-tara/log.log.2019-11-08
+excel-tara/pom.xml.versionsBackup
+notify-tara/pom.xml.versionsBackup
+pom.xml.versionsBackup

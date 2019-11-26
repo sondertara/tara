@@ -1,7 +1,7 @@
 package com.sondertara.common.util;
 
 
-import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
+import org.apache.commons.codec.binary.Base64;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -136,7 +136,7 @@ public class EncryptUtil {
     }
 
     private String base64(byte[] res) {
-        return Base64.encode(res);
+        return Base64.encodeBase64String(res);
     }
 
     /**
@@ -158,8 +158,9 @@ public class EncryptUtil {
      * 将16进制转换为二进制
      */
     public static byte[] parseHexStr2Byte(String hexStr) {
-        if (hexStr.length() < 1)
+        if (hexStr.length() < 1) {
             return null;
+        }
         byte[] result = new byte[hexStr.length() / 2];
         for (int i = 0; i < hexStr.length() / 2; i++) {
             int high = Integer.parseInt(hexStr.substring(i * 2, i * 2 + 1), 16);
@@ -303,7 +304,7 @@ public class EncryptUtil {
      * @return
      */
     public String Base64Encode(String res) {
-        return Base64.encode(res.getBytes());
+        return Base64.encodeBase64String(res.getBytes());
     }
 
     /**
@@ -313,7 +314,7 @@ public class EncryptUtil {
      * @return
      */
     public String Base64Decode(String res) {
-        return new String(Base64.decode(res));
+        return new String(Base64.decodeBase64(res));
     }
 
     public static void main(String[] args) {

@@ -1,6 +1,16 @@
 package com.sondertara.excel.parser;
 
 
+import com.sondertara.common.util.DateUtil;
+import com.sondertara.common.util.RegexUtil;
+import com.sondertara.common.util.StringUtil;
+import com.sondertara.excel.common.Constant;
+import com.sondertara.excel.entity.ErrorEntity;
+import com.sondertara.excel.entity.ExcelEntity;
+import com.sondertara.excel.entity.ExcelPropertyEntity;
+import com.sondertara.excel.exception.AllEmptyRowException;
+import com.sondertara.excel.exception.ExcelBootException;
+import com.sondertara.excel.function.ImportFunction;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
@@ -12,16 +22,6 @@ import org.apache.poi.xssf.model.SharedStringsTable;
 import org.apache.poi.xssf.model.StylesTable;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
-import com.sondertara.common.util.DateUtil;
-import com.sondertara.common.util.RegexUtil;
-import com.sondertara.common.util.StringUtil;
-import com.sondertara.excel.common.Constant;
-import com.sondertara.excel.entity.ErrorEntity;
-import com.sondertara.excel.entity.ExcelEntity;
-import com.sondertara.excel.entity.ExcelPropertyEntity;
-import com.sondertara.excel.exception.AllEmptyRowException;
-import com.sondertara.excel.exception.ExcelBootException;
-import com.sondertara.excel.function.ImportFunction;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -188,8 +188,8 @@ public class ExcelReader extends DefaultHandler {
     /**
      * 获取sharedStrings.xml文件的XMLReader对象
      *
-     * @param sst
-     * @return
+     * @param sst 字符串索引
+     * @return xml解析器
      * @throws SAXException
      */
     private XMLReader fetchSheetParser(SharedStringsTable sst) throws SAXException {
@@ -343,7 +343,7 @@ public class ExcelReader extends DefaultHandler {
      * 根据数据类型获取数据
      *
      * @param value
-     * @return
+     * @return cell值
      */
     private String getCellValue(String value) {
         switch (excelCellType) {
@@ -494,7 +494,7 @@ public class ExcelReader extends DefaultHandler {
      *
      * @param refA
      * @param refB
-     * @return
+     * @return 单元格差值
      */
     public int countNullCell(String refA, String refB) {
         // excel2007最大行数是1048576，最大列数是16384，最后一列列名是XFD

@@ -2,6 +2,11 @@
 package com.sondertara.excel.parser;
 
 
+import com.sondertara.common.util.DateUtil;
+import com.sondertara.common.util.StringUtil;
+import com.sondertara.excel.common.Constant;
+import com.sondertara.excel.entity.ExcelEntity;
+import com.sondertara.excel.entity.ExcelPropertyEntity;
 import com.sondertara.excel.function.ExportFunction;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.csv.CSVFormat;
@@ -15,11 +20,6 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.DefaultIndexedColorMap;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
-import com.sondertara.common.util.DateUtil;
-import com.sondertara.common.util.StringUtil;
-import com.sondertara.excel.common.Constant;
-import com.sondertara.excel.entity.ExcelEntity;
-import com.sondertara.excel.entity.ExcelPropertyEntity;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -106,11 +106,11 @@ public class ExcelWriter {
     }
 
     /**
-     * @param param
-     * @param exportFunction
-     * @param <P>
-     * @param <T>
-     * @return
+     * @param param          查询参数
+     * @param exportFunction 导出
+     * @param <P>            param
+     * @param <T>            export pojo
+     * @return workbook
      * @throws InvocationTargetException
      * @throws NoSuchMethodException
      * @throws ParseException
@@ -177,7 +177,7 @@ public class ExcelWriter {
     /**
      * 构建模板Excel
      *
-     * @return
+     * @return workbook
      */
     public SXSSFWorkbook generateTemplateWorkbook() {
         SXSSFWorkbook workbook = new SXSSFWorkbook(rowAccessWindowSize);
@@ -202,7 +202,7 @@ public class ExcelWriter {
      * @param exportFunction
      * @param <R>
      * @param <T>
-     * @return
+     * @return workbook
      * @throws InvocationTargetException
      * @throws NoSuchMethodException
      * @throws ParseException
@@ -299,7 +299,7 @@ public class ExcelWriter {
      * @param workbook
      * @param propertyList
      * @param sheetName
-     * @return
+     * @return SXSSFSheet
      */
     private SXSSFSheet generateHeader(SXSSFWorkbook workbook, List<ExcelPropertyEntity> propertyList, String sheetName) {
         SXSSFSheet sheet = workbook.createSheet(sheetName);

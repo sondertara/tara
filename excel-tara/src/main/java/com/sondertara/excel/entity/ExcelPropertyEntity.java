@@ -22,7 +22,6 @@ public class ExcelPropertyEntity {
     /**
      * excel列名称
      *
-     * @return
      */
     private String columnName;
     /**
@@ -32,41 +31,32 @@ public class ExcelPropertyEntity {
     /**
      * 默认单元格值
      *
-     * @return
      */
     private String templateCellValue;
     /**
      * 日期格式 默认 yyyy-MM-dd HH:mm:ss
      *
-     * @return
      */
     private String dateFormat;
     /**
      * 正则表达式校验
      *
-     * @return
      */
     private String regex;
     /**
      * 正则表达式校验失败返回的错误信息,regex配置后生效
-     *
-     * @return
      */
     private String regexMessage;
     /**
      * BigDecimal精度 默认:2
-     *
-     * @return
      */
     private Integer scale;
     /**
      * BigDecimal 舍入规则 默认:2
-     *
-     * @return
      */
     private Integer roundingMode;
     /**
-     * @return 是否必填
+     * 是否必填
      */
     private Boolean required;
 }

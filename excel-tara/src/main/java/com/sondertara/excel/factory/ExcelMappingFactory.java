@@ -20,7 +20,7 @@ public class ExcelMappingFactory {
      * 根据指定Excel实体获取导入Excel文件相关信息
      *
      * @param clazz
-     * @return
+     * @return excel 属性
      * @throws IllegalAccessException
      * @throws InstantiationException
      */
@@ -58,7 +58,7 @@ public class ExcelMappingFactory {
      * 根据指定Excel实体获取导出Excel文件相关信息
      *
      * @param clazz
-     * @return
+     * @return excel属性
      * @throws IllegalAccessException
      * @throws InstantiationException
      */

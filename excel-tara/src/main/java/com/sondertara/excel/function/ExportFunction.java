@@ -17,7 +17,7 @@ public interface ExportFunction<P, T> {
      * @param param
      * @param pageNum
      * @param pageSize
-     * @return
+     * @return 查询结果
      */
     List<T> pageQuery(P param, int pageNum, int pageSize);
 
@@ -25,7 +25,7 @@ public interface ExportFunction<P, T> {
      * 集合内对象转换
      *
      * @param queryResult
-     * @return
+     * @return 导出pojo
      */
     Object convert(T queryResult);
 
