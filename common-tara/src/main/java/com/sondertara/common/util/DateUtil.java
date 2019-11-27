@@ -38,6 +38,9 @@ public class DateUtil {
 
     /**
      * 判断两个时间内的时间间隔（毫秒）
+     *
+     * @param startDate
+     * @param endDate
      */
     public static long afterTime(Date startDate, Date endDate) {
         if (startDate != null & endDate != null) {
@@ -49,7 +52,7 @@ public class DateUtil {
 
 
     /**
-     * @description 计算与当前时间相差N分钟的时间
+     * 计算与当前时间相差N分钟的时间
      */
     public static Date getAfterSecondTime(Integer second) {
         second = second * 60 * 1000;

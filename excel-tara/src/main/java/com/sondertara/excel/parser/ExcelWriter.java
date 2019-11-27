@@ -335,11 +335,8 @@ public class ExcelWriter {
         if (cellValue == null) {
             cell.setCellValue("");
         } else if (cellValue instanceof BigDecimal) {
-            if (-1 == property.getScale()) {
-                cell.setCellValue(cellValue.toString());
-            } else {
-                cell.setCellValue((((BigDecimal) cellValue).setScale(property.getScale(), property.getRoundingMode())).toString());
-            }
+            cell.setCellValue((((BigDecimal) cellValue).setScale(property.getScale(), property.getRoundingMode())).toString());
+
         } else if (cellValue instanceof Date) {
             cell.setCellValue(DateUtil.formatDate((Date) cellValue, property.getDateFormat()));
         } else {

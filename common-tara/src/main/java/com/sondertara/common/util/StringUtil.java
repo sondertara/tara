@@ -45,7 +45,7 @@ public class StringUtil {
      * @param str
      * @return
      */
-    public static String convertNull(Object str) {
+    public static String convertNullToEmpty(Object str) {
         if (str == null) {
             return "";
         }
@@ -58,9 +58,23 @@ public class StringUtil {
      * @param str
      * @return
      */
-    public static String convertNullTOZERO(Object str) {
+    public static String convertNullToZero(Object str) {
         if (str == null || "".equals(str.toString().trim()) || "null".equalsIgnoreCase(str.toString().trim())) {
             return "0";
+        }
+        return str.toString();
+    }
+
+    /**
+     * 格式化null
+     *
+     *
+     * @param str
+     * @return
+     */
+    public static String convertNullToNull(Object str) {
+        if (str == null || "".equals(str.toString().trim()) || "null".equalsIgnoreCase(str.toString().trim())) {
+            return null;
         }
         return str.toString();
     }

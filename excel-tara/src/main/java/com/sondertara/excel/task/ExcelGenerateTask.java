@@ -169,11 +169,7 @@ public class ExcelGenerateTask<P, T> implements ExcelRunnable {
             if (cellValue == null) {
                 cell = "";
             } else if (cellValue instanceof BigDecimal) {
-                if (-1 == property.getScale()) {
-                    cell = cellValue.toString();
-                } else {
-                    cell = (((BigDecimal) cellValue).setScale(property.getScale(), property.getRoundingMode())).toString();
-                }
+                cell = (((BigDecimal) cellValue).setScale(property.getScale(), property.getRoundingMode())).toString();
             } else if (cellValue instanceof Date) {
                 cell = DateUtil.formatDate((Date) cellValue, property.getDateFormat());
             } else {

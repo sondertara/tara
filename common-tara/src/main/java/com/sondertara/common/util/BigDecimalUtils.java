@@ -4,10 +4,8 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 
 /**
- * @description: BigDecimalUtils 处理数据库金额工具类
- * @author: lvqun
- * @create: 2018-10-31 14:43
- **/
+ * @author huangxiaohu
+ */
 public class BigDecimalUtils {
 
     private static final String TWO_DECIMAL = "0.00";
@@ -18,7 +16,8 @@ public class BigDecimalUtils {
     /**
      * 格式化精度,默认取两位小数
      *
-     * @param pattern 格式化的模式
+     * @param bigDecimal 原始
+     * @param pattern    格式化的模式
      * @return String
      */
     @Deprecated
@@ -42,21 +41,6 @@ public class BigDecimalUtils {
         }
 
         return df.format(bigDecimal);
-    }
-
-    /**
-     * 获取Double
-     */
-    public static Double getDoubleValue(BigDecimal bigDecimal) {
-        if (bigDecimal == null) {
-            return null;
-        }
-
-        return bigDecimal.doubleValue();
-    }
-
-    public static void main(String[] args) {
-        System.out.println(format(new BigDecimal("0.1012"), BigDecimalUtils.TWO_DECIMAL));
     }
 
 }

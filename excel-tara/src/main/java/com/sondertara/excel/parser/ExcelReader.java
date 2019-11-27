@@ -2,6 +2,7 @@ package com.sondertara.excel.parser;
 
 
 import com.sondertara.common.util.DateUtil;
+import com.sondertara.common.util.NumberUtil;
 import com.sondertara.common.util.RegexUtil;
 import com.sondertara.common.util.StringUtil;
 import com.sondertara.excel.common.Constant;
@@ -253,11 +254,13 @@ public class ExcelReader extends DefaultHandler {
             }
             if (!currentCellLocation.equals(previousCellLocation) && currentRowIndex != 0) {
                 for (int i = 0; i < countNullCell(currentCellLocation, previousCellLocation); i++) {
+                    currentCellIndex = dataCurrentCellIndex + 1;
                     cellsOnRow.add(dataCurrentCellIndex, "");
                     dataCurrentCellIndex++;
                 }
             }
             if (currentRowIndex != 0 || !"".equals(currentCellValue.trim())) {
+                currentCellIndex = dataCurrentCellIndex + 1;
                 String value = this.getCellValue(currentCellValue.trim());
                 cellsOnRow.add(dataCurrentCellIndex, value);
                 dataCurrentCellIndex++;
@@ -275,6 +278,7 @@ public class ExcelReader extends DefaultHandler {
             }
             if (null != endCellLocation) {
                 for (int i = 0; i <= countNullCell(endCellLocation, currentCellLocation); i++) {
+                    currentCellIndex = dataCurrentCellIndex + 1;
                     cellsOnRow.add(dataCurrentCellIndex, "");
                     dataCurrentCellIndex++;
                 }
@@ -304,16 +308,16 @@ public class ExcelReader extends DefaultHandler {
      * @param cellType xml中单元格格式属性
      */
     private void setCellType(String cellType, String cellStyleStr) {
-        if ("inlineStr".equals(cellType)) {
-            excelCellType = ExcelCellType.INLINESTR;
-        } else if (cellType == null) {
-            excelCellType = ExcelCellType.SSTINDEX;
-        } else if ("s".equals(cellType)) {
-            excelCellType = ExcelCellType.SSTINDEX;
-        } else if ("b".equals(cellType)) {
+        if ("b".equals(cellType)) {
             excelCellType = ExcelCellType.BOOL;
         } else if ("e".equals(cellType)) {
             excelCellType = ExcelCellType.ERROR;
+        } else if ("inlineStr".equals(cellType)) {
+            excelCellType = ExcelCellType.INLINESTR;
+        } else if ("s".equals(cellType)) {
+            excelCellType = ExcelCellType.SSTINDEX;
+        } else if ("str".equals(cellType)) {
+            excelCellType = ExcelCellType.FORMULA;
         } else if ("str".equals(cellType)) {
             excelCellType = ExcelCellType.FORMULA;
         } else if (cellStyleStr != null) {
@@ -428,25 +432,28 @@ public class ExcelReader extends DefaultHandler {
             } else {
                 cellValue = null;
             }
-        } else if (filedClazz == Short.class || filedClazz == short.class) {
-            cellValue = Short.valueOf(StringUtil.convertNullTOZERO(cellValue));
-        } else if (filedClazz == Integer.class || filedClazz == int.class) {
-            cellValue = Integer.valueOf(StringUtil.convertNullTOZERO(cellValue));
-        } else if (filedClazz == Double.class || filedClazz == double.class) {
-            cellValue = Double.valueOf(StringUtil.convertToNumber(cellValue));
-        } else if (filedClazz == Long.class || filedClazz == long.class) {
-            cellValue = Long.valueOf(StringUtil.convertNullTOZERO(cellValue));
-        } else if (filedClazz == Float.class || filedClazz == float.class) {
-            cellValue = Float.valueOf(StringUtil.convertToNumber(cellValue));
-        } else if (filedClazz == BigDecimal.class) {
-            if (mappingProperty.getScale() == -1) {
-                cellValue = new BigDecimal(StringUtil.convertToNumber(cellValue));
-            } else {
-                cellValue = new BigDecimal(StringUtil.convertToNumber(cellValue)).setScale(mappingProperty.getScale(), mappingProperty.getRoundingMode());
-            }
         } else if (filedClazz == String.class) {
-            cellValue = String.valueOf(cellValue);
-
+            cellValue = StringUtil.convertNullToNull(cellValue);
+        } else if (filedClazz == Integer.class) {
+            cellValue = NumberUtil.toInt(cellValue);
+        } else if (filedClazz == Double.class) {
+            cellValue = NumberUtil.toDouble(cellValue);
+        } else if (filedClazz == Long.class) {
+            cellValue = NumberUtil.toLong(cellValue);
+        } else if (filedClazz == Float.class) {
+            cellValue = NumberUtil.toFloat(cellValue);
+        } else if (filedClazz == BigDecimal.class) {
+            cellValue = NumberUtil.toBigDecimalWithScale(cellValue, mappingProperty.getScale(), mappingProperty.getRoundingMode());
+        } else if (filedClazz == int.class) {
+            cellValue = NumberUtil.toInt(StringUtil.convertNullToZero(cellValue), 0);
+        } else if (filedClazz == short.class) {
+            cellValue = NumberUtil.toShort(StringUtil.convertNullToZero(cellValue), (short) 0);
+        } else if (filedClazz == double.class) {
+            cellValue = NumberUtil.toDouble(StringUtil.convertNullToZero(cellValue), 0d);
+        } else if (filedClazz == long.class) {
+            cellValue = NumberUtil.toLong(StringUtil.convertNullToZero(cellValue), 0L);
+        } else if (filedClazz == float.class) {
+            cellValue = NumberUtil.toFloat(StringUtil.convertNullToZero(cellValue), 0f);
         } else if (filedClazz != String.class) {
             throw new ExcelBootException("不支持的属性类型:{},导入失败!", filedClazz);
         }
@@ -484,7 +491,7 @@ public class ExcelReader extends DefaultHandler {
                 .sheetIndex(currentSheetIndex + 1)
                 .rowIndex(currentRowIndex + 1)
                 .cellIndex(cellIndex + 1)
-                .cellValue(StringUtil.convertNull(cellValue))
+                .cellValue(StringUtil.convertNullToEmpty(cellValue))
                 .errorMessage(validErrorMessage)
                 .build();
     }

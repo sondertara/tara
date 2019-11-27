@@ -14,7 +14,7 @@ import java.util.Date;
  * Time: 下午03:51
  */
 @Data
-public class PremiumImportParam implements Serializable {
+public class ImportParam implements Serializable {
     /**
      * 理赔单号
      */

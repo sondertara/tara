@@ -1,15 +1,16 @@
 package com.sondertara;
 
 
+import com.sondertara.excel.ExcelTara;
 import com.sondertara.excel.entity.ErrorEntity;
 import com.sondertara.excel.entity.ExcelHelper;
 import com.sondertara.excel.function.ExportFunction;
 import com.sondertara.excel.function.ImportFunction;
-import com.sondertara.model.PremiumImportParam;
+import com.sondertara.model.ImportParam;
+import com.sondertara.model.PolicyReturnImportParam;
 import com.sondertara.model.UserDTO;
 import com.sondertara.model.UserInfoVo;
 import lombok.extern.slf4j.Slf4j;
-import com.sondertara.excel.ExcelTara;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -28,7 +29,7 @@ public class ExcelTaraTest {
      * Rigorous Test :-)
      */
     @Test
-    public void shouldAnswerWithTrue() {
+    public void exportTest() {
         String fileName = "Excel文件名";
         String email = "xhhuangchn@outlook.com";
         final ExcelHelper helper = ExcelHelper.builder().fileName(fileName).receiptUser(email).pageSize(200).build();
@@ -67,9 +68,9 @@ public class ExcelTaraTest {
     }
 
     @Test
-    public void testImport() throws Exception {
-        ExcelTara.builder(new FileInputStream(new File("/Users/huangxiaohu/Desktop/保费结算导入结果/error.xlsx")), PremiumImportParam.class)
-                .importExcel(true, new ImportFunction<PremiumImportParam>() {
+    public void importTest() throws Exception {
+        ExcelTara.builder(new FileInputStream(new File("/Users/huangxiaohu/Desktop/data-return-import.xlsx")), PolicyReturnImportParam.class)
+                .importExcel(true, new ImportFunction<PolicyReturnImportParam>() {
 
                     /**
                      * @param sheetIndex 当前执行的Sheet的索引, 从1开始
@@ -77,7 +78,7 @@ public class ExcelTaraTest {
                      * @param userEntity Excel行数据的实体
                      */
                     @Override
-                    public void onProcess(int sheetIndex, int rowIndex, PremiumImportParam userEntity) {
+                    public void onProcess(int sheetIndex, int rowIndex, PolicyReturnImportParam userEntity) {
                         //将读取到Excel中每一行的userEntity数据进行自定义处理
                         //如果该行数据发生问题,将不会走本方法,而会走onError方法
                         log.info(userEntity.toString());
