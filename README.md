@@ -1,9 +1,10 @@
+
 [![Build Status](https://travis-ci.org/sondertara/tara.svg?branch=master)](https://travis-ci.org/sondertara/tara)
 ![Java](https://sondertara.github.io/assets/java8.svg)
 ![Maven Central](https://img.shields.io/maven-central/v/com.sondertara/tara)
 
-
 ## Tara
+
 Tara是一个纯java项目,包括常用util工具类和excel处理两个模块
 
 ## System Requirements
@@ -13,21 +14,23 @@ Tara是一个纯java项目,包括常用util工具类和excel处理两个模块
 
 ## TODO
 
-* [x] excel导入导出优化
-* [x] 上传maven仓库
-* [ ] 通知模块
-* [ ] java doc
-
+- [x] excel导入导出优化
+- [x] 上传maven仓库
+- [ ] 通知模块
+- [ ] java doc
 
 ## Quick Start
 
- ### [excel-tara]
+### [excel-tara]
+
 高性能excel处理工具
+
 - 支持导入大批量数据处理
 - 异步多线程导出数据
 - 生成导入模板
 
 #### 引入maven依赖,version为上方maven仓库中版本
+
 ```xml
  <dependency>
     <groupId>com.sondertara</groupId>
@@ -35,7 +38,9 @@ Tara是一个纯java项目,包括常用util工具类和excel处理两个模块
     <version>${version}</version>
 </dependency>
 ```
+
 #### 1.导出示例
+
 ##### 1)添加导出注解 `@ExportField`
 
 ```java
@@ -50,8 +55,11 @@ public class ExportVO {
     private String address;
 }
 ```
+
 ##### 2)同步导出
-⚠⚠⚠当数据量过大时，会长时间阻塞,推荐使用异步导出方案
+
+🌈🌈当数据量过大时，会长时间阻塞,推荐使用异步导出方案
+
 ``` java
  /**
      * 导出Demo
@@ -103,7 +111,9 @@ public class ExportVO {
                 });
     }
 ```
+
 #### 3)异步导出
+
 该方案会异步多线程生成csv格式的Excel文件，其中`ExcelHelper` 使用build构建
 
 ```java
@@ -123,7 +133,6 @@ public void exportCsv(QueryParam param, ExcelHelper helper) {
             String path = ExcelBoot.builder(helper, ExportVO.class).exportCsv(param, new ExportFunction<ParamEntity, ResultEntity>() {
                 @Override
                 public List<ResultEntity> pageQuery(ParamEntity param, int pageNum, int pageSize) {
-                
                    //调用自定义的分页查询方法
                         List<ResultEntity> result =null；
                         return result;
@@ -145,9 +154,8 @@ public void exportCsv(QueryParam param, ExcelHelper helper) {
             } catch (IOException e) {
                 log.error("upload file error:", e);
             }
-            //获取到path后，发送邮件,也可以上传至服务器
             try {
-    
+        //获取到path后，发送邮件,也可以上传至服务器
             } catch (Exception e) {
                 log.error("", e)
             }
@@ -155,6 +163,5 @@ public void exportCsv(QueryParam param, ExcelHelper helper) {
         });
     }
 ```
-
 
 ## Contact
