@@ -1,20 +1,17 @@
 package com.sondertara.common.util;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Arrays;
 
 /**
- * TODO
+ * file util
  *
  * @author huangxiaohu
  * @version 1.0
- * @date 2019/11/8 1:00 下午
  * @since 1.0
+ * date 2019/11/8 1:00 下午
  **/
-@Slf4j
 public class FileUtil {
 
 

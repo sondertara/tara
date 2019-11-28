@@ -15,6 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import com.sondertara.excel.task.ExcelGenerateTask;
 import com.sondertara.excel.task.ExcelRunnable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -32,8 +34,9 @@ import java.util.concurrent.TimeUnit;
  *
  * @author huangxiaohu
  */
-@Slf4j
 public class ExcelTara {
+
+    private static final Logger logger = LoggerFactory.getLogger(ExcelTara.class);
 
 
     private ThreadPoolExecutor taskPool;
@@ -198,7 +201,7 @@ public class ExcelTara {
      * 导出csv,一般用于异步导出大Excel文件到本地路径
      */
     public <R, T> String exportCsv(R param, ExportFunction<R, T> exportFunction) {
-        log.info("开始导出csv");
+        logger.info("开始导出csv");
         try {
             verifyAndBuildParams();
             ExcelEntity excelMapping = ExcelMappingFactory.loadExportExcelClass(excelClass, helper.getFileName());
@@ -217,11 +220,11 @@ public class ExcelTara {
             taskPool.shutdown();
             while (true) {
                 if (taskPool.isTerminated()) {
-                    log.info("文件处理结束");
+                    logger.info("文件处理结束");
                     //合并文件
                     ExcelWriter excelWriter = new ExcelWriter(excelMapping, workPath);
                     excelWriter.generateCsv();
-                    log.info("csv生成完毕");
+                    logger.info("csv生成完毕");
                     break;
                 }
             }
@@ -245,7 +248,7 @@ public class ExcelTara {
             sxssfWorkbook.write(outputStream);
             return outputStream;
         } catch (Exception e) {
-            log.error("生成Excel发生异常! 异常信息:", e);
+            logger.error("生成Excel发生异常! 异常信息:", e);
             if (sxssfWorkbook != null) {
                 sxssfWorkbook.close();
             }
@@ -305,7 +308,7 @@ public class ExcelTara {
             sxssfWorkbook.write(outputStream);
             return outputStream;
         } catch (Exception e) {
-            log.error("分Sheet生成Excel发生异常! 异常信息:", e);
+            logger.error("分Sheet生成Excel发生异常! 异常信息:", e);
             if (sxssfWorkbook != null) {
                 sxssfWorkbook.close();
             }

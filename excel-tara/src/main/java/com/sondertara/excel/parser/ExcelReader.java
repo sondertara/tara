@@ -12,7 +12,6 @@ import com.sondertara.excel.entity.ExcelPropertyEntity;
 import com.sondertara.excel.exception.AllEmptyRowException;
 import com.sondertara.excel.exception.ExcelBootException;
 import com.sondertara.excel.function.ImportFunction;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
@@ -23,6 +22,8 @@ import org.apache.poi.xssf.model.SharedStringsTable;
 import org.apache.poi.xssf.model.StylesTable;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -41,8 +42,9 @@ import java.util.concurrent.ExecutionException;
 /**
  * @author huangxiaohu
  */
-@Slf4j
 public class ExcelReader extends DefaultHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(ExcelReader.class);
 
     /**
      * 格式化formatter
@@ -106,6 +108,10 @@ public class ExcelReader extends DefaultHandler {
      */
     private List<String> cellsOnRow = new ArrayList<String>();
     /**
+     * 表头
+     */
+    private List<String> titleRow = new ArrayList<String>();
+    /**
      * 开始读取行号
      */
     private Integer beginReadRowIndex;
@@ -166,10 +172,10 @@ public class ExcelReader extends DefaultHandler {
                     sheet = sheets.next();
                     sheetSource = new InputSource(sheet);
                     try {
-                        log.info("开始读取第{}个Sheet!", currentSheetIndex + 1);
+                        logger.info("开始读取第{}个Sheet!", currentSheetIndex + 1);
                         parser.parse(sheetSource);
                     } catch (AllEmptyRowException e) {
-                        log.warn(e.getMessage());
+                        logger.warn(e.getMessage());
                     } catch (Exception e) {
                         throw new ExcelBootException(e, "第{}个Sheet,第{}行,第{}列,系统发生异常! ", currentSheetIndex + 1, currentRowIndex + 1, currentCellIndex);
                     }
@@ -275,6 +281,7 @@ public class ExcelReader extends DefaultHandler {
                 if (cellsOnRow.size() < propertySize) {
                     throw new ExcelBootException("Excel有效列数小于标注注解的属性数量!Excel列数:{},标注注解的属性数量:{}", cellsOnRow.size(), propertySize);
                 }
+                titleRow.addAll(cellsOnRow);
             }
             if (null != endCellLocation) {
                 for (int i = 0; i <= countNullCell(endCellLocation, currentCellLocation); i++) {
@@ -376,7 +383,7 @@ public class ExcelReader extends DefaultHandler {
                 throw new AllEmptyRowException("第{}行为空行,第{}个Sheet导入结束!", currentRowIndex + 1, currentSheetIndex + 1);
             }
             Object entity = excelClass.newInstance();
-            ErrorEntity errorEntity = ErrorEntity.builder().build();
+            ErrorEntity errorEntity = null;
             for (int i = 0; i < propertyList.size(); i++) {
                 ExcelPropertyEntity property = propertyList.get(i);
                 //  dataCurrentCellIndex = i;
@@ -385,13 +392,13 @@ public class ExcelReader extends DefaultHandler {
 
 
                 errorEntity = checkCellValue(currentCellIndex, property, cellValue);
-                if (errorEntity.getErrorMessage() != null) {
+                if (null != errorEntity) {
                     break;
                 }
                 try {
                     cellValue = convertCellValue(property, cellValue);
                 } catch (Exception e) {
-                    log.error("convertCellValue error...", e);
+                    logger.error(" cell value[{}],convertCellValue error...", cellValue, e);
                     errorEntity = buildErrorMsg(currentCellIndex, cellValue, "解析错误");
                     break;
                 }
@@ -400,7 +407,7 @@ public class ExcelReader extends DefaultHandler {
                     field.set(entity, cellValue);
                 }
             }
-            if (errorEntity.getErrorMessage() == null) {
+            if (null == errorEntity) {
                 importFunction.onProcess(currentSheetIndex + 1, currentRowIndex + 1, entity);
             } else {
                 importFunction.onError(errorEntity);
@@ -469,6 +476,19 @@ public class ExcelReader extends DefaultHandler {
                         , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1);
                 return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
             }
+            if (Double.MIN_VALUE != mappingProperty.getMin() || Double.MAX_VALUE != mappingProperty.getMax()) {
+                final Double v = NumberUtil.toDouble(cellValue);
+                if (null == v) {
+                    String validErrorMessage = String.format("第[%s]个Sheet,第[%s]行,第[%s]列,单元格转换数值后为空!"
+                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1);
+                    return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
+                } else if (v > mappingProperty.getMin() || v < mappingProperty.getMin()) {
+                    String validErrorMessage = String.format("第[%s]个Sheet,第[%s]行,第[%s]列,单元格值:[%s],数值大小区间校验失败!"
+                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue);
+                    return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
+
+                }
+            }
         }
 
         String regex = mappingProperty.getRegex();
@@ -482,7 +502,8 @@ public class ExcelReader extends DefaultHandler {
             }
         }
 
-        return buildErrorMsg(cellIndex, cellValue, null);
+
+        return null;
     }
 
     private ErrorEntity buildErrorMsg(Integer cellIndex, Object cellValue,
@@ -492,6 +513,7 @@ public class ExcelReader extends DefaultHandler {
                 .rowIndex(currentRowIndex + 1)
                 .cellIndex(cellIndex + 1)
                 .cellValue(StringUtil.convertNullToEmpty(cellValue))
+                .columnName(titleRow.get(cellIndex))
                 .errorMessage(validErrorMessage)
                 .build();
     }

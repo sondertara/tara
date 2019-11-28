@@ -33,7 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author huangxiaohu
  */
 public class ExcelGenerateTask<P, T> implements ExcelRunnable {
-    private static final Logger log = LoggerFactory.getLogger(ExcelGenerateTask.class);
+    private static final Logger logger = LoggerFactory.getLogger(ExcelGenerateTask.class);
 
     private AtomicBoolean flag = new AtomicBoolean(true);
     private AtomicInteger page = new AtomicInteger(1);
@@ -71,24 +71,24 @@ public class ExcelGenerateTask<P, T> implements ExcelRunnable {
         @Override
         public void produce() throws InterruptedException {
             if (!flag.get()) {
-                log.warn("结束完毕");
+                logger.warn("结束完毕");
                 super.isDone = true;
                 return;
             }
-            log.info("开始查询 pageSize[{}]", helper.getPageSize());
+            logger.info("开始查询 pageSize[{}]", helper.getPageSize());
 
             final int queryPage = page.getAndIncrement();
             if (queryPage > helper.getPageEnd()) {
-                log.warn("分页查询结束");
+                logger.warn("分页查询结束");
                 super.isDone = true;
                 flag.set(false);
                 return;
             }
-            log.info("开始查询第[{}]页", queryPage);
+            logger.info("开始查询第[{}]页", queryPage);
             List<T> data = exportFunction.pageQuery(param, queryPage, helper.getPageSize());
-            log.info("第[{}]页查询结束", queryPage);
+            logger.info("第[{}]页查询结束", queryPage);
             if (data == null || data.isEmpty()) {
-                log.warn("查询结果为空,结束查询!");
+                logger.warn("查询结果为空,结束查询!");
                 super.isDone = true;
                 flag.set(false);
                 return;
@@ -98,7 +98,7 @@ public class ExcelGenerateTask<P, T> implements ExcelRunnable {
             entity.setPage(queryPage);
             queue.put(entity);
             if (data.size() < helper.getPageSize()) {
-                log.warn("查询结果数量小于pageSize,为最后一页，结束查询!");
+                logger.warn("查询结果数量小于pageSize,为最后一页，结束查询!");
                 super.isDone = true;
                 flag.set(false);
                 return;
@@ -112,7 +112,7 @@ public class ExcelGenerateTask<P, T> implements ExcelRunnable {
 
             if (!flag.get() && queue.isEmpty()) {
                 super.isDone = true;
-                log.warn("结束消费[{}]", Thread.currentThread().getName());
+                logger.warn("结束消费[{}]", Thread.currentThread().getName());
                 return;
             }
             ExcelQueryEntity excelQueryEntity = queue.poll(3000, TimeUnit.MILLISECONDS);
@@ -120,9 +120,9 @@ public class ExcelGenerateTask<P, T> implements ExcelRunnable {
                 return;
             }
 
-            log.info("current dir is {}", helper.getWorkspace());
+            logger.info("current dir is {}", helper.getWorkspace());
 
-            log.info("处理第{}页", excelQueryEntity.getPage());
+            logger.info("处理第{}页", excelQueryEntity.getPage());
             try {
                 File file = new File(helper.getWorkspace());
                 if (!file.exists()) {
@@ -140,9 +140,9 @@ public class ExcelGenerateTask<P, T> implements ExcelRunnable {
 
                 csvPrinter.flush();
                 csvPrinter.close();
-                log.info("第{}页处理完毕", excelQueryEntity.getPage());
+                logger.info("第{}页处理完毕", excelQueryEntity.getPage());
             } catch (Exception e) {
-                log.error("write into file error:", e);
+                logger.error("write into file error:", e);
             }
 
 

@@ -24,6 +24,8 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLException;
@@ -42,8 +44,9 @@ import java.util.Map.Entry;
 /**
  * @author huangxiaohu
  */
-@Slf4j
+
 public class HttpUtil {
+    private static final Logger logger = LoggerFactory.getLogger(HttpUtil.class);
 
     private static final int CONN_TIME_OUT = 60000;
     private static final int READ_TIME_OUT = 60000;
@@ -67,7 +70,7 @@ public class HttpUtil {
         BufferedReader in = null;
         try {
 
-            log.info("data:{}", buffer.toString());
+            logger.info("data:{}", buffer.toString());
             URL realUrl = new URL(buffer.toString());
             // 打开和URL之间的连接
             HttpURLConnection connection = (HttpURLConnection) realUrl.openConnection();
@@ -96,7 +99,7 @@ public class HttpUtil {
                     in.close();
                 }
             } catch (Exception e2) {
-                log.error("释放资源异常", e2);
+                logger.error("释放资源异常", e2);
             }
         }
         return result.toString();
@@ -132,20 +135,20 @@ public class HttpUtil {
                 result = EntityUtils.toString(entity, "UTF-8");
             }
         } catch (IOException e) {
-            log.error("HttpClientUtil-doGet,error:", e);
+            logger.error("HttpClientUtil-doGet,error:", e);
         } finally {
             if (response != null) {
                 try {
                     EntityUtils.consume(response.getEntity());
                 } catch (IOException e) {
-                    log.error("HttpClientUtil-doGet,error:", e);
+                    logger.error("HttpClientUtil-doGet,error:", e);
                 }
             }
             if (httpclient != null) {
                 try {
                     httpclient.close();
                 } catch (IOException e) {
-                    log.error("httpclient close error:", e);
+                    logger.error("httpclient close error:", e);
                 }
             }
         }
@@ -258,7 +261,7 @@ public class HttpUtil {
                 try {
                     EntityUtils.consume(response.getEntity());
                 } catch (IOException e) {
-                    log.error("HttpClientUtil-sendSSLPost,error:", e);
+                    logger.error("HttpClientUtil-sendSSLPost,error:", e);
                 }
             }
         }
@@ -290,14 +293,14 @@ public class HttpUtil {
                 try {
                     EntityUtils.consume(response.getEntity());
                 } catch (IOException e) {
-                    log.error("HttpClientUtil-sendSSLPost2,error:", e);
+                    logger.error("HttpClientUtil-sendSSLPost2,error:", e);
                 }
             }
             if (httpClient != null) {
                 try {
                     httpClient.close();
                 } catch (IOException e) {
-                    log.error("httpclient close error:", e);
+                    logger.error("httpclient close error:", e);
                 }
             }
         }
@@ -329,14 +332,14 @@ public class HttpUtil {
             }
             httpClient.close();
         } catch (Exception e) {
-            log.error("HttpClientUtil-sendClientGet,error:", e);
+            logger.error("HttpClientUtil-sendClientGet,error:", e);
             throw e;
         } finally {
             if (httpClient != null) {
                 try {
                     httpClient.close();
                 } catch (IOException e) {
-                    log.error("httpclient close error:", e);
+                    logger.error("httpclient close error:", e);
                 }
             }
         }
@@ -378,7 +381,7 @@ public class HttpUtil {
                 }
             }
         } catch (Exception e) {
-            log.error("HttpClientUtil-sendClientPost,error:", e);
+            logger.error("HttpClientUtil-sendClientPost,error:", e);
             throw e;
         }
         return result;
@@ -464,7 +467,7 @@ public class HttpUtil {
                     conn.disconnect();
                 }
             } catch (IOException ex) {
-                log.error("释放资源异常", ex);
+                logger.error("释放资源异常", ex);
             }
         }
     }
@@ -482,31 +485,31 @@ public class HttpUtil {
                     return false;
                 }
                 if (exception instanceof NoHttpResponseException) {
-                    log.error("没有响应异常");
+                    logger.error("没有响应异常");
                     return true;
                 } else if (exception instanceof ConnectTimeoutException) {
-                    log.error("连接超时，重试");
+                    logger.error("连接超时，重试");
                     return true;
                 } else if (exception instanceof SSLHandshakeException) {
-                    log.error("本地证书异常");
+                    logger.error("本地证书异常");
                     return false;
                 } else if (exception instanceof InterruptedIOException) {
-                    log.error("IO中断异常");
+                    logger.error("IO中断异常");
                     return false;
                 } else if (exception instanceof UnknownHostException) {
-                    log.error("找不到服务器异常");
+                    logger.error("找不到服务器异常");
                     return false;
                 } else if (exception instanceof SSLException) {
-                    log.error("SSL异常");
+                    logger.error("SSL异常");
                     return false;
                 } else if (exception instanceof HttpHostConnectException) {
-                    log.error("主机连接异常");
+                    logger.error("主机连接异常");
                     return false;
                 } else if (exception instanceof SocketException) {
-                    log.error("socket异常");
+                    logger.error("socket异常");
                     return false;
                 } else {
-                    log.error("未记录的请求异常：" + exception.getClass());
+                    logger.error("未记录的请求异常：" + exception.getClass());
                 }
                 HttpClientContext clientContext = HttpClientContext.adapt(context);
                 HttpRequest request = clientContext.getRequest();
@@ -558,7 +561,7 @@ public class HttpUtil {
             SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslContext);
             return HttpClients.custom().setSSLSocketFactory(sslsf).build();
         } catch (Exception e) {
-            log.error("HttpClientUtil-createSSLClientDefault,error:", e);
+            logger.error("HttpClientUtil-createSSLClientDefault,error:", e);
         }
         return HttpClients.createDefault();
     }

@@ -2,6 +2,8 @@ package com.sondertara.notify.email;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -15,8 +17,8 @@ import java.util.concurrent.TimeUnit;
  * @date 2019/11/7 3:58 下午
  * @since 1.0
  **/
-@Slf4j
 public class EmailServiceTest {
+    private static final Logger logger = LoggerFactory.getLogger(EmailServiceTest.class);
 
     private static ThreadPoolExecutor poolExecutor = new ThreadPoolExecutor(8, 16, 120,
             TimeUnit.SECONDS,
@@ -43,9 +45,9 @@ public class EmailServiceTest {
                 .to(to).subject(subject).build();
         emailService = new EmailService(excelEntity);
         poolExecutor.execute(() -> {
-            log.info("send email start...");
+            logger.info("send email start...");
             emailService.sendMail(true);
-            log.info("send email end...");
+            logger.info("send email end...");
         });
 
 

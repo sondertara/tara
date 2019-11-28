@@ -9,7 +9,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author: maowenbo
+ * enum util
+ *
+ * @author huangxiaohu
  */
 public class EnumUtil {
 

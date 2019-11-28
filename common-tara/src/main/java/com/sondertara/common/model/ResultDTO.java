@@ -7,8 +7,8 @@ import java.io.Serializable;
 
 /**
  * @author huangxiaohu
- * @Date: 2018-12-29
- * @Time: 上午9:39
+ * date: 2018-12-29
+ * time:上午9:39
  */
 @Data
 public class ResultDTO<T> implements Serializable {

@@ -20,6 +20,8 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.DefaultIndexedColorMap;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -35,8 +37,9 @@ import java.util.stream.Collectors;
  *
  * @author huangxiaohu
  */
-@Slf4j
 public class ExcelWriter {
+
+    private static final Logger logger = LoggerFactory.getLogger(ExcelReader.class);
 
     private Integer rowAccessWindowSize;
     private ExcelEntity excelEntity;
@@ -100,7 +103,7 @@ public class ExcelWriter {
             }
 
         } catch (Exception e) {
-            log.error("write into file error:{}", e.toString());
+            logger.error("write into file error:{}", e.toString());
         }
 
     }
@@ -134,7 +137,7 @@ public class ExcelWriter {
                         sizeColumnWidth(sheet, propertyList.size());
                     }
                 }
-                log.warn("查询结果为空,结束查询!");
+                logger.warn("查询结果为空,结束查询!");
                 break;
             }
             int dataSize = data.size();
@@ -157,7 +160,7 @@ public class ExcelWriter {
                     calculateColumnWidth(cell, j);
                 }
                 if (nullCellCount == propertyList.size()) {
-                    log.warn("忽略一行空数据!");
+                    logger.warn("忽略一行空数据!");
                     sheet.removeRow(row);
                     rowNum--;
                 }
@@ -166,7 +169,7 @@ public class ExcelWriter {
             }
             if (data.size() < pageSize) {
                 sizeColumnWidth(sheet, propertyList.size());
-                log.warn("查询结果数量小于pageSize,结束查询!");
+                logger.warn("查询结果数量小于pageSize,结束查询!");
                 break;
             }
             firstPageNo++;
@@ -222,7 +225,7 @@ public class ExcelWriter {
                 if (rowNum != 1) {
                     sizeColumnWidth(sheet, propertyList.size());
                 }
-                log.warn("查询结果为空,结束查询!");
+                logger.warn("查询结果为空,结束查询!");
                 break;
             }
             for (int i = 1; i <= data.size(); i++, rowNum++) {
@@ -242,7 +245,7 @@ public class ExcelWriter {
                     calculateColumnWidth(cell, j);
                 }
                 if (nullCellCount == propertyList.size()) {
-                    log.warn("忽略一行空数据!");
+                    logger.warn("忽略一行空数据!");
                     sheet.removeRow(bodyRow);
                     rowNum--;
                 }
@@ -250,7 +253,7 @@ public class ExcelWriter {
             }
             if (data.size() < pageSize) {
                 sizeColumnWidth(sheet, propertyList.size());
-                log.warn("查询结果数量小于pageSize,结束查询!");
+                logger.warn("查询结果数量小于pageSize,结束查询!");
                 break;
             }
             pageNo++;

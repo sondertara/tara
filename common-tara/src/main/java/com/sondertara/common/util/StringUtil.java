@@ -24,17 +24,19 @@ public class StringUtil {
     private static final Pattern PHONE_PATTERN = Pattern.compile("^[1][3,4,5,6,7,8,9][0-9]{9}$");
 
     /**
-     * 空字符串。
+     * empty str
      */
     public static final String EMPTY_STRING = "";
-
+    /**
+     * dict
+     */
     private final static String AS = "abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     /**
      * 判断字符串是否为空
      *
-     * @param str
-     * @return
+     * @param str original str
+     * @return is blank
      */
     public static boolean isBlank(Object str) {
         return str == null || "".equals(str.toString().trim()) || "null".equalsIgnoreCase(str.toString().trim());
@@ -43,8 +45,8 @@ public class StringUtil {
     /**
      * 格式化null为空
      *
-     * @param str
-     * @return
+     * @param str original str
+     * @return new str
      */
     public static String convertNullToEmpty(Object str) {
         if (str == null) {
@@ -56,21 +58,18 @@ public class StringUtil {
     /**
      * 格式化null为0
      *
-     * @param str
-     * @return
+     * @param str original str
+     * @return new str
      */
     public static String convertNullToZero(Object str) {
-        if (str == null || "".equals(str.toString().trim()) || "null".equalsIgnoreCase(str.toString().trim())) {
-            return "0";
-        }
-        return str.toString();
+        return convertToNumber(str, 0);
     }
 
     /**
      * 格式化null
      *
-     * @param str
-     * @return
+     * @param str original str
+     * @return str maybe null
      */
     public static String convertNullToNull(Object str) {
         if (str == null || "".equals(str.toString().trim()) || "null".equalsIgnoreCase(str.toString().trim())) {
@@ -81,9 +80,12 @@ public class StringUtil {
 
     /**
      * 格式化字符串为数字
+     * <p>
+     * 可能会返回null
+     * </p>
      *
-     * @param str
-     * @return
+     * @param str original str
+     * @return number
      */
     public static String convertToNumber(Object str) {
         if (str == null || "".equals(str.toString().trim()) || "null".equalsIgnoreCase(str.toString().trim())) {
@@ -99,6 +101,9 @@ public class StringUtil {
 
     /**
      * 格式化字符串为数字
+     * <p>
+     * 如果字符串为空或者null，会返回默认值
+     * </p>
      *
      * @param str
      * @return
@@ -600,7 +605,7 @@ public class StringUtil {
      *
      * @param s
      * @return
-     * @author Taylor
+     * 
      */
     public static boolean isEmpty(String s) {
         return s == null || s.trim().length() == 0;
@@ -664,7 +669,7 @@ public class StringUtil {
      *
      * @param s
      * @return
-     * @author Taylor
+     * 
      */
     public static boolean isNotEmpty(String s) {
         return s != null && s.trim().length() != 0;
@@ -717,7 +722,7 @@ public class StringUtil {
      * @param byteLength
      * @param omit
      * @return
-     * @author Taylor
+     * 
      */
     public static String limitString(String s, int byteLength, String omit) {
         if (s == null) {
@@ -778,11 +783,10 @@ public class StringUtil {
     /**
      * 将字符串补齐至一定长度,不足部分用omit补齐
      *
-     * @param s
-     * @param byteLength
-     * @param omit
-     * @return
-     * @author Taylor
+     * @param s          原始字符串
+     * @param byteLength 长度
+     * @param omit       填充字符串
+     * @return 新字符串
      */
     public static String toSize(String s, int byteLength, String omit) {
         if (byteLength <= 0) {
@@ -812,8 +816,8 @@ public class StringUtil {
     /**
      * 将字符串的首字母大写.
      *
-     * @param str
-     * @return
+     * @param str 原始
+     * @return 新
      */
     public static String capitalizeFirstLetter(String str) {
         if (StringUtil.isEmpty(str)) {
@@ -827,8 +831,8 @@ public class StringUtil {
     /**
      * 将字符串的首字母小写.
      *
-     * @param str
-     * @return
+     * @param str original str
+     * @return new str
      */
     public static String lowerFirstLetter(String str) {
         if (StringUtil.isEmpty(str)) {
@@ -842,7 +846,7 @@ public class StringUtil {
     /**
      * 判断某字符串是否都在ascii的范围内
      *
-     * @param str
+     * @param str str
      * @return
      */
     public static boolean isAsciiStr(String str) {
@@ -1104,6 +1108,12 @@ public class StringUtil {
         return sb.toString();
     }
 
+    /**
+     * is phone number
+     *
+     * @param phone stc
+     * @return is phone number
+     */
     public static boolean isPhone(String phone) {
         if (isEmpty(phone)) {
             return false;

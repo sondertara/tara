@@ -1,8 +1,8 @@
 package com.sondertara.model;
 
 
-import lombok.Data;
 import com.sondertara.excel.annotation.ImportField;
+import lombok.Data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -48,7 +48,7 @@ public class ImportParam implements Serializable {
 
     @ImportField(index = 17, scale = 4)
     private BigDecimal discount;
-    @ImportField(index = 18, required = true)
+    @ImportField(index = 18, required = true, min = 20d)
     private BigDecimal premium;
     @ImportField(index = 21)
     private String specialInvoiceNo;

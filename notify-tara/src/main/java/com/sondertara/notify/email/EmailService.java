@@ -1,7 +1,8 @@
 package com.sondertara.notify.email;
 
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
@@ -16,8 +17,8 @@ import java.util.Properties;
  * @author huangxiaohu
  * 邮件发送服务
  */
-@Slf4j
 public class EmailService {
+    private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
 
     private EmailEntity emailEntity;
 
@@ -63,15 +64,15 @@ public class EmailService {
             }
             message.setContent(multipart);
             Transport.send(message);
-            log.info("send email success");
+            logger.info("send email success");
 
             if (deleteAttachFile && null != file) {
                 file.delete();
             }
         } catch (IOException e) {
-            log.error("file resolve error:", e);
+            logger.error("file resolve error:", e);
         } catch (MessagingException e) {
-            log.error("send email error:", e);
+            logger.error("send email error:", e);
         }
     }
 

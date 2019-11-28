@@ -33,6 +33,7 @@ public class BigDecimalUtils {
     /**
      * 格式化精度,默认取两位小数
      *
+     * @param bigDecimal
      * @return String
      */
     public static String formatWithTwoDecimal(BigDecimal bigDecimal) {

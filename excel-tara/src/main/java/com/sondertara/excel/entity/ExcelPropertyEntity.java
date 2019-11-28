@@ -21,7 +21,6 @@ public class ExcelPropertyEntity {
     private Field fieldEntity;
     /**
      * excel列名称
-     *
      */
     private String columnName;
     /**
@@ -30,17 +29,14 @@ public class ExcelPropertyEntity {
     private Integer index;
     /**
      * 默认单元格值
-     *
      */
     private String templateCellValue;
     /**
      * 日期格式 默认 yyyy-MM-dd HH:mm:ss
-     *
      */
     private String dateFormat;
     /**
      * 正则表达式校验
-     *
      */
     private String regex;
     /**
@@ -59,4 +55,12 @@ public class ExcelPropertyEntity {
      * 是否必填
      */
     private Boolean required;
+    /**
+     * 最小值
+     */
+    private Double min;
+    /**
+     * 最大值
+     */
+    private Double max;
 }

@@ -55,7 +55,7 @@ public class EncryptUtil {
      *
      * @param res       被加密的文本
      * @param algorithm 加密算法名称
-     * @return
+     * @return 加密后的字符串
      */
     private String messageDigest(String res, String algorithm) {
         try {
@@ -74,7 +74,7 @@ public class EncryptUtil {
      * @param res       被加密的原文
      * @param algorithm 加密使用的算法名称
      * @param key       加密使用的秘钥
-     * @return
+     * @return 加密后的字符串
      */
     private String keyGeneratorMac(String res, String algorithm, String key) {
         try {
@@ -104,7 +104,7 @@ public class EncryptUtil {
      * @param key       加密的秘钥
      * @param keysize
      * @param isEncode
-     * @return
+     * @return 加密后的字符串
      */
     private String keyGeneratorES(String res, String algorithm, String key, int keysize, boolean isEncode) {
         try {
@@ -135,14 +135,23 @@ public class EncryptUtil {
         return null;
     }
 
+    /**
+     * base64编码
+     *
+     * @param res 明文
+     * @return 编码后的字符串
+     */
     private String base64(byte[] res) {
         return Base64.encodeBase64String(res);
     }
 
     /**
      * 将二进制转换成16进制
+     *
+     * @param buf 二进制
+     * @return 16进制
      */
-    public static String parseByte2HexStr(byte buf[]) {
+    public static String parseByte2HexStr(byte[] buf) {
         StringBuffer sb = new StringBuffer();
         for (int i = 0; i < buf.length; i++) {
             String hex = Integer.toHexString(buf[i] & 0xFF);
@@ -156,6 +165,9 @@ public class EncryptUtil {
 
     /**
      * 将16进制转换为二进制
+     *
+     * @param hexStr 16进制
+     * @return 2进制
      */
     public static byte[] parseHexStr2Byte(String hexStr) {
         if (hexStr.length() < 1) {
@@ -174,7 +186,7 @@ public class EncryptUtil {
      * md5加密算法进行加密（不可逆）
      *
      * @param res 需要加密的原文
-     * @return
+     * @return 加密后的
      */
     public String MD5(String res) {
         return messageDigest(res, MD5);
@@ -185,7 +197,7 @@ public class EncryptUtil {
      *
      * @param res 需要加密的原文
      * @param key 秘钥
-     * @return
+     * @return 加密后的
      */
     public String MD5(String res, String key) {
         return keyGeneratorMac(res, HmacMD5, key);
@@ -195,7 +207,7 @@ public class EncryptUtil {
      * 使用SHA1加密算法进行加密（不可逆）
      *
      * @param res 需要加密的原文
-     * @return
+     * @return 加密后的字符串
      */
     public String SHA1(String res) {
         return messageDigest(res, SHA1);
@@ -206,7 +218,7 @@ public class EncryptUtil {
      *
      * @param res 需要加密的原文
      * @param key 秘钥
-     * @return
+     * @return 加密后的字符串
      */
     public String SHA1(String res, String key) {
         return keyGeneratorMac(res, HmacSHA1, key);
@@ -217,7 +229,7 @@ public class EncryptUtil {
      *
      * @param res 需要加密的原文
      * @param key 秘钥
-     * @return
+     * @return 加密后的字符串
      */
     public String DESencode(String res, String key) {
         return keyGeneratorES(res, DES, key, keysizeDES, true);
@@ -228,9 +240,9 @@ public class EncryptUtil {
      *
      * @param res 需要解密的密文
      * @param key 秘钥
-     * @return
+     * @return 加密后的字符串
      */
-    public String DESdecode(String res, String key) {
+    public String DESDecode(String res, String key) {
         return keyGeneratorES(res, DES, key, keysizeDES, false);
     }
 
@@ -239,9 +251,9 @@ public class EncryptUtil {
      *
      * @param res 需要加密的密文
      * @param key 秘钥
-     * @return
+     * @return 加密后的字符串
      */
-    public String AESencode(String res, String key) {
+    public String AESEncode(String res, String key) {
         return keyGeneratorES(res, AES, key, keysizeAES, true);
     }
 
@@ -250,9 +262,9 @@ public class EncryptUtil {
      *
      * @param res 需要解密的密文
      * @param key 秘钥
-     * @return
+     * @return 解密后的字符串
      */
-    public String AESdecode(String res, String key) {
+    public String AESDecode(String res, String key) {
         return keyGeneratorES(res, AES, key, keysizeAES, false);
     }
 
@@ -261,9 +273,9 @@ public class EncryptUtil {
      *
      * @param res 需要加密的密文
      * @param key 秘钥
-     * @return
+     * @return 加密后的字符串
      */
-    public String XORencode(String res, String key) {
+    public String XOREncode(String res, String key) {
         byte[] bs = res.getBytes();
         for (int i = 0; i < bs.length; i++) {
             bs[i] = (byte) ((bs[i]) ^ key.hashCode());
@@ -276,9 +288,9 @@ public class EncryptUtil {
      *
      * @param res 需要解密的密文
      * @param key 秘钥
-     * @return
+     * @return 解密
      */
-    public String XORdecode(String res, String key) {
+    public String XORDecode(String res, String key) {
         byte[] bs = parseHexStr2Byte(res);
         for (int i = 0; i < bs.length; i++) {
             bs[i] = (byte) ((bs[i]) ^ key.hashCode());
@@ -291,7 +303,7 @@ public class EncryptUtil {
      *
      * @param res 密文
      * @param key 秘钥
-     * @return
+     * @return 异或
      */
     public int XOR(int res, String key) {
         return res ^ key.hashCode();
@@ -301,7 +313,7 @@ public class EncryptUtil {
      * 使用Base64进行加密
      *
      * @param res 密文
-     * @return
+     * @return base64
      */
     public String Base64Encode(String res) {
         return Base64.encodeBase64String(res.getBytes());
@@ -311,14 +323,9 @@ public class EncryptUtil {
      * 使用Base64进行解密
      *
      * @param res
-     * @return
+     * @return base64解密
      */
     public String Base64Decode(String res) {
         return new String(Base64.decodeBase64(res));
-    }
-
-    public static void main(String[] args) {
-        final String digest = EncryptUtil.getInstance().SHA1("qq0313");
-        System.out.println(digest);
     }
 }

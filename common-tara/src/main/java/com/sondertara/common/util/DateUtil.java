@@ -39,8 +39,8 @@ public class DateUtil {
     /**
      * 判断两个时间内的时间间隔（毫秒）
      *
-     * @param startDate
-     * @param endDate
+     * @param startDate 开始时间
+     * @param endDate 终止时间
      */
     public static long afterTime(Date startDate, Date endDate) {
         if (startDate != null & endDate != null) {
@@ -50,15 +50,6 @@ public class DateUtil {
         }
     }
 
-
-    /**
-     * 计算与当前时间相差N分钟的时间
-     */
-    public static Date getAfterSecondTime(Integer second) {
-        second = second * 60 * 1000;
-        Date afterDate = new Date(System.currentTimeMillis() + second);
-        return afterDate;
-    }
 
 
     /**
@@ -176,12 +167,6 @@ public class DateUtil {
         return cal.getTime();
     }
 
-    public static void main(String[] args) throws ExecutionException {
-
-        String date = "2012/12";
-
-        System.out.println(parse(date));
-    }
 
 
     //日期转为字符串，格式为月日

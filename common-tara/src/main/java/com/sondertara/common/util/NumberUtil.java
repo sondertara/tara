@@ -99,6 +99,7 @@ public class NumberUtil {
      * @return
      * @throws NumberFormatException
      */
+    @SuppressWarnings("unchecked")
     public static <T extends Number> T parse(Class<T> clazz, String number) throws NumberFormatException {
         if (StringUtil.isEmpty(number)) {
             return null;

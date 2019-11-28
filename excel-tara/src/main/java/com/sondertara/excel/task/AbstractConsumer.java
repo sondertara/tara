@@ -1,13 +1,16 @@
 package com.sondertara.excel.task;
 
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author huangxiaohu
  * 抽象消费者
  */
-@Slf4j
 abstract public class AbstractConsumer implements Consumer, Runnable {
+    private static final Logger logger = LoggerFactory.getLogger(AbstractConsumer.class);
+
     public boolean isDone = false;
 
     @Override
@@ -16,10 +19,10 @@ abstract public class AbstractConsumer implements Consumer, Runnable {
             try {
                 consume();
             } catch (InterruptedException e) {
-                log.error("consume task error:", e);
+                logger.error("consume task error:", e);
                 break;
             }
         }
-        log.info("consume task is done.[{}]", Thread.currentThread().getName());
+        logger.info("consume task is done.[{}]", Thread.currentThread().getName());
     }
 }
