@@ -145,7 +145,7 @@ public class NumberUtil {
      * @return
      */
     public static BigDecimal toBigDecimalWithScale(final Object str, int newScale, int roundingMode) {
-        final String s = StringUtil.convertNullToNull(str);
+        final String s = StringUtil.convertToNumber(str);
         if (null == s) {
             return null;
         }
@@ -271,7 +271,7 @@ public class NumberUtil {
      * @since 2.1
      */
     public static Float toFloat(final Object str) {
-        final String s = StringUtil.convertNullToNull(str);
+        final String s = StringUtil.convertToNumber(str);
         if (null == s) {
             return null;
         }
@@ -325,7 +325,7 @@ public class NumberUtil {
      * @since 2.1
      */
     public static Double toDouble(final Object str) {
-        final String s = StringUtil.convertNullToNull(str);
+        final String s = StringUtil.convertToNumber(str);
         if (null == s) {
             return null;
         }

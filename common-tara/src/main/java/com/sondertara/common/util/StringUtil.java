@@ -1,6 +1,7 @@
 
 package com.sondertara.common.util;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,7 +69,6 @@ public class StringUtil {
     /**
      * 格式化null
      *
-     *
      * @param str
      * @return
      */
@@ -87,9 +87,27 @@ public class StringUtil {
      */
     public static String convertToNumber(Object str) {
         if (str == null || "".equals(str.toString().trim()) || "null".equalsIgnoreCase(str.toString().trim())) {
-            return "0";
+            return null;
         }
         String s = org.apache.commons.lang3.StringUtils.deleteWhitespace(str.toString());
+        if (s.endsWith("%")) {
+            final double v = Double.parseDouble(s.substring(0, s.length() - 1)) / 100;
+            return String.valueOf(v);
+        }
+        return String.valueOf(str);
+    }
+
+    /**
+     * 格式化字符串为数字
+     *
+     * @param str
+     * @return
+     */
+    public static String convertToNumber(Object str, Number defaultValue) {
+        if (str == null || "".equals(str.toString().trim()) || "null".equalsIgnoreCase(str.toString().trim())) {
+            return String.valueOf(defaultValue);
+        }
+        String s = StringUtils.deleteWhitespace(str.toString());
         if (s.endsWith("%")) {
             final double v = Double.parseDouble(s.substring(0, s.length() - 1)) / 100;
             return String.valueOf(v);

@@ -69,8 +69,8 @@ public class ExcelTaraTest {
 
     @Test
     public void importTest() throws Exception {
-        ExcelTara.builder(new FileInputStream(new File("/Users/huangxiaohu/Desktop/data-return-import.xlsx")), PolicyReturnImportParam.class)
-                .importExcel(true, new ImportFunction<PolicyReturnImportParam>() {
+        ExcelTara.builder(new FileInputStream(new File("/Users/huangxiaohu/Desktop/保费结算导入结果/error.xlsx")), ImportParam.class)
+                .importExcel(true, new ImportFunction<ImportParam>() {
 
                     /**
                      * @param sheetIndex 当前执行的Sheet的索引, 从1开始
@@ -78,7 +78,7 @@ public class ExcelTaraTest {
                      * @param userEntity Excel行数据的实体
                      */
                     @Override
-                    public void onProcess(int sheetIndex, int rowIndex, PolicyReturnImportParam userEntity) {
+                    public void onProcess(int sheetIndex, int rowIndex, ImportParam userEntity) {
                         //将读取到Excel中每一行的userEntity数据进行自定义处理
                         //如果该行数据发生问题,将不会走本方法,而会走onError方法
                         log.info(userEntity.toString());

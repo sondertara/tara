@@ -21,6 +21,9 @@ public class ImportParam implements Serializable {
     @ImportField(index = 1)
     private String recordNo;
 
+    @ImportField(index = 3)
+    private Date orderTime;
+
     @ImportField(index = 6, required = true)
     private String vin;
 
@@ -29,9 +32,14 @@ public class ImportParam implements Serializable {
 
     @ImportField(index = 8)
     private String correctNo;
+    @ImportField(index = 11)
+    private String bizType;
 
     @ImportField(index = 13)
     private String insuredName;
+
+    @ImportField(index = 14)
+    private String insurerName;
 
     @ImportField(index = 15)
     private String cityName;

@@ -445,15 +445,15 @@ public class ExcelReader extends DefaultHandler {
         } else if (filedClazz == BigDecimal.class) {
             cellValue = NumberUtil.toBigDecimalWithScale(cellValue, mappingProperty.getScale(), mappingProperty.getRoundingMode());
         } else if (filedClazz == int.class) {
-            cellValue = NumberUtil.toInt(StringUtil.convertNullToZero(cellValue), 0);
+            cellValue = NumberUtil.toInt(StringUtil.convertToNumber(cellValue, 0));
         } else if (filedClazz == short.class) {
-            cellValue = NumberUtil.toShort(StringUtil.convertNullToZero(cellValue), (short) 0);
+            cellValue = NumberUtil.toShort(StringUtil.convertToNumber(cellValue, (short) 0));
         } else if (filedClazz == double.class) {
-            cellValue = NumberUtil.toDouble(StringUtil.convertNullToZero(cellValue), 0d);
+            cellValue = NumberUtil.toDouble(StringUtil.convertToNumber(cellValue, 0d));
         } else if (filedClazz == long.class) {
             cellValue = NumberUtil.toLong(StringUtil.convertNullToZero(cellValue), 0L);
         } else if (filedClazz == float.class) {
-            cellValue = NumberUtil.toFloat(StringUtil.convertNullToZero(cellValue), 0f);
+            cellValue = NumberUtil.toFloat(StringUtil.convertToNumber(cellValue, 0f));
         } else if (filedClazz != String.class) {
             throw new ExcelBootException("不支持的属性类型:{},导入失败!", filedClazz);
         }
