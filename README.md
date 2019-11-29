@@ -1,4 +1,3 @@
-
 [![Build Status](https://travis-ci.org/sondertara/tara.svg?branch=master)](https://travis-ci.org/sondertara/tara)
 ![Java](https://sondertara.github.io/assets/java8.svg)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/sondertara/tara)
@@ -115,7 +114,7 @@ public class ExportVO {
 
 #### 3)异步导出
 
-该方案会异步多线程生成csv格式的Excel文件，其中`ExcelHelper` 使用build构建
+该方案会异步多线程生成csv格式的Excel文件，并返回文件所在的路径.其中`ExcelHelper` 使用build构建
 
 ```java
 public void exportCsv(QueryParam param, ExcelHelper helper) {
