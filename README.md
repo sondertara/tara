@@ -80,7 +80,7 @@ public class ExportVO {
     @RequestMapping("/exportDemo")
     public void exportResponse(@RequestParam(value = "fieldValues") String fieldValues, HttpServletResponse httpServletResponse) {
         ParamEntity param = JSON.parseObject(fieldValues, ParamEntity.class);
-        ExcelBoot.builder(httpServletResponse, ExcelHelper.builder().fileName("导出列表").build(), ExportVO.class).exportResponse(param,
+        ExcelTara.builder(httpServletResponse, ExcelHelper.builder().fileName("导出列表").build(), ExportVO.class).exportResponse(param,
                 new ExportFunction<ParamEntity, ResultEntity>() {
                     /**
                      * @param queryQaram 查询条件对象
@@ -130,7 +130,7 @@ public void exportCsv(QueryParam param, ExcelHelper helper) {
         //起线程处理，快速返回web页面
         taskPool.execute(() -> {
             //文件绝对路径
-            String path = ExcelBoot.builder(helper, ExportVO.class).exportCsv(param, new ExportFunction<ParamEntity, ResultEntity>() {
+            String path = ExcelTara.builder(helper, ExportVO.class).exportCsv(param, new ExportFunction<ParamEntity, ResultEntity>() {
                 @Override
                 public List<ResultEntity> pageQuery(ParamEntity param, int pageNum, int pageSize) {
                    //调用自定义的分页查询方法
@@ -144,18 +144,8 @@ public void exportCsv(QueryParam param, ExcelHelper helper) {
                         return new ExportVO();
                 }
             });
-
-            //上传到阿里云，获得url
             try {
-                final String name = "insurance" + DateUtil.formatDate(new Date(), "yyyyMMdd") + File.separator + URLEncoder.encode(helper.getFileName(), "utf-8") + ".csv";
-                fileStorageRepository.put(name, new FileInputStream(path), null);
-                final String absoluteImageUrl = ImageUtil.getAbsoluteImageUrl(name);
-                log.info(absoluteImageUrl);
-            } catch (IOException e) {
-                log.error("upload file error:", e);
-            }
-            try {
-        //获取到path后，发送邮件,也可以上传至服务器
+               //获取到path后，发送邮件,也可以上传至服务器
             } catch (Exception e) {
                 log.error("", e)
             }
