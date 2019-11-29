@@ -6,7 +6,7 @@
 
     <groupId>com.sondertara</groupId>
     <artifactId>tara</artifactId>
-    <version>0.0.3.200</version>
+    <version>0.0.3.201</version>
     <packaging>pom</packaging>
     <name>tara</name>
     <description>tara is a awesome java advance Kit.</description>
@@ -43,18 +43,17 @@
 
     <dependencyManagement>
         <dependencies>
-
+            <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>1.18.10</version>
+                <scope>provided</scope>
+            </dependency>
             <dependency>
                 <groupId>com.alibaba</groupId>
                 <artifactId>fastjson</artifactId>
                 <version>1.2.58</version>
-            </dependency>
-
-
-            <dependency>
-                <groupId>org.projectlombok</groupId>
-                <artifactId>lombok</artifactId>
-                <version>1.16.10</version>
             </dependency>
             <dependency>
                 <groupId>org.reflections</groupId>
@@ -168,7 +167,12 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.2.0</version>
             </dependency>
-
+            <!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-release-plugin -->
+            <dependency>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.3</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

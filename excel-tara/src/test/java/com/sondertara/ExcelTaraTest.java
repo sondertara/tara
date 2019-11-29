@@ -80,7 +80,7 @@ public class ExcelTaraTest {
 
         CSVPrinter errorPrinter = CSVFormat.EXCEL.print(errorWriter);
 
-        ExcelTara.builder(new FileInputStream(new File("/Users/huangxiaohu/Desktop/保费结算导入结果/error.xlsx")), ImportParam.class)
+        ExcelTara.builder(new FileInputStream(new File("/Users/huangxiaohu/Desktop/7-9导入服务费金额有误数据.xlsx")), ImportParam.class)
                 .importExcel(true, new ImportFunction<ImportParam>() {
 
                     /**

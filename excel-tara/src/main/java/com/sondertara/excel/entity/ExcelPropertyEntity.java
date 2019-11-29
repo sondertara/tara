@@ -1,6 +1,7 @@
 
 package com.sondertara.excel.entity;
 
+import com.sondertara.excel.enums.FieldRangeType;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -57,11 +58,15 @@ public class ExcelPropertyEntity {
      */
     private Boolean required;
     /**
-     * 最小值
+     * range
+     * <p>
+     * number  eg:{"2",""}(2, ),{"2","5"},{"","5"}
+     * date eg:{"2019-08-01 12:00:00",""},{"2019-08-01 12:00:00","2019-10-01 12:00:00"}
+     * </p>
      */
-    private Double min;
+    private String[] range;
     /**
-     * 最大值
+     * range type {@link FieldRangeType} ,default is {@link FieldRangeType#RANGE_CLOSE}
      */
-    private Double max;
+    private FieldRangeType rangeType;
 }
