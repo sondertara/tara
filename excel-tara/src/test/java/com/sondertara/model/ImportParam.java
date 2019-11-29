@@ -48,7 +48,7 @@ public class ImportParam implements Serializable {
 
     @ImportField(index = 17, scale = 4)
     private BigDecimal discount;
-    @ImportField(index = 18, required = true, min = 20d)
+    @ImportField(index = 18, required = true)
     private BigDecimal premium;
     @ImportField(index = 21)
     private String specialInvoiceNo;

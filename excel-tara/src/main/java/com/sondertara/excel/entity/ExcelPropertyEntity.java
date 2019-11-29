@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.lang.reflect.Field;
+import java.math.RoundingMode;
 
 /**
  * @author huangxiaohu
@@ -50,7 +51,7 @@ public class ExcelPropertyEntity {
     /**
      * BigDecimal 舍入规则 默认:2
      */
-    private Integer roundingMode;
+    private RoundingMode roundingMode;
     /**
      * 是否必填
      */

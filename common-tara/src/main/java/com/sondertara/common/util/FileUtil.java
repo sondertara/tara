@@ -19,7 +19,7 @@ public class FileUtil {
      * 递归删除文件（夹）
      *
      * @param file 待删除的文件（夹）
-     * @return
+     * @return 是否删除
      */
 
     static boolean remove(File file) {

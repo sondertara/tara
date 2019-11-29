@@ -20,16 +20,17 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * 生成excel任务
+ * generate csv excel file
  *
- * @param <P> 查询参数
- * @param <T> 结果数据
+ * @param <P> query param
+ * @param <T> query result
  * @author huangxiaohu
  */
 public class ExcelGenerateTask<P, T> implements ExcelRunnable {
@@ -42,7 +43,7 @@ public class ExcelGenerateTask<P, T> implements ExcelRunnable {
 
     private ExportFunction<P, T> exportFunction;
 
-    private BlockingQueue<ExcelQueryEntity> queue;
+    private BlockingQueue<ExcelQueryEntity<T>> queue;
     private ExcelEntity excelEntity;
 
     private ExcelHelper helper;
@@ -71,24 +72,24 @@ public class ExcelGenerateTask<P, T> implements ExcelRunnable {
         @Override
         public void produce() throws InterruptedException {
             if (!flag.get()) {
-                logger.warn("结束完毕");
                 super.isDone = true;
+                logger.warn("producer thread exit");
                 return;
             }
-            logger.info("开始查询 pageSize[{}]", helper.getPageSize());
+            logger.info("start query pageSize[{}]", helper.getPageSize());
 
             final int queryPage = page.getAndIncrement();
             if (queryPage > helper.getPageEnd()) {
-                logger.warn("分页查询结束");
+                logger.warn("page query end!");
                 super.isDone = true;
                 flag.set(false);
                 return;
             }
-            logger.info("开始查询第[{}]页", queryPage);
+            logger.info("start query page[{}]...", queryPage);
             List<T> data = exportFunction.pageQuery(param, queryPage, helper.getPageSize());
-            logger.info("第[{}]页查询结束", queryPage);
+            logger.info("end query page[{}]...", queryPage);
             if (data == null || data.isEmpty()) {
-                logger.warn("查询结果为空,结束查询!");
+                logger.warn("query data is empty,query exit !");
                 super.isDone = true;
                 flag.set(false);
                 return;
@@ -98,10 +99,9 @@ public class ExcelGenerateTask<P, T> implements ExcelRunnable {
             entity.setPage(queryPage);
             queue.put(entity);
             if (data.size() < helper.getPageSize()) {
-                logger.warn("查询结果数量小于pageSize,为最后一页，结束查询!");
+                logger.warn("current data  size is [{}],less than pageSize[{}],is the last page,query exit!", data.size(), helper.getPageSize());
                 super.isDone = true;
                 flag.set(false);
-                return;
             }
         }
     }
@@ -112,17 +112,17 @@ public class ExcelGenerateTask<P, T> implements ExcelRunnable {
 
             if (!flag.get() && queue.isEmpty()) {
                 super.isDone = true;
-                logger.warn("结束消费[{}]", Thread.currentThread().getName());
+                logger.warn("consumer[{}] exit...", Thread.currentThread().getName());
                 return;
             }
-            ExcelQueryEntity excelQueryEntity = queue.poll(3000, TimeUnit.MILLISECONDS);
+            ExcelQueryEntity<T> excelQueryEntity = queue.poll(3000, TimeUnit.MILLISECONDS);
             if (null == excelQueryEntity) {
                 return;
             }
 
             logger.info("current dir is {}", helper.getWorkspace());
 
-            logger.info("处理第{}页", excelQueryEntity.getPage());
+            logger.info("start handle data of page[{}]  ...", excelQueryEntity.getPage());
             try {
                 File file = new File(helper.getWorkspace());
                 if (!file.exists()) {
@@ -140,7 +140,7 @@ public class ExcelGenerateTask<P, T> implements ExcelRunnable {
 
                 csvPrinter.flush();
                 csvPrinter.close();
-                logger.info("第{}页处理完毕", excelQueryEntity.getPage());
+                logger.info("end handle data of page[{}]...", excelQueryEntity.getPage());
             } catch (Exception e) {
                 logger.error("write into file error:", e);
             }
@@ -151,12 +151,12 @@ public class ExcelGenerateTask<P, T> implements ExcelRunnable {
     }
 
     /**
-     * 构造 除第一行以外的其他行的列值
+     * build data row except first row in excel.
      *
-     * @param entity      数据
-     * @param excelEntity 导出字段属性
+     * @param entity      data
+     * @param excelEntity excel entity via {@link com.sondertara.excel.annotation.ExportField}
      */
-    private List<String> buildRow(Object entity, ExcelEntity excelEntity) throws Exception {
+    private List<String> buildRow(Object entity, ExcelEntity excelEntity) throws ExecutionException, IllegalAccessException {
 
 
         List<ExcelPropertyEntity> propertyList = excelEntity.getPropertyList();

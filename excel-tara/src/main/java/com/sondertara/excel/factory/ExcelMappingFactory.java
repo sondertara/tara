@@ -5,7 +5,7 @@ import com.sondertara.excel.annotation.ExportField;
 import com.sondertara.excel.annotation.ImportField;
 import com.sondertara.excel.entity.ExcelEntity;
 import com.sondertara.excel.entity.ExcelPropertyEntity;
-import com.sondertara.excel.exception.ExcelBootException;
+import com.sondertara.excel.exception.ExcelTaraException;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -48,7 +48,7 @@ public class ExcelMappingFactory {
             }
         }
         if (propertyList.isEmpty()) {
-            throw new ExcelBootException("[{}] 类未找到标注@ImportField注解的属性!", clazz.getName());
+            throw new ExcelTaraException("[{}] 类未找到标注@ImportField注解的属性!", clazz.getName());
         }
         ExcelEntity excelMapping = new ExcelEntity();
         excelMapping.setPropertyList(propertyList);
@@ -84,7 +84,7 @@ public class ExcelMappingFactory {
             }
         }
         if (propertyList.isEmpty()) {
-            throw new ExcelBootException("[{}]类未找到标注@ExportField注解的属性!", clazz.getName());
+            throw new ExcelTaraException("[{}]类未找到标注@ExportField注解的属性!", clazz.getName());
         }
         ExcelEntity excelMapping = new ExcelEntity();
         excelMapping.setPropertyList(propertyList);

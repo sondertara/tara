@@ -5,7 +5,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 /**
  * @author huangxiaohu
@@ -48,7 +48,7 @@ public @interface ImportField {
     /**
      * BigDecimal 舍入规则 默认:BigDecimal.ROUND_HALF_EVEN
      */
-    int roundingMode() default BigDecimal.ROUND_HALF_EVEN;
+    RoundingMode roundingMode() default RoundingMode.HALF_EVEN;
 
     /**
      * 最小值,需要配合required一起使用

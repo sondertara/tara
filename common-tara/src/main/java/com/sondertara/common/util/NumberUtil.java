@@ -7,13 +7,14 @@ import org.apache.commons.lang3.math.NumberUtils;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 
 /**
  * 数字处理 base org.apache.commons.lang3.NumberUtils
  *
  * @author huangxiaohu
  * @version 1.0
- * @date 2019/11/8 1:00 下午
+ * date 2019/11/8 1:00 下午
  * @since 1.0
  **/
 public class NumberUtil {
@@ -96,7 +97,7 @@ public class NumberUtil {
      * @param clazz  the number class to parse
      * @param number str
      * @param <T>    type
-     * @return
+     * @return number
      * @throws NumberFormatException
      */
     @SuppressWarnings("unchecked")
@@ -129,7 +130,7 @@ public class NumberUtil {
      * to bigDecimal
      *
      * @param str
-     * @return
+     * @return bigDecimal
      */
     public static BigDecimal toBigDecimal(final Object str) {
         final String s = StringUtil.convertNullToNull(str);
@@ -143,9 +144,9 @@ public class NumberUtil {
      * to bigDecimal with scale
      *
      * @param str
-     * @return
+     * @return bigDecimal
      */
-    public static BigDecimal toBigDecimalWithScale(final Object str, int newScale, int roundingMode) {
+    public static BigDecimal toBigDecimalWithScale(final Object str, int newScale, RoundingMode roundingMode) {
         final String s = StringUtil.convertToNumber(str);
         if (null == s) {
             return null;

@@ -30,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ExcelTaraTest {
     private static final Logger logger = LoggerFactory.getLogger(ExcelTaraTest.class);
+
     /**
      * Rigorous Test :-)
      */
@@ -78,6 +79,7 @@ public class ExcelTaraTest {
         Appendable errorWriter = new PrintWriter("error.csv", "GBK");
 
         CSVPrinter errorPrinter = CSVFormat.EXCEL.print(errorWriter);
+
         ExcelTara.builder(new FileInputStream(new File("/Users/huangxiaohu/Desktop/保费结算导入结果/error.xlsx")), ImportParam.class)
                 .importExcel(true, new ImportFunction<ImportParam>() {
 
@@ -86,6 +88,7 @@ public class ExcelTaraTest {
                      * @param rowIndex 当前执行的行数, 从1开始
                      * @param userEntity Excel行数据的实体
                      */
+                    @SuppressWarnings("unchecked")
                     @Override
                     public void onProcess(int sheetIndex, int rowIndex, ImportParam userEntity) {
                         //将读取到Excel中每一行的userEntity数据进行自定义处理

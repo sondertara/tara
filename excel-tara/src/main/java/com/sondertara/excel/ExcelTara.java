@@ -5,16 +5,15 @@ import com.sondertara.common.util.StringUtil;
 import com.sondertara.excel.common.Constant;
 import com.sondertara.excel.entity.ExcelEntity;
 import com.sondertara.excel.entity.ExcelHelper;
-import com.sondertara.excel.exception.ExcelBootException;
+import com.sondertara.excel.exception.ExcelTaraException;
 import com.sondertara.excel.factory.ExcelMappingFactory;
 import com.sondertara.excel.function.ExportFunction;
 import com.sondertara.excel.function.ImportFunction;
 import com.sondertara.excel.parser.ExcelReader;
 import com.sondertara.excel.parser.ExcelWriter;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import com.sondertara.excel.task.ExcelGenerateTask;
 import com.sondertara.excel.task.ExcelRunnable;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 
 
 /**
- * excel构造器
+ * Excel kit.  use this kit you need work with the builder, avoid using the constructor
  *
  * @author huangxiaohu
  */
@@ -38,28 +37,57 @@ public class ExcelTara {
 
     private static final Logger logger = LoggerFactory.getLogger(ExcelTara.class);
 
-
+    /**
+     * task pool
+     */
     private ThreadPoolExecutor taskPool;
+    /**
+     * http response
+     */
     private HttpServletResponse httpServletResponse;
+    /**
+     * output stream the excel  file to flush
+     */
     private OutputStream outputStream;
+    /**
+     * input stream the excel file to read
+     */
     private InputStream inputStream;
+    /**
+     * the class to work
+     * <p>
+     * {@link com.sondertara.excel.annotation.ImportField}
+     * <p>
+     * {@link com.sondertara.excel.annotation.ImportField}
+     */
     private Class excelClass;
-
+    /**
+     * excel export helper
+     */
     private ExcelHelper helper;
+    /**
+     * row cached in memory, default is 200 {@link Constant#DEFAULT_ROW_ACCESS_WINDOW_SIZE}
+     */
     private Integer rowAccessWindowSize;
+    /**
+     * pre sheet rows count,when export large data will generate multi sheet.
+     */
     private Integer recordCountPerSheet;
+    /**
+     * enable open cell auto column width ,to keep high performance has removed.
+     */
     private Boolean openAutoColumWidth;
 
 
     /**
-     * 导入构造器
+     * the constructor for import
      */
     protected ExcelTara(InputStream inputStream, Class excelClass) {
         this(null, null, inputStream, null, excelClass, null, null, null);
     }
 
     /**
-     * OutputStream导出构造器,一般用于导出到ftp服务器
+     * OutputStream  export constructor ,can use to export  to ftp server
      */
     protected ExcelTara(OutputStream outputStream, ExcelHelper helper, Class excelClass) {
         this(null, outputStream, null, helper, excelClass,
@@ -68,7 +96,7 @@ public class ExcelTara {
     }
 
     /**
-     * HttpServletResponse导出构造器,一般用于浏览器导出
+     * HttpServletResponse export constructor,can use to browser
      */
     protected ExcelTara(HttpServletResponse response, ExcelHelper helper, Class excelClass) {
         this(response, null, null, helper, excelClass,
@@ -76,12 +104,18 @@ public class ExcelTara {
                 Constant.OPEN_AUTO_COLUMN_WIDTH);
     }
 
+    /**
+     * constructor for export
+     *
+     * @param helper
+     * @param clazz
+     */
     protected ExcelTara(ExcelHelper helper, Class clazz) {
         this(null, null, null, helper, clazz, null, null, null);
     }
 
     /**
-     * 构造器
+     * the base constructor
      */
     protected ExcelTara(HttpServletResponse response, OutputStream outputStream,
                         InputStream inputStream
@@ -105,7 +139,7 @@ public class ExcelTara {
     }
 
     /**
-     * 通过HttpServletResponse,一般用于在浏览器中导出excel
+     * export to HttpServletResponse,when export excel to browser.
      */
     public static ExcelTara builder(HttpServletResponse httpServletResponse, ExcelHelper helper,
                                     Class clazz) {
@@ -113,21 +147,21 @@ public class ExcelTara {
     }
 
     /**
-     * 通过OutputStream生成excel文件,一般用于异步导出大Excel文件到ftp服务器或本地路径
+     * export to OutputStream, when export large excel for long time or to ftp server.
      */
     public static ExcelTara builder(OutputStream outputStream, ExcelHelper helper, Class clazz) {
         return new ExcelTara(outputStream, helper, clazz);
     }
 
     /**
-     * 用于异步导出大Excel文件到ftp服务器或本地路径,格式为csv
+     * export to csv file  async with multi thread,when export large data.
      */
     public static ExcelTara builder(ExcelHelper helper, Class clazz) {
         return new ExcelTara(helper, clazz);
     }
 
     /**
-     * HttpServletResponse 通用导出Excel构造器
+     * export to HttpServletResponse with row cache config .
      */
     public static ExcelTara builder(HttpServletResponse response, ExcelHelper helper,
                                     Class excelClass, Integer rowAccessWindowSize, Integer recordCountPerSheet,
@@ -138,7 +172,7 @@ public class ExcelTara {
     }
 
     /**
-     * OutputStream 通用导出Excel构造器
+     * export to OutputStream with cache config.
      */
     public static ExcelTara builder(OutputStream outputStream, ExcelHelper helper,
                                     Class excelClass, Integer rowAccessWindowSize, Integer recordCountPerSheet, Boolean openAutoColumWidth) {
@@ -148,14 +182,14 @@ public class ExcelTara {
     }
 
     /**
-     * 导入Excel文件数据
+     * import excel builder.
      */
     public static ExcelTara builder(InputStream inputStream, Class clazz) {
         return new ExcelTara(inputStream, clazz);
     }
 
     /**
-     * 用于浏览器导出
+     * export to http response with browser
      */
     public <R, T> void exportResponse(R param, ExportFunction<R, T> exportFunction) {
         SXSSFWorkbook sxssfWorkbook = null;
@@ -174,31 +208,31 @@ public class ExcelTara {
                 }
             }
         } catch (Exception e) {
-            throw new ExcelBootException(e);
+            throw new ExcelTaraException(e);
         }
     }
 
     /**
-     * 通过OutputStream导出excel文件,一般用于异步导出大Excel文件到本地路径
+     * export to OutputStream to generate large excel file or upload ftp server
      */
     public <R, T> void exportStream(R param, ExportFunction<R, T> exportFunction) {
         OutputStream outputStream = null;
         try {
             try {
                 outputStream = generateStream(param, exportFunction);
-                write(outputStream);
+                close(outputStream);
             } finally {
                 if (outputStream != null) {
                     outputStream.close();
                 }
             }
         } catch (Exception e) {
-            throw new ExcelBootException(e);
+            throw new ExcelTaraException(e);
         }
     }
 
     /**
-     * 导出csv,一般用于异步导出大Excel文件到本地路径
+     * async multi thread export to csv file
      */
     public <R, T> String exportCsv(R param, ExportFunction<R, T> exportFunction) {
         logger.info("开始导出csv");
@@ -231,15 +265,15 @@ public class ExcelTara {
             //返回文件path
             return workPath + helper.getFileName() + ".csv";
         } catch (Exception e) {
-            throw new ExcelBootException(e);
+            throw new ExcelTaraException(e);
         }
 
     }
 
     /**
-     * 通过OutputStream导出excel文件,一般用于异步导出大Excel文件到ftp服务器
+     * generate export stream.
      */
-    public <R, T> OutputStream generateStream(R param, ExportFunction<R, T> exportFunction)
+    private <R, T> OutputStream generateStream(R param, ExportFunction<R, T> exportFunction)
             throws IOException {
         SXSSFWorkbook sxssfWorkbook = null;
         try {
@@ -248,16 +282,16 @@ public class ExcelTara {
             sxssfWorkbook.write(outputStream);
             return outputStream;
         } catch (Exception e) {
-            logger.error("生成Excel发生异常! 异常信息:", e);
+            logger.error("generate excel stream error!", e);
             if (sxssfWorkbook != null) {
                 sxssfWorkbook.close();
             }
-            throw new ExcelBootException(e);
+            throw new ExcelTaraException(e);
         }
     }
 
     /**
-     * 用于浏览器分sheet导出
+     * export  multi sheets to http response
      */
     public <R, T> void exportMultiSheetResponse(R param, ExportFunction<R, T> exportFunction) {
         SXSSFWorkbook sxssfWorkbook = null;
@@ -273,34 +307,34 @@ public class ExcelTara {
                 }
             }
         } catch (Exception e) {
-            throw new ExcelBootException(e);
+            throw new ExcelTaraException(e);
         }
     }
 
     /**
-     * 通过OutputStream分sheet导出excel文件,一般用于异步导出大Excel文件到本地路径
+     * export  multi sheets to http output stream
      */
     public <R, T> void exportMultiSheetStream(R param, ExportFunction<R, T> exportFunction) {
         OutputStream outputStream = null;
         try {
             try {
                 outputStream = generateMultiSheetStream(param, exportFunction);
-                write(outputStream);
+                close(outputStream);
             } finally {
                 if (outputStream != null) {
                     outputStream.close();
                 }
             }
         } catch (Exception e) {
-            throw new ExcelBootException(e);
+            throw new ExcelTaraException(e);
         }
     }
 
     /**
-     * 通过OutputStream分sheet导出excel文件,一般用于异步导出大Excel文件到ftp服务器
+     * generate multi sheets to output stream
      */
-    public <R, T> OutputStream generateMultiSheetStream(R param,
-                                                        ExportFunction<R, T> exportFunction) throws IOException {
+    private <R, T> OutputStream generateMultiSheetStream(R param,
+                                                         ExportFunction<R, T> exportFunction) throws IOException {
         SXSSFWorkbook sxssfWorkbook = null;
         try {
             verifyStream();
@@ -308,16 +342,16 @@ public class ExcelTara {
             sxssfWorkbook.write(outputStream);
             return outputStream;
         } catch (Exception e) {
-            logger.error("分Sheet生成Excel发生异常! 异常信息:", e);
+            logger.error("generate multi sheets excel error!", e);
             if (sxssfWorkbook != null) {
                 sxssfWorkbook.close();
             }
-            throw new ExcelBootException(e);
+            throw new ExcelTaraException(e);
         }
     }
 
     /**
-     * 导出-导入模板
+     * export  excel tmplate for import
      */
     public void exportTemplate() {
         SXSSFWorkbook sxssfWorkbook = null;
@@ -341,31 +375,41 @@ public class ExcelTara {
                 }
             }
         } catch (Exception e) {
-            throw new ExcelBootException(e);
+            throw new ExcelTaraException(e);
         }
     }
 
     /**
-     * 导入excel全部sheet
+     * import all excel sheet
      */
     public void importExcel(Boolean enableIndex, ImportFunction importFunction) {
         try {
             if (importFunction == null) {
-                throw new ExcelBootException("excelReadHandler参数为空!");
+                throw new ExcelTaraException("excel read handler importFunction is null!");
             }
             if (inputStream == null) {
-                throw new ExcelBootException("inputStream参数为空!");
+                throw new ExcelTaraException("inputStream is null");
             }
 
             ExcelEntity excelMapping = ExcelMappingFactory.loadImportExcelClass(excelClass);
             ExcelReader excelReader = new ExcelReader(excelClass, excelMapping, importFunction, enableIndex);
             excelReader.process(inputStream);
         } catch (Exception e) {
-            throw new ExcelBootException(e);
+            throw new ExcelTaraException(e);
         }
 
     }
 
+    /**
+     * genetare one sheet.
+     *
+     * @param param          query param
+     * @param exportFunction export function
+     * @param <R>            query class
+     * @param <T>            export class via {@link com.sondertara.excel.annotation.ExportField}
+     * @return workbook
+     * @throws Exception
+     */
     private <R, T> SXSSFWorkbook commonSingleSheet(R param, ExportFunction<R, T> exportFunction)
             throws Exception {
         verifyAndBuildParams();
@@ -385,16 +429,16 @@ public class ExcelTara {
     }
 
     /**
-     * 生成文件
+     * close stream
      */
-    private void write(OutputStream out) throws IOException {
+    private void close(OutputStream out) throws IOException {
         if (null != out) {
             out.flush();
         }
     }
 
     /**
-     * 构建Excel服务器响应格式
+     * flush excel workbook to file.
      */
     private void download(SXSSFWorkbook wb, HttpServletResponse response, String filename)
             throws IOException {
@@ -409,28 +453,37 @@ public class ExcelTara {
         }
     }
 
+    /**
+     * validate http response
+     */
     private void verifyResponse() {
         if (httpServletResponse == null) {
-            throw new ExcelBootException("httpServletResponse参数为空!");
+            throw new ExcelTaraException("httpServletResponse is null");
         }
     }
 
+    /**
+     * validate  output stream
+     */
     private void verifyStream() {
         if (outputStream == null) {
-            throw new ExcelBootException("outputStream参数为空!");
+            throw new ExcelTaraException("outputStream is null");
         }
     }
 
+    /**
+     * validate param and set default value when some field is null.
+     */
     private void verifyAndBuildParams() {
         if (excelClass == null) {
-            throw new ExcelBootException("excelClass参数为空!");
+            throw new ExcelTaraException("param excelClass is null");
         }
         if (helper == null) {
-            throw new ExcelBootException("helper参数为空!");
+            throw new ExcelTaraException("param excelHelper is null");
         }
 
         if (StringUtil.isEmpty(helper.getFileName())) {
-            throw new ExcelBootException("fileName参数为空!");
+            throw new ExcelTaraException("param fileName is null");
         }
         if (StringUtil.isEmpty(helper.getReceiptUser())) {
             helper.setReceiptUser("default_export");
@@ -443,6 +496,9 @@ public class ExcelTara {
         }
         if (helper.getPageEnd() == null) {
             helper.setPageEnd(Integer.MAX_VALUE);
+        }
+        if (this.rowAccessWindowSize == null) {
+            this.rowAccessWindowSize = Constant.DEFAULT_ROW_ACCESS_WINDOW_SIZE;
         }
     }
 

@@ -18,6 +18,7 @@ public class EnumUtil {
     /**
      * 获取是否类枚举的name
      */
+    @SuppressWarnings("unchecked")
     public static <T extends Enum<T>> String getName(Class<T> enumType, Boolean flag) {
         if (flag == null) {
             return null;
@@ -148,6 +149,7 @@ public class EnumUtil {
     /**
      *
      */
+    @SuppressWarnings("unchecked")
     public static <T extends Enum<T>, K, V> Map<K, V> getMap(Class<T> enumType, String keyFieldName,
                                                              Class<K> keyType, String valueFieldName, Class<V> valueType) {
         Map<K, V> map = Maps.newHashMap();

@@ -5,12 +5,13 @@ import com.sondertara.common.util.DateUtil;
 import com.sondertara.common.util.NumberUtil;
 import com.sondertara.common.util.RegexUtil;
 import com.sondertara.common.util.StringUtil;
+import com.sondertara.excel.annotation.ImportField;
 import com.sondertara.excel.common.Constant;
 import com.sondertara.excel.entity.ErrorEntity;
 import com.sondertara.excel.entity.ExcelEntity;
 import com.sondertara.excel.entity.ExcelPropertyEntity;
 import com.sondertara.excel.exception.AllEmptyRowException;
-import com.sondertara.excel.exception.ExcelBootException;
+import com.sondertara.excel.exception.ExcelTaraException;
 import com.sondertara.excel.function.ImportFunction;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
@@ -47,84 +48,89 @@ public class ExcelReader extends DefaultHandler {
     private static final Logger logger = LoggerFactory.getLogger(ExcelReader.class);
 
     /**
-     * 格式化formatter
+     * formatter
      */
     private static final DataFormatter FORMATTER = new DataFormatter();
     /**
-     * 当前sheet
+     * current sheet
      */
     private Integer currentSheetIndex = -1;
     /**
-     * Excel当前行
+     * row of sheet
      */
     private Integer currentRowIndex = 0;
     /**
-     * Excel当前列
+     * column of sheet
      */
     private Integer currentCellIndex = -1;
     /**
-     * 行数据索引
+     * data list index of a row
      */
     private Integer dataCurrentCellIndex = 0;
     /**
-     * 下一个cell数据类型
+     * next cell type
      */
     private ExcelCellType excelCellType;
     /**
-     * 定义前一个元素和当前元素的位置，用来计算其中空的单元格数量，如A6和A8等
+     * the pre cell and current cell ,to calculate the distance like A6 and A8
      */
     private String previousCellLocation;
     private String currentCellLocation;
     /**
-     * 最后一列坐标
+     * the last cell location
      */
     private String endCellLocation;
     /**
-     * 共享字符串索引
+     * shared strings table
      */
     private SharedStringsTable mSharedStringsTable;
     /**
-     * 当前cell值
+     * current cell value
      */
     private String currentCellValue;
     /**
-     * 是否需要查共享字符串
+     * is need to read shared strings
      */
     private Boolean isNeedSharedStrings = false;
     /**
-     * excel映射
+     * excel entity via annotation
      */
     private ExcelEntity excelMapping;
     /**
-     * 导入方法
+     * import function
      */
     private ImportFunction importFunction;
     /**
-     * 导入pojo
+     * class which will parse data
      */
     private Class excelClass;
     /**
-     * 一行记录
+     * data of one row
      */
     private List<String> cellsOnRow = new ArrayList<String>();
     /**
-     * 表头
+     * data of the head
      */
     private List<String> titleRow = new ArrayList<String>();
     /**
-     * 开始读取行号
+     * the row  index begin to read.( head is 0)
      */
     private Integer beginReadRowIndex;
     /**
-     * 是否启用列index对应关系
+     * is enable the index  mapping relation
+     * <p>
+     * if true the index value  is the column in excel,else the field and column one-to-one
+     *
+     * @see ImportField#index()
+     * </p>
      */
     private Boolean enableIndex = false;
     /**
-     * 单元格格式
+     * style in a cell
      */
     private StylesTable stylesTable;
     /**
-     * 单元格number格式化信息
+     * cell formatter
      */
     private short formatIndex;
     private String formatString;
@@ -152,7 +158,7 @@ public class ExcelReader extends DefaultHandler {
 
         for (ExcelPropertyEntity entity : excelMapping.getPropertyList()) {
             if (enableIndex && entity.getIndex() < 0) {
-                throw new ExcelBootException("Excel导入启动了列对应关系，请标注注解属性对应的index值", entity.getFieldEntity().getName());
+                throw new ExcelTaraException("Excel enable the index mapping relation .please set [index] filed via @ImportField", entity.getFieldEntity().getName());
             }
         }
         OPCPackage opcPackage = null;
@@ -172,12 +178,12 @@ public class ExcelReader extends DefaultHandler {
                     sheet = sheets.next();
                     sheetSource = new InputSource(sheet);
                     try {
-                        logger.info("开始读取第{}个Sheet!", currentSheetIndex + 1);
+                        logger.info("start read the Sheet[{}]....", currentSheetIndex + 1);
                         parser.parse(sheetSource);
                     } catch (AllEmptyRowException e) {
                         logger.warn(e.getMessage());
                     } catch (Exception e) {
-                        throw new ExcelBootException(e, "第{}个Sheet,第{}行,第{}列,系统发生异常! ", currentSheetIndex + 1, currentRowIndex + 1, currentCellIndex);
+                        throw new ExcelTaraException(e, "Sheet[{}],row[{}],column[{}],parse error... ", currentSheetIndex + 1, currentRowIndex + 1, currentCellIndex);
                     }
                 } finally {
                     if (sheet != null) {
@@ -193,11 +199,11 @@ public class ExcelReader extends DefaultHandler {
     }
 
     /**
-     * 获取sharedStrings.xml文件的XMLReader对象
+     * get XMLReader instance of sharedStrings.xml
      *
-     * @param sst 字符串索引
-     * @return xml解析器
-     * @throws SAXException
+     * @param sst SharedStringsTable
+     * @return XMLReader
+     * @throws SAXException exception
      */
     private XMLReader fetchSheetParser(SharedStringsTable sst) throws SAXException {
         XMLReader parser = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser");
@@ -207,12 +213,12 @@ public class ExcelReader extends DefaultHandler {
     }
 
     /**
-     * 开始读取一个标签元素
+     * read  start the first xml element
      *
-     * @param uri
-     * @param localName
-     * @param name
-     * @param attributes
+     * @param uri        The Namespace URI
+     * @param localName  he local name (without prefix)
+     * @param name       The qualified name (with prefix)
+     * @param attributes The attributes attached to the element
      */
     @Override
     public void startElement(String uri, String localName, String name, Attributes attributes) {
@@ -231,11 +237,11 @@ public class ExcelReader extends DefaultHandler {
     }
 
     /**
-     * 加载v标签中间的值
+     * get the value between tag 'v'
      *
-     * @param chars
-     * @param start
-     * @param length
+     * @param chars  The characters
+     * @param start  start
+     * @param length len
      */
     @Override
     public void characters(char[] chars, int start, int length) {
@@ -243,7 +249,7 @@ public class ExcelReader extends DefaultHandler {
     }
 
     /**
-     * 结束读取一个标签元素
+     * read end the xml element
      *
      * @param uri
      * @param localName
@@ -276,10 +282,7 @@ public class ExcelReader extends DefaultHandler {
                 endCellLocation = currentCellLocation;
                 int propertySize = excelMapping.getPropertyList().size();
                 if (!enableIndex && cellsOnRow.size() != propertySize) {
-                    throw new ExcelBootException("Excel有效列数不等于标注注解的属性数量!Excel列数:{},标注注解的属性数量:{}", cellsOnRow.size(), propertySize);
-                }
-                if (cellsOnRow.size() < propertySize) {
-                    throw new ExcelBootException("Excel有效列数小于标注注解的属性数量!Excel列数:{},标注注解的属性数量:{}", cellsOnRow.size(), propertySize);
+                    throw new ExcelTaraException("Excel qualified columns size not equal the  fields size via @ImportFiled in pojo.Excel columns size [{}],via import annotation size[{}]...you can enable index mapping relation ", cellsOnRow.size(), propertySize);
                 }
                 titleRow.addAll(cellsOnRow);
             }
@@ -295,7 +298,7 @@ public class ExcelReader extends DefaultHandler {
             } catch (AllEmptyRowException e) {
                 throw e;
             } catch (Exception e) {
-                throw new ExcelBootException(e);
+                throw new ExcelTaraException(e);
             }
             cellsOnRow.clear();
             currentRowIndex++;
@@ -309,10 +312,10 @@ public class ExcelReader extends DefaultHandler {
     }
 
     /**
-     * 根据c节点的t属性获取单元格格式
-     * 根据c节点的s属性获取单元格样式,去styles.xml文件找相应样式
+     * set cell type by 'c' node and 't' node
      *
-     * @param cellType xml中单元格格式属性
+     * @param cellType     cell type
+     * @param cellStyleStr cell style
      */
     private void setCellType(String cellType, String cellStyleStr) {
         if ("b".equals(cellType)) {
@@ -344,17 +347,17 @@ public class ExcelReader extends DefaultHandler {
             excelCellType = ExcelCellType.NULL;
 
         } else {
-            throw new ExcelBootException("Excel单元格格式未设置成文本或者常规!单元格格式:{}", cellType);
+            throw new ExcelTaraException("Excel cell not Text or General! the cell type is:{},please fix it first", cellType);
         }
 
 
     }
 
     /**
-     * 根据数据类型获取数据
+     * get cell value
      *
      * @param value
-     * @return cell值
+     * @return cell value
      */
     private String getCellValue(String value) {
         switch (excelCellType) {
@@ -372,6 +375,12 @@ public class ExcelReader extends DefaultHandler {
         }
     }
 
+    /**
+     * generate one row data list
+     *
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
     private void assembleData() throws Exception {
 
         if (currentRowIndex >= beginReadRowIndex) {
@@ -380,7 +389,7 @@ public class ExcelReader extends DefaultHandler {
                 cellsOnRow.add(i, "");
             }
             if (isAllEmptyRowData()) {
-                throw new AllEmptyRowException("第{}行为空行,第{}个Sheet导入结束!", currentRowIndex + 1, currentSheetIndex + 1);
+                throw new AllEmptyRowException("The row[{}] is all empty,the sheet[{}] import exit!", currentRowIndex + 1, currentSheetIndex + 1);
             }
             Object entity = excelClass.newInstance();
             ErrorEntity errorEntity = null;
@@ -398,8 +407,8 @@ public class ExcelReader extends DefaultHandler {
                 try {
                     cellValue = convertCellValue(property, cellValue);
                 } catch (Exception e) {
-                    logger.error(" cell value[{}],convertCellValue error...", cellValue, e);
-                    errorEntity = buildErrorMsg(currentCellIndex, cellValue, "解析错误");
+                    logger.error(" cell value[{}],convert cell value error...", cellValue, e);
+                    errorEntity = buildErrorMsg(currentCellIndex, cellValue, "Parse error");
                     break;
                 }
                 if (cellValue != null) {
@@ -415,6 +424,11 @@ public class ExcelReader extends DefaultHandler {
         }
     }
 
+    /**
+     * all cell is empty of one row
+     *
+     * @return is empty row
+     */
     private boolean isAllEmptyRowData() {
         int emptyCellCount = 0;
         for (Object cellData : cellsOnRow) {
@@ -425,6 +439,15 @@ public class ExcelReader extends DefaultHandler {
         return emptyCellCount == cellsOnRow.size();
     }
 
+    /**
+     * parse cell value to pojo via {@link ImportField}
+     *
+     * @param mappingProperty pojo filed attribute in {@link ImportField}
+     * @param cellValue       cell value
+     * @return the qualified value
+     * @throws ParseException
+     * @throws ExecutionException
+     */
     private Object convertCellValue(ExcelPropertyEntity mappingProperty, Object cellValue) throws
             ParseException, ExecutionException {
         Class filedClazz = mappingProperty.getFieldEntity().getType();
@@ -462,28 +485,38 @@ public class ExcelReader extends DefaultHandler {
         } else if (filedClazz == float.class) {
             cellValue = NumberUtil.toFloat(StringUtil.convertToNumber(cellValue, 0f));
         } else if (filedClazz != String.class) {
-            throw new ExcelBootException("不支持的属性类型:{},导入失败!", filedClazz);
+            throw new ExcelTaraException("The field type[{}] not support,import error", filedClazz);
         }
         return cellValue;
     }
 
+    /**
+     * check the cell value via {@link ImportField}
+     *
+     * @param cellIndex       cell index
+     * @param mappingProperty pojo field attribute
+     * @param cellValue       cell value
+     * @return error entity if  pass validate  will return null
+     * @throws Exception
+     */
     private ErrorEntity checkCellValue(Integer cellIndex, ExcelPropertyEntity mappingProperty, Object cellValue) throws
             Exception {
         Boolean required = mappingProperty.getRequired();
         if (null != required && required) {
             if (null == cellValue || StringUtil.isBlank(cellValue)) {
-                String validErrorMessage = String.format("第[%s]个Sheet,第[%s]行,第[%s]列必填单元格为空!"
+
+                String validErrorMessage = String.format("The sheet[{}],row[{}],column[{}] is required,but now is empty!"
                         , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1);
                 return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
             }
             if (Double.MIN_VALUE != mappingProperty.getMin() || Double.MAX_VALUE != mappingProperty.getMax()) {
                 final Double v = NumberUtil.toDouble(cellValue);
                 if (null == v) {
-                    String validErrorMessage = String.format("第[%s]个Sheet,第[%s]行,第[%s]列,单元格转换数值后为空!"
+                    String validErrorMessage = String.format("The sheet[{}],row[{}],column[{}] is empty after converted!"
                             , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1);
                     return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
-                } else if (v > mappingProperty.getMin() || v < mappingProperty.getMin()) {
-                    String validErrorMessage = String.format("第[%s]个Sheet,第[%s]行,第[%s]列,单元格值:[%s],数值大小区间校验失败!"
+                } else if (v > mappingProperty.getMax() || v < mappingProperty.getMin()) {
+                    String validErrorMessage = String.format("The sheet[{}],row[{}],column[{}],cell value[%s] not pass the number range validation!"
                             , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue);
                     return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
 
@@ -496,7 +529,7 @@ public class ExcelReader extends DefaultHandler {
             boolean matches = RegexUtil.isMatch(regex, cellValue.toString());
             if (!matches) {
                 String regularExpMessage = mappingProperty.getRegexMessage();
-                String validErrorMessage = String.format("第[%s]个Sheet,第[%s]行,第[%s]列,单元格值:[%s],正则表达式[%s]校验失败!"
+                String validErrorMessage = String.format("The sheet[{}],row[{}],column[{}],cell value[%s] not pass the regex validation!"
                         , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, regularExpMessage);
                 return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
             }
@@ -506,6 +539,14 @@ public class ExcelReader extends DefaultHandler {
         return null;
     }
 
+    /**
+     * build error entity
+     *
+     * @param cellIndex         cell index in excel
+     * @param cellValue         value
+     * @param validErrorMessage error msg
+     * @return error entity
+     */
     private ErrorEntity buildErrorMsg(Integer cellIndex, Object cellValue,
                                       String validErrorMessage) {
         return ErrorEntity.builder()
@@ -519,14 +560,14 @@ public class ExcelReader extends DefaultHandler {
     }
 
     /**
-     * 计算两个单元格之间的单元格数目(同一行)
+     * calculate distance of the two cell in one row
      *
      * @param refA
      * @param refB
-     * @return 单元格差值
+     * @return the distance
      */
     public int countNullCell(String refA, String refB) {
-        // excel2007最大行数是1048576，最大列数是16384，最后一列列名是XFD
+        // excel2007 max row is 1048576，max column is 16384，the last column name is 'XFD'
         String xfdA = refA.replaceAll("\\d+", "");
         String xfdB = refB.replaceAll("\\d+", "");
 
@@ -560,7 +601,7 @@ public class ExcelReader extends DefaultHandler {
     }
 
     /**
-     * 单元格中的数据可能的数据类型
+     * cell type
      */
     enum ExcelCellType {
         BOOL, ERROR, FORMULA, INLINESTR, NULL, NUMBER, SSTINDEX

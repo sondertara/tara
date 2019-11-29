@@ -62,7 +62,7 @@ public class LocalDateTimeUtil {
     /**
      * @param date    jdk8之前的date 
      * @param pattern
-     * @return
+     * @return date str
      */
     public static String format(Date date, String pattern) {
         if (null == date) {
