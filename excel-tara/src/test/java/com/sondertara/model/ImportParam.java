@@ -54,7 +54,7 @@ public class ImportParam implements Serializable {
     private String specialInvoiceNo;
     @ImportField(index = 26)
     private Date commitTime;
-    @ImportField(index = 27)
+    @ImportField(index = 27, range = {"300","200"})
     private BigDecimal commissionAmount;
 
 

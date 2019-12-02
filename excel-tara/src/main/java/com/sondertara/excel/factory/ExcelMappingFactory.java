@@ -41,8 +41,8 @@ public class ExcelMappingFactory {
                         .regexMessage(importField.regexMessage().trim())
                         .scale(importField.scale())
                         .roundingMode(importField.roundingMode())
-                        .min(importField.min())
-                        .max(importField.max())
+                        .range(importField.range())
+                        .rangeType(importField.rangeType())
                         .build();
                 propertyList.add(excelPropertyEntity);
             }

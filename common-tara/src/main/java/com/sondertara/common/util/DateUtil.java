@@ -40,7 +40,7 @@ public class DateUtil {
      * 判断两个时间内的时间间隔（毫秒）
      *
      * @param startDate 开始时间
-     * @param endDate 终止时间
+     * @param endDate   终止时间
      */
     public static long afterTime(Date startDate, Date endDate) {
         if (startDate != null & endDate != null) {
@@ -51,7 +51,6 @@ public class DateUtil {
     }
 
 
-
     /**
      * 尝试转换日期
      *
@@ -59,6 +58,9 @@ public class DateUtil {
      * @return 转换后的date，尝试转换失败时返回null
      */
     public static Date parse(String dateString) throws ExecutionException {
+        if (StringUtil.isBlank(dateString)) {
+            return null;
+        }
         Date date = null;
         if (date == null) {
 
@@ -168,7 +170,6 @@ public class DateUtil {
     }
 
 
-
     //日期转为字符串，格式为月日
     public static String dateToMD(Date d) {
         if (d == null) {
@@ -191,5 +192,4 @@ public class DateUtil {
         int year = calendar.get(Calendar.YEAR);
         return year + "年" + dateToMD(d);
     }
-
 }

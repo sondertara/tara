@@ -7,12 +7,12 @@
     <parent>
         <groupId>com.sondertara</groupId>
         <artifactId>tara</artifactId>
-        <version>0.0.3.200</version>
+        <version>0.0.3.201</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <groupId>com.sondertara</groupId>
     <artifactId>excel-tara</artifactId>
-    <version>0.0.3.200</version>
+    <version>0.0.3.201</version>
     <name>excel-tara</name>
     <description>high performance excel kit.</description>
     <url>https://github.com/sondertara/tara</url>
@@ -118,7 +118,7 @@
         <dependency>
             <groupId>com.sondertara</groupId>
             <artifactId>common-tara</artifactId>
-            <version>0.0.3.200</version>
+            <version>0.0.3.201</version>
         </dependency>
 
     </dependencies>

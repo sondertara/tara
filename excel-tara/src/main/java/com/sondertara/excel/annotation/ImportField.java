@@ -1,6 +1,8 @@
 
 package com.sondertara.excel.annotation;
 
+import com.sondertara.excel.enums.FieldRangeType;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -59,4 +61,18 @@ public @interface ImportField {
      * 最大值,需要配合required一起使用
      */
     double max() default Double.MAX_VALUE;
+
+    /**
+     * range
+     *
+     * @return the field value rang
+     */
+    String[] range() default {};
+
+    /**
+     * the range type
+     *
+     * @return range type enum
+     */
+    FieldRangeType rangeType() default FieldRangeType.RANGE_CLOSE;
 }

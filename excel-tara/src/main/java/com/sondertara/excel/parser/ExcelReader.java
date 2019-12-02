@@ -10,6 +10,7 @@ import com.sondertara.excel.common.Constant;
 import com.sondertara.excel.entity.ErrorEntity;
 import com.sondertara.excel.entity.ExcelEntity;
 import com.sondertara.excel.entity.ExcelPropertyEntity;
+import com.sondertara.excel.enums.FieldRangeType;
 import com.sondertara.excel.exception.AllEmptyRowException;
 import com.sondertara.excel.exception.ExcelTaraException;
 import com.sondertara.excel.function.ImportFunction;
@@ -501,6 +502,7 @@ public class ExcelReader extends DefaultHandler {
      */
     private ErrorEntity checkCellValue(Integer cellIndex, ExcelPropertyEntity mappingProperty, Object cellValue) throws
             Exception {
+        // is required
         Boolean required = mappingProperty.getRequired();
         if (null != required && required) {
             if (null == cellValue || StringUtil.isBlank(cellValue)) {
@@ -509,21 +511,8 @@ public class ExcelReader extends DefaultHandler {
                         , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1);
                 return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
             }
-            if (Double.MIN_VALUE != mappingProperty.getMin() || Double.MAX_VALUE != mappingProperty.getMax()) {
-                final Double v = NumberUtil.toDouble(cellValue);
-                if (null == v) {
-                    String validErrorMessage = String.format("The sheet[{}],row[{}],column[{}] is empty after converted!"
-                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1);
-                    return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
-                } else if (v > mappingProperty.getMax() || v < mappingProperty.getMin()) {
-                    String validErrorMessage = String.format("The sheet[{}],row[{}],column[{}],cell value[%s] not pass the number range validation!"
-                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue);
-                    return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
-
-                }
-            }
         }
-
+        //regex
         String regex = mappingProperty.getRegex();
         if (!StringUtil.isBlank(cellValue) && !StringUtils.isBlank(regex)) {
             boolean matches = RegexUtil.isMatch(regex, cellValue.toString());
@@ -534,8 +523,29 @@ public class ExcelReader extends DefaultHandler {
                 return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
             }
         }
+        // value range
+        Class filedClazz = mappingProperty.getFieldEntity().getType();
+        String[] range = mappingProperty.getRange();
+        if (range.length == 0) {
+            return null;
+        } else if (StringUtil.isEmpty(range[0]) && StringUtil.isEmpty(range[1])) {
+            return null;
+        } else if (range.length != 2) {
+            throw new Exception("the ImportFiled annotation attribute[range] should a string[] with two elements!");
+        }
+        String simpleName = filedClazz.getSimpleName();
 
-
+        if ("Date".equals(simpleName)) {
+            return checkRangeDate(cellIndex, filedClazz, range, cellValue, mappingProperty.getRangeType());
+        } else if ("Integer".equals(simpleName)
+                || "double".equals(simpleName.toLowerCase())
+                || "BigDecimal".equals(simpleName)
+                || "float".equals(simpleName.toLowerCase())
+                || "int".equals(simpleName)
+                || "short".equals(simpleName.toLowerCase())
+                || "long".equals(simpleName.toLowerCase())) {
+            return checkRangeNumber(cellIndex, filedClazz, range, cellValue, mappingProperty.getRangeType());
+        }
         return null;
     }
 
@@ -599,6 +609,214 @@ public class ExcelReader extends DefaultHandler {
         }
         return str;
     }
+
+    /**
+     * if the field is date check date range
+     *
+     * @param cellIndex
+     * @param filedClazz
+     * @param range
+     * @param cellValue
+     * @param rangeType
+     * @return error entity
+     * @throws Exception
+     */
+    private ErrorEntity checkRangeDate(Integer cellIndex, Class filedClazz, String[] range, Object cellValue, FieldRangeType rangeType) throws Exception {
+        final Date min = DateUtil.parse(range[0]);
+        final Date max = DateUtil.parse(range[1]);
+        if (null == min && null == max) {
+            throw new Exception("The ImportFiled annotation attribute[range] value must be date string[]");
+        } else if (null != max && null != min && max.getTime() <= min.getTime()) {
+            throw new Exception(String.format("The ImportFiled annotation attribute[range] value %s is illegal!", Arrays.toString(range)))
+                    ;
+        }
+        Date v = null;
+        try {
+            v = DateUtil.parse(String.valueOf(cellValue));
+        } catch (ExecutionException e) {
+            String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] must can be parsed to a date!"
+                    , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0], range[1]);
+            return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
+        }
+        if (null == v) {
+            String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s]  is empty after converted!"
+                    , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1);
+            return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
+        }
+        switch (rangeType) {
+            case RANGE_CLOSE:
+                if (null == max && v.getTime() < min.getTime()) {
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the date range '[%s,]' validation!"
+                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0]);
+                    return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
+                } else if (null == min && v.getTime() > max.getTime()) {
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the date range '[,%s]' validation!"
+                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[1]);
+                    return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
+                } else if (v.getTime() > max.getTime() || v.getTime() < min.getTime()) {
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the date range '[%s,%s]' validation!"
+                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0], range[1]);
+                    return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
+                }
+                break;
+            case RANGE_OPEN:
+                if (null == max && v.getTime() <= min.getTime()) {
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '(%s,)' validation!"
+                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0]);
+                    return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
+                } else if (null == min && v.getTime() >= max.getTime()) {
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '(,%s)' validation!"
+                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[1]);
+                    return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
+                } else if (v.getTime() >= max.getTime() || v.getTime() <= min.getTime()) {
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '(%s,%s)' validation!"
+                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0], range[1]);
+                    return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
+                }
+                break;
+            case RANGE_LEFT_OPEN:
+                if (null == max && v.getTime() <= min.getTime()) {
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '(%s,]' validation!"
+                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0]);
+                    return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
+                } else if (null == min && v.getTime() > max.getTime()) {
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '(,%s]' validation!"
+                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[1]);
+                    return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
+                } else if (v.getTime() > max.getTime() || v.getTime() <= min.getTime()) {
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '(%s,%s]' validation!"
+                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0], range[1]);
+                    return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
+                }
+                break;
+            case RANGE_RIGHT_OPEN:
+                if (null == max && v.getTime() < min.getTime()) {
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '[%s,)' validation!"
+                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0]);
+                    return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
+                } else if (null == min && v.getTime() >= max.getTime()) {
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '[,%s)' validation!"
+                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[1]);
+                    return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
+                } else if (v.getTime() >= max.getTime() || v.getTime() < min.getTime()) {
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '[%s,%s)' validation!"
+                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0], range[1]);
+                    return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
+                }
+                break;
+            default:
+        }
+        return null;
+
+    }
+
+    /**
+     * if the field is number check range
+     *
+     * @param cellIndex
+     * @param filedClazz
+     * @param range
+     * @param cellValue
+     * @param rangeType
+     * @return error entity
+     * @throws Exception
+     */
+    private ErrorEntity checkRangeNumber(Integer cellIndex, Class filedClazz, String[] range, Object cellValue, FieldRangeType rangeType) throws Exception {
+
+        Double min = null;
+        Double max = null;
+        try {
+            min = NumberUtil.toDouble(range[0]);
+            max = NumberUtil.toDouble(range[1]);
+        } catch (Exception e) {
+            throw new Exception("the ImportFiled annotation attribute[range] value must be number string[]");
+        }
+        Double v = null;
+        try {
+            v = NumberUtil.toDouble(cellValue);
+        } catch (Exception e) {
+        }
+        if (null == min && null == max) {
+            throw new Exception("the ImportFiled annotation attribute[range] value must be number string[]");
+        } else if (null != max && null != min && max <= min) {
+            throw new Exception(String.format("The ImportFiled annotation attribute[range] value %s is illegal!", Arrays.toString(range)));
+        }
+        if (null == v) {
+            String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s]  is empty after converted!"
+                    , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1);
+            return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
+        }
+        switch (rangeType) {
+            case RANGE_CLOSE:
+                if (null == max && v < min) {
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '[%s,]' validation!"
+                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0]);
+                    return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
+
+                } else if (null == min && v > max) {
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '[,%s]' validation!"
+                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[1]);
+                    return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
+                } else if (v > max || v < min) {
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '[%s,%s]' validation!"
+                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0], range[1]);
+                    return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
+                }
+                break;
+            case RANGE_OPEN:
+                if (null == max && v <= min) {
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '(%s,]' validation!"
+                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0]);
+                    return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
+
+                } else if (null == min && v >= max) {
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '[,%s)' validation!"
+                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[1]);
+                    return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
+                } else if (v >= max || v <= min) {
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '(%s,%s)' validation!"
+                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0], range[1]);
+                    return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
+                }
+                break;
+            case RANGE_LEFT_OPEN:
+                if (null == max && v <= min) {
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '(%s,]' validation!"
+                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0]);
+                    return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
+
+                } else if (null == min && v > min) {
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '(,%s]' validation!"
+                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[1]);
+                    return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
+
+                } else if (v > max || v <= min) {
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '(%s,%s]' validation!"
+                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0], range[1]);
+                    return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
+
+                }
+                break;
+            case RANGE_RIGHT_OPEN:
+                if (null == max && v < min) {
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '[%s,)' validation!"
+                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0]);
+                    return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
+                } else if (null == min && v >= max) {
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '[,%s)' validation!"
+                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[1]);
+                    return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
+                } else if (v >= max || v < min) {
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '[%s,%s)' validation!"
+                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0], range[1]);
+                    return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
+                }
+                break;
+            default:
+        }
+        return null;
+    }
+
 
     /**
      * cell type
