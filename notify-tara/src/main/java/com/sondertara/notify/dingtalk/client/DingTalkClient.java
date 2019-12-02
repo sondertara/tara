@@ -55,7 +55,7 @@ public class DingTalkClient {
         }
         JSONObject obj = JSONObject.parseObject(result);
         Integer errorCode = obj.getInteger("errcode");
-        ResultDTO<String> resultDTO = new ResultDTO();
+        ResultDTO<String> resultDTO = new ResultDTO<>();
         resultDTO.setCode(errorCode.equals(0) ? "200" : String.valueOf(errorCode));
         resultDTO.setMsg(errorCode.equals(0) ? null : obj.getString("errmsg"));
         resultDTO.setSuccess(errorCode.equals(0));
