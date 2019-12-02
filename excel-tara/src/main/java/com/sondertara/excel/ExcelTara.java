@@ -78,6 +78,8 @@ public class ExcelTara {
      */
     private Boolean openAutoColumWidth;
 
+    public ExcelTara() {
+    }
 
     /**
      * the constructor for import
