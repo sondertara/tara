@@ -1,6 +1,7 @@
 package com.sondertara.notify.dingtalk.message;
 
 import com.alibaba.fastjson.JSON;
+import com.sondertara.common.exception.TaraException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
@@ -30,17 +31,17 @@ public class FeedCardMessage implements DingTalkMessage {
         Map<String, Object> feedCard = new HashMap<String, Object>();
 
         if (feedItems == null || feedItems.isEmpty()) {
-            throw new IllegalArgumentException("feedItems should not be null or empty");
+            throw new TaraException("feedItems should not be null or empty");
         }
         for (FeedCardMessageItem item : feedItems) {
             if (StringUtils.isBlank(item.getTitle())) {
-                throw new IllegalArgumentException("title should not be blank");
+                throw new  TaraException("title should not be blank");
             }
             if (StringUtils.isBlank(item.getMessageURL())) {
-                throw new IllegalArgumentException("messageURL should not be blank");
+                throw new  TaraException("messageURL should not be blank");
             }
             if (StringUtils.isBlank(item.getPicURL())) {
-                throw new IllegalArgumentException("picURL should not be blank");
+                throw new  TaraException("picURL should not be blank");
             }
         }
         feedCard.put("links", feedItems);

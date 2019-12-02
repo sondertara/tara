@@ -1,6 +1,7 @@
 package com.sondertara.notify.dingtalk.message;
 
 import com.alibaba.fastjson.JSON;
+import com.sondertara.common.exception.TaraException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -50,7 +51,7 @@ public class MarkdownMessage implements DingTalkMessage {
 
     public static String getHeaderText(int headerType, String text) {
         if (headerType < 1 || headerType > 6) {
-            throw new IllegalArgumentException("headerType should be in [1, 6]");
+            throw new TaraException("headerType should be in [1, 6]");
         }
 
         StringBuffer numbers = new StringBuffer();

@@ -1,6 +1,7 @@
 package com.sondertara.notify.dingtalk.message;
 
 import com.alibaba.fastjson.JSON;
+import com.sondertara.common.exception.TaraException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
@@ -101,10 +102,10 @@ public class SingleTargetActionCardMessage implements DingTalkMessage {
             actionCardContent.put("hideAvatar", "1");
         }
         if (StringUtils.isBlank(singleTitle)) {
-            throw new IllegalArgumentException("singleTitle should not be blank");
+            throw new TaraException("singleTitle should not be blank");
         }
         if (StringUtils.isBlank(singleURL)) {
-            throw new IllegalArgumentException("singleURL should not be blank");
+            throw new  TaraException("singleURL should not be blank");
         }
 
         actionCardContent.put("singleTitle", singleTitle);

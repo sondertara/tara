@@ -1,6 +1,8 @@
 package com.sondertara.notify.dingtalk.message;
 
 import com.alibaba.fastjson.JSON;
+import com.sondertara.common.exception.TaraException;
+import com.sondertara.common.util.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
@@ -9,7 +11,7 @@ import java.util.Map;
 
 
 /**
- * Created by dustin on 2017/3/17.
+ * @author huangxiaohu
  */
 public class TextMessage implements DingTalkMessage {
 
@@ -52,7 +54,7 @@ public class TextMessage implements DingTalkMessage {
 
         Map<String, String> textContent = new HashMap<String, String>();
         if (StringUtils.isBlank(text)) {
-            throw new IllegalArgumentException("text should not be blank");
+            throw new TaraException("text should not be blank");
         }
         textContent.put("content", text);
         items.put("text", textContent);
@@ -64,7 +66,9 @@ public class TextMessage implements DingTalkMessage {
         if (isAtAll) {
             atItems.put("isAtAll", isAtAll);
         }
-        items.put("at", atItems);
+        if (CollectionUtils.isNotEmpty(atItems)) {
+            items.put("at", atItems);
+        }
 
         return JSON.toJSONString(items);
     }

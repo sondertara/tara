@@ -1,30 +1,20 @@
 package com.sondertara.notify.dingtalk.message;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
 /**
- *  @author huangxiaohu
+ * @author huangxiaohu
  */
+@Data
+@AllArgsConstructor
 public class ActionCardAction {
+    /**
+     * title
+     */
     private String title;
+    /**
+     * url
+     */
     private String actionURL;
-
-    public ActionCardAction(String text, String actionURL) {
-        this.title = text;
-        this.actionURL = actionURL;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getActionURL() {
-        return actionURL;
-    }
-
-    public void setActionURL(String actionURL) {
-        this.actionURL = actionURL;
-    }
 }

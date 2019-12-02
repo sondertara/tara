@@ -1,13 +1,14 @@
 package com.sondertara.notify.dingtalk.message;
 
 import com.alibaba.fastjson.JSON;
+import com.sondertara.common.exception.TaraException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by dustin on 2017/3/18.
+ * @author huangxiaohu
  */
 public class LinkMessage implements DingTalkMessage {
 
@@ -56,17 +57,17 @@ public class LinkMessage implements DingTalkMessage {
 
         Map<String, String> linkContent = new HashMap<String, String>();
         if (StringUtils.isBlank(title)) {
-            throw new IllegalArgumentException("title should not be blank");
+            throw new TaraException("title should not be blank");
         }
         linkContent.put("title", title);
 
-        if (StringUtils.isBlank(messageUrl)){
-            throw new IllegalArgumentException("messageUrl should not be blank");
+        if (StringUtils.isBlank(messageUrl)) {
+            throw new  TaraException("messageUrl should not be blank");
         }
         linkContent.put("messageUrl", messageUrl);
 
-        if (StringUtils.isBlank(text)){
-            throw new IllegalArgumentException("text should not be blank");
+        if (StringUtils.isBlank(text)) {
+            throw new  TaraException("text should not be blank");
         }
         linkContent.put("text", text);
 

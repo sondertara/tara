@@ -1,9 +1,15 @@
 package com.sondertara.notify.dingtalk.message;
 
 /**
- *  @author huangxiaohu
+ * @author huangxiaohu
  */
 public enum ActionButtonStyle {
+    /**
+     * horizontal
+     */
     HORIZONTAL,
-    VERTICAL
+    /**
+     * vertical
+     */
+    VERTICAL;
 }

@@ -1,6 +1,7 @@
 package com.sondertara.notify.dingtalk.message;
 
 import com.alibaba.fastjson.JSON;
+import com.sondertara.common.exception.TaraException;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -75,7 +76,7 @@ public class ActionCardMessage implements DingTalkMessage {
 
     public void addAction(ActionCardAction action) {
         if (actions.size() >= MAX_ACTION_BUTTON_CNT) {
-            throw new IllegalArgumentException("number of actions can't more than " + MAX_ACTION_BUTTON_CNT);
+            throw new TaraException("number of actions can't more than " + MAX_ACTION_BUTTON_CNT);
         }
         actions.add(action);
     }
@@ -106,7 +107,7 @@ public class ActionCardMessage implements DingTalkMessage {
         }
 
         if (actions.size() < MIN_ACTION_BUTTON_CNT) {
-            throw new IllegalArgumentException("number of actions can't less than " + MIN_ACTION_BUTTON_CNT);
+            throw new  TaraException("number of actions can't less than " + MIN_ACTION_BUTTON_CNT);
         }
         actionCardContent.put("btns", actions);
 
