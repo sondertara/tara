@@ -1,6 +1,7 @@
 package com.sondertara.common.util;
 
 import com.alibaba.fastjson.JSON;
+import com.sondertara.common.exception.TaraException;
 import org.apache.http.*;
 import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.ServiceUnavailableRetryStrategy;
@@ -58,7 +59,7 @@ public class HttpUtil {
             .setConnectionRequestTimeout(CONN_TIME_OUT)
             .build();
 
-    public static String doGet(String url, Map<String, Object> param) throws Exception {
+    public static String doGet(String url, Map<String, Object> param) throws TaraException {
         StringBuffer buffer = new StringBuffer(url);
         if (url.endsWith("/")) {
             buffer.deleteCharAt(buffer.length() - 1);
@@ -89,7 +90,7 @@ public class HttpUtil {
                 result.append(line);
             }
         } catch (Exception e) {
-            throw e;
+            throw new TaraException(e);
         }
         // 使用finally块来关闭输入流
         finally {
@@ -154,15 +155,16 @@ public class HttpUtil {
         return result;
     }
 
-    public static String sendPostJson(String url, Map<String, Object> param) throws Exception {
+    public static String sendPostJson(String url, Map<String, Object> param) throws TaraException {
         System.out.println(url);
         System.out.println(JSON.toJSONString(param));
 
         return sendPostJson(url, JSON.toJSONString(param));
     }
 
-    public static String sendPostJson(String url, String jsonParam) throws Exception {
-
+    public static String sendPostJson(String url, String jsonParam) throws TaraException {
+        logger.info("post url ==>", url);
+        logger.info("post param ==>", url);
         OutputStream out = null;
         InputStream in = null;
         HttpURLConnection conn = null;
@@ -205,15 +207,19 @@ public class HttpUtil {
             return result.toString();
 
         } catch (Exception e) {
-            throw e;
+            throw new TaraException(e);
         }
         // 使用finally块来关闭输出流、输入流
         finally {
-            if (out != null) {
-                out.close();
-            }
-            if (in != null) {
-                in.close();
+            try {
+                if (out != null) {
+                    out.close();
+                }
+                if (in != null) {
+                    in.close();
+                }
+            } catch (IOException e) {
+                throw new TaraException(e);
             }
 
             if (conn != null) {
@@ -222,19 +228,23 @@ public class HttpUtil {
         }
     }
 
-    private static StringBuffer getParams(Map<String, Object> param) throws UnsupportedEncodingException {
+    private static StringBuffer getParams(Map<String, Object> param) throws TaraException {
         StringBuffer buffer = new StringBuffer();
-        if (param != null && !param.isEmpty()) {
-            for (Entry<String, Object> entry : param.entrySet()) {
-                buffer.append(entry.getKey()).append("=").append(URLEncoder.encode(String.valueOf(entry.getValue()), "UTF-8"))
-                        .append("&");
+        try {
+            if (param != null && !param.isEmpty()) {
+                for (Entry<String, Object> entry : param.entrySet()) {
+                    buffer.append(entry.getKey()).append("=").append(URLEncoder.encode(String.valueOf(entry.getValue()), "UTF-8"))
+                            .append("&");
+                }
+                buffer.deleteCharAt(buffer.length() - 1);
             }
-            buffer.deleteCharAt(buffer.length() - 1);
+        } catch (UnsupportedEncodingException e) {
+            throw new TaraException(e);
         }
         return buffer;
     }
 
-    public static String sendSSLPost(String url, String params, String contentType) throws Exception {
+    public static String sendSSLPost(String url, String params, String contentType) throws TaraException {
         CloseableHttpClient httpClient = createSSLClientDefault();
         HttpPost httpPost = new HttpPost(url);
         CloseableHttpResponse response = null;
@@ -254,7 +264,7 @@ public class HttpUtil {
                 httpStr = EntityUtils.toString(response.getEntity(), "utf-8");
             }
         } catch (Exception e) {
-            throw e;
+            throw new TaraException(e);
         } finally {
             if (response != null) {
                 try {
@@ -267,7 +277,7 @@ public class HttpUtil {
         return httpStr;
     }
 
-    public static String sendSSLPost2(String url, Map<String, Object> params) throws Exception {
+    public static String sendSSLPost2(String url, Map<String, Object> params) throws TaraException {
         CloseableHttpClient httpClient = createSSLClientDefault();
         HttpPost httpPost = new HttpPost(url);
         CloseableHttpResponse response = null;
@@ -286,7 +296,7 @@ public class HttpUtil {
                 httpStr = EntityUtils.toString(response.getEntity(), "utf-8");
             }
         } catch (Exception e) {
-            throw e;
+            throw new TaraException(e);
         } finally {
             if (response != null) {
                 try {
@@ -306,7 +316,7 @@ public class HttpUtil {
         return httpStr;
     }
 
-    public static String doClientGet(String url, Map<String, Object> params) throws Exception {
+    public static String doClientGet(String url, Map<String, Object> params) throws TaraException {
         String result = "";
         CloseableHttpClient httpClient = HttpClients.createDefault();
         try {
@@ -332,7 +342,7 @@ public class HttpUtil {
             httpClient.close();
         } catch (Exception e) {
             logger.error("HttpClientUtil-sendClientGet,error:", e);
-            throw e;
+            throw new TaraException(e);
         } finally {
             if (httpClient != null) {
                 try {
@@ -345,7 +355,7 @@ public class HttpUtil {
         return result;
     }
 
-    public static String doClientPost(String url, Map<String, Object> params) throws Exception {
+    public static String doClientPost(String url, Map<String, Object> params) throws TaraException {
         String result = null;
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
             HttpPost httpPost = new HttpPost(url);
@@ -381,7 +391,7 @@ public class HttpUtil {
             }
         } catch (Exception e) {
             logger.error("HttpClientUtil-sendClientPost,error:", e);
-            throw e;
+            throw new TaraException(e);
         }
         return result;
     }
@@ -405,14 +415,15 @@ public class HttpUtil {
                 .build();
     }
 
-    public static String postForm(String url, Map<String, Object> param) throws Exception {
+    public static String postForm(String url, Map<String, Object> param) throws TaraException {
 
-        StringBuffer buffer = getParams(param);
+
         OutputStream out = null;
         InputStream in = null;
         StringBuffer result = new StringBuffer();
         HttpURLConnection conn = null;
         try {
+            StringBuffer buffer = getParams(param);
             URL realUrl = new URL(url);
             // 打开和URL之间的连接
             conn = (HttpURLConnection) realUrl.openConnection();
@@ -451,7 +462,7 @@ public class HttpUtil {
             return result.toString();
 
         } catch (Exception e) {
-            throw e;
+            throw new TaraException(e);
         }
         // 使用finally块来关闭输出流、输入流
         finally {
@@ -474,7 +485,7 @@ public class HttpUtil {
     /**
      * 请求异常,获取重试控制器
      *
-     * @return
+     * @return retry
      */
     private static HttpRequestRetryHandler getHttpRequestRetryHandler() {
         return new HttpRequestRetryHandler() {

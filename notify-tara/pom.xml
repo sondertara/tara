@@ -7,12 +7,12 @@
     <parent>
         <groupId>com.sondertara</groupId>
         <artifactId>tara</artifactId>
-        <version>0.0.3.201</version>
+        <version>0.0.3.300</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <groupId>com.sondertara</groupId>
     <artifactId>notify-tara</artifactId>
-    <version>0.0.3.201</version>
+    <version>0.0.3.300</version>
 
     <name>notify-tara</name>
     <description>notify kit.</description>
@@ -48,6 +48,11 @@
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sondertara</groupId>
+            <artifactId>common-tara</artifactId>
+            <version>0.0.3.300</version>
         </dependency>
     </dependencies>
 </project>

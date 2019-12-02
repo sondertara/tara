@@ -1,13 +1,12 @@
 package com.sondertara.common.util;
 
 
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * @author
- * @since 2017/6/8.
+ * @author huangxiaohu
+ * @since 1.0
  */
 public class TypeUtil {
     /**
@@ -199,17 +198,18 @@ public class TypeUtil {
 
     /**
      * 布尔值转整型
+     *
      * @param b 布尔值
      * @return true返回1，false返回0，其余情况返回null
      */
-    public static Integer booleanToInteger(Boolean b){
-        if(b == null){
+    public static Integer booleanToInteger(Boolean b) {
+        if (b == null) {
             return null;
         }
-        if(b == true){
+        if (b == true) {
             return 1;
         }
-        if(b == false){
+        if (b == false) {
             return 0;
         }
         return null;
@@ -217,17 +217,18 @@ public class TypeUtil {
 
     /**
      * 整形转布尔值
+     *
      * @param i 整型
      * @return 1返回true，0返回false，其余情况返回null
      */
-    public static Boolean integerToBoolean(Integer i){
-        if(i == null){
+    public static Boolean integerToBoolean(Integer i) {
+        if (i == null) {
 
         }
-        if(i == 1){
+        if (i == 1) {
             return true;
         }
-        if(i == 0){
+        if (i == 0) {
             return false;
         }
         return null;
@@ -235,11 +236,12 @@ public class TypeUtil {
 
     /**
      * 对象转字符串
+     *
      * @param o 转换的对象
      * @return 对象为空时返回""，其余返回o.toString()
      */
-    public static String toString(Object o){
-        if(o == null){
+    public static String toString(Object o) {
+        if (o == null) {
             return "";
         }
         return o.toString();
@@ -247,14 +249,15 @@ public class TypeUtil {
 
     /**
      * 字符串转整型
+     *
      * @param intString 整型数字字符串
      * @return 整型数字字符串对应的Integer值
      */
-    public static Integer parseInt(String intString){
+    public static Integer parseInt(String intString) {
         Integer intValue = null;
-        try{
+        try {
             intValue = Integer.parseInt(intString);
-        }catch(Exception e){
+        } catch (Exception e) {
 
         }
         return intValue;
