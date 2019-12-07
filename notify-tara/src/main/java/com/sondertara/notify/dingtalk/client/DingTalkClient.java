@@ -2,7 +2,7 @@ package com.sondertara.notify.dingtalk.client;
 
 import com.alibaba.fastjson.JSONObject;
 import com.sondertara.common.model.ResultDTO;
-import com.sondertara.common.util.HttpClientUtil;
+import com.sondertara.common.util.HttpUtil;
 import com.sondertara.common.util.StringUtil;
 import com.sondertara.notify.dingtalk.message.DingTalkMessage;
 import com.sondertara.notify.dingtalk.message.TextMessage;
@@ -47,8 +47,7 @@ public class DingTalkClient {
 
     public ResultDTO send(String webhook, DingTalkMessage message) {
 
-
-        String result = HttpClientUtil.sendHttpPostJson(webhook, message.toJsonString());
+        String result = HttpUtil.sendPostJson(webhook, message.toJsonString());
 
         if (StringUtil.isEmpty(result)) {
             return ResultDTO.fail("request error!");
