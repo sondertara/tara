@@ -11,6 +11,11 @@ import javax.crypto.spec.SecretKeySpec;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 
+/**
+ * encrypt util.
+ *
+ * @author huangxiaohu
+ */
 public class EncryptUtil {
     public static final String MD5 = "MD5";
     public static final String SHA1 = "SHA1";

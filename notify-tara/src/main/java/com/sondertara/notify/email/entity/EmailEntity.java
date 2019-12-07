@@ -1,4 +1,4 @@
-package com.sondertara.notify.email;
+package com.sondertara.notify.email.entity;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -20,16 +20,11 @@ public class EmailEntity {
     /**
      * 邮件主题
      */
-    private String subject = "空主题";
+    private String subject = "tara email";
     /**
      * 邮件内容
      */
     private String content;
-
-    private String host = "";
-    private int port = 0;
-    private String username = "";
-    private String password = "";
     /**
      * 附件路径
      */

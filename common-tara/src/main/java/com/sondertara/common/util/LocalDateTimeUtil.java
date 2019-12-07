@@ -11,7 +11,8 @@ import java.util.Date;
  * date util
  *
  * @author huangxiaohu
- * @since 2019-03-19 16:25
+ * @since 1.0
+ * date 2019-03-19 16:25
  */
 public class LocalDateTimeUtil {
 

@@ -7,33 +7,14 @@
     <parent>
         <groupId>com.sondertara</groupId>
         <artifactId>tara</artifactId>
-        <version>0.0.3.201</version>
+        <version>0.0.3.300</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <groupId>com.sondertara</groupId>
     <artifactId>excel-tara</artifactId>
-    <version>0.0.3.201</version>
+    <version>0.0.3.300</version>
     <name>excel-tara</name>
-    <description>high performance excel kit.</description>
-    <url>https://github.com/sondertara/tara</url>
-    <licenses>
-        <license>
-            <name>The Apache Software License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-        </license>
-    </licenses>
-    <scm>
-        <url>https://github.com/sondertara/tara</url>
-        <connection>https://github.com/sondertara/tara.git</connection>
-        <developerConnection>https://github.com/sondertara/tara</developerConnection>
-    </scm>
-    <developers>
-        <developer>
-            <name>sondertara</name>
-            <email>xhhuangchn@outlook.com</email>
-        </developer>
-    </developers>
-
+    <description>High performance Excel kit.</description>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -118,7 +99,7 @@
         <dependency>
             <groupId>com.sondertara</groupId>
             <artifactId>common-tara</artifactId>
-            <version>0.0.3.201</version>
+            <version>0.0.3.300</version>
         </dependency>
 
     </dependencies>
