@@ -2,6 +2,11 @@ package com.sondertara.common.util;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Arrays;
 
 /**
@@ -56,6 +61,43 @@ public class FileUtil {
         }
 
         return remove(parentFile);
+    }
+
+    /**
+     * 获取文件属性
+     *
+     * @param filePath 路径
+     */
+    public static BasicFileAttributes getAttributes(String filePath) throws IOException {
+
+        BasicFileAttributes attributes = Files.readAttributes(new File(filePath).toPath(), BasicFileAttributes.class);
+        return attributes;
+
+
+    }
+
+    /**
+     * 获取文件创建时间
+     *
+     * @param filePath 路径
+     */
+    public static LocalDateTime getTimeCreate(String filePath) throws IOException {
+
+        return LocalDateTime.ofInstant(getAttributes(filePath).creationTime().toInstant(), ZoneId.systemDefault());
+
+
+    }
+
+    /**
+     * 获取文件最后修改时间
+     *
+     * @param filePath 路径
+     */
+    public static LocalDateTime getTimeLastModify(String filePath) throws IOException {
+
+        return LocalDateTime.ofInstant(getAttributes(filePath).lastModifiedTime().toInstant(), ZoneId.systemDefault());
+
+
     }
 
     public static void main(String[] args) {

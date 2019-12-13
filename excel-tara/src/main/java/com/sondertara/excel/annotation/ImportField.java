@@ -53,16 +53,6 @@ public @interface ImportField {
     RoundingMode roundingMode() default RoundingMode.HALF_EVEN;
 
     /**
-     * 最小值,需要配合required一起使用
-     */
-    double min() default Double.MIN_VALUE;
-
-    /**
-     * 最大值,需要配合required一起使用
-     */
-    double max() default Double.MAX_VALUE;
-
-    /**
      * range
      *
      * @return the field value rang
