@@ -27,7 +27,27 @@ public class FileUtil {
      * @return 是否删除
      */
 
-    static boolean remove(File file) {
+    public static boolean remove(File file) {
+        if (!file.exists()) {
+            return false;
+        }
+        if (file.isFile()) {
+            return file.delete();
+        }
+        Arrays.asList(file.listFiles()).forEach(FileUtil::remove);
+        return file.delete();
+
+    }
+
+    /**
+     * 递归删除文件（夹）路径
+     *
+     * @param path 待删除的文件（夹）路径
+     * @return 是否删除
+     */
+
+    public static boolean remove(String path) {
+        final File file = new File(path);
         if (!file.exists()) {
             return false;
         }
@@ -47,7 +67,7 @@ public class FileUtil {
      * @return 结果
      */
 
-    static boolean removeParent(File file, int depth) throws FileNotFoundException {
+    public static boolean removeParent(File file, int depth) throws FileNotFoundException {
         if (!file.exists()) {
             throw new FileNotFoundException(file.getPath());
         }
@@ -100,9 +120,5 @@ public class FileUtil {
 
     }
 
-    public static void main(String[] args) {
-        final int anInt = Integer.valueOf(null);
-        System.out.println(anInt);
-    }
 
 }
