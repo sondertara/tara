@@ -8,7 +8,10 @@ import java.io.File;
  */
 public final class Constant {
 
-    public static final String CHARSET = "GBK";
+    /**
+     * The name of a supported {@linkplain java.nio.charset.Charset charset}
+     */
+    public static String CHARSET = "GBK";
     /**
      * row cached in memory,if row counts greater than this will flush to disk.
      */
@@ -72,4 +75,8 @@ public final class Constant {
      * the number handle thread
      */
     public static final int CONSUMER_COUNT = 4;
+    /**
+     * the workspace
+     */
+    public static final String FILE_STORAGE_PREFIX = "TARA_FILE_DIR";
 }

@@ -15,9 +15,6 @@ import java.util.Date;
  */
 @Data
 public class ImportParam implements Serializable {
-    /**
-     * 理赔单号
-     */
     @ImportField(index = 1)
     private String recordNo;
 
@@ -54,7 +51,7 @@ public class ImportParam implements Serializable {
     private String specialInvoiceNo;
     @ImportField(index = 26)
     private Date commitTime;
-    @ImportField(index = 27, range = {"300","200"})
+    @ImportField(index = 27, range = {"100", "500"})
     private BigDecimal commissionAmount;
 
 

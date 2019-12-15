@@ -241,7 +241,7 @@ public class ExcelTara {
         try {
             verifyAndBuildParams();
             ExcelEntity excelMapping = ExcelMappingFactory.loadExportExcelClass(excelClass, helper.getFileName());
-            final String workPath = Constant.FILE_PATH + helper.getReceiptUser() + File.separator + helper.getFileName() + File.separator;
+            final String workPath = Constant.FILE_PATH + helper.getUser() + File.separator + helper.getFileName() + File.separator;
             helper.setWorkspace(workPath);
             ExcelRunnable excelRunnable = new ExcelGenerateTask<R, T>(param, exportFunction, excelMapping, helper);
             for (int i = 0; i < Constant.PRODUCER_COUNT; i++) {
@@ -487,8 +487,8 @@ public class ExcelTara {
         if (StringUtil.isEmpty(helper.getFileName())) {
             throw new ExcelTaraException("param fileName is null");
         }
-        if (StringUtil.isEmpty(helper.getReceiptUser())) {
-            helper.setReceiptUser("default_export");
+        if (StringUtil.isEmpty(helper.getUser())) {
+            helper.setUser("default_export");
         }
         if (helper.getPageSize() == null) {
             helper.setPageSize(Constant.DEFAULT_PAGE_SIZE);

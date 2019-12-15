@@ -9,12 +9,12 @@
     <parent>
         <groupId>com.sondertara</groupId>
         <artifactId>tara</artifactId>
-        <version>0.0.3.302</version>
+        <version>0.0.3.303</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <groupId>com.sondertara</groupId>
     <artifactId>common-tara</artifactId>
-    <version>0.0.3.302</version>
+    <version>0.0.3.303</version>
 
     <name>common-tara</name>
     <description>common utils.</description>

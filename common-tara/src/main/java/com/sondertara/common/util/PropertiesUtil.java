@@ -117,7 +117,7 @@ public class PropertiesUtil {
      * 获取单例对象
      *
      * @param propertyFileName 文件名称
-     * @return
+     * @return PropertiesUtil
      */
     public static PropertiesUtil getInstance(String propertyFileName) {
         if (instanceMap.get(propertyFileName) != null) {

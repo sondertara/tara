@@ -5,9 +5,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * @Author: chenxinshi
- * @Since: 2018/7/3
- * @desc:
+ * @author huangxiaohu
  */
 public class MathUtil {
 
