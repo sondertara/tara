@@ -2,6 +2,7 @@ package com.sondertara.model;
 
 import com.sondertara.excel.common.ExcelTaraTool;
 import com.sondertara.excel.entity.ErrorEntity;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
@@ -14,9 +15,10 @@ import java.util.List;
  * @version 1.0
  * @since 1.0
  **/
-public class Test {
+public class ExcelTaraToolTest {
 
-    public static void main(String[] args) {
+    @Test
+    public void test() {
 
         new Thread(new Runnable() {
             @Override
