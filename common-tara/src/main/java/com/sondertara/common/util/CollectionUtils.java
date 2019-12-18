@@ -92,9 +92,9 @@ public final class CollectionUtils {
     /**
      * 把list转换成string，中间以combineChar来连接
      *
-     * @param lists
-     * @param combineChar
-     * @return
+     * @param lists       original list
+     * @param combineChar char
+     * @return strs
      */
     public static <T> String combineListToString(List<T> lists, char combineChar) {
         StringBuffer sb = new StringBuffer();

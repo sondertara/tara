@@ -19,9 +19,9 @@ public class ExcelHelper implements Serializable {
      */
     private String fileName;
     /**
-     * 接收者
+     * 操作空间,防止多个操作人文件混乱
      */
-    private String receiptUser;
+    private String user;
     /***
      * 开始页码，不填默认是1
      */
@@ -39,9 +39,9 @@ public class ExcelHelper implements Serializable {
      */
     private String workspace;
 
-    private ExcelHelper(String fileName, String receiptUser, Integer pageStart, Integer pageEnd, Integer pageSize) {
+    private ExcelHelper(String fileName, String user, Integer pageStart, Integer pageEnd, Integer pageSize) {
         this.fileName = fileName;
-        this.receiptUser = receiptUser;
+        this.user = user;
         this.pageStart = pageStart;
         this.pageEnd = pageEnd;
         this.pageSize = pageSize;
@@ -55,7 +55,7 @@ public class ExcelHelper implements Serializable {
 
         private String fileName;
 
-        private String receiptUser;
+        private String user;
 
         private Integer pageStart;
 
@@ -69,8 +69,8 @@ public class ExcelHelper implements Serializable {
             return this;
         }
 
-        public Builder receiptUser(final String receiptUser) {
-            this.receiptUser = receiptUser;
+        public Builder user(final String user) {
+            this.user = user;
             return this;
         }
 
@@ -90,7 +90,7 @@ public class ExcelHelper implements Serializable {
         }
 
         public ExcelHelper build() {
-            return new ExcelHelper(this.fileName, this.receiptUser, this.pageStart, this.pageEnd, this.pageSize);
+            return new ExcelHelper(this.fileName, this.user, this.pageStart, this.pageEnd, this.pageSize);
         }
     }
 }

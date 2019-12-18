@@ -16,7 +16,7 @@ Tara是一个纯java项目,包括常用util工具类和excel处理两个模块
 
 - [x] excel导入导出优化
 - [x] 上传maven仓库
-- [ ] 通知模块
+- [x] 通知模块
 - [ ] java doc
 
 ## Quick Start
@@ -117,41 +117,123 @@ public class ExportVO {
 该方案会异步多线程生成csv格式的Excel文件，并返回文件所在的路径.其中`ExcelHelper` 使用build构建
 
 ```java
-public void exportCsv(QueryParam param, ExcelHelper helper) {
+public class ExceExportDemo {
+    private static final Logger logger = LoggerFactory.getLogger(ExceExportDemo.class);
 
-        StringBuilder sb = new StringBuilder();
-        sb.append(param.toString()).append(helper.getReceiptUser()).append(helper.getFileName());
-        String s = Md5Crypt.md5Crypt(sb.toString().getBytes());
+    public void exportCsvDemo() {
+        String fileName = "Excel文件名";
+        String email = "xhhuangchn@outlook.com";
+        final ExcelHelper helper = ExcelHelper.builder().fileName(fileName).user(email).pageSize(200).build();
+        ExcelTara.builder(helper, UserInfoVo.class).exportCsv(null,
+                new ExportFunction<String, UserDTO>() {
+                    @Override
+                    public List<UserDTO> pageQuery(String param, int pageNum, int pageSize) {
 
-        //做一定的幂等，防止多次调用导致内存占用过大
-        if (!cacheService.add(KEY_PREFIX + s, helper.getReceiptUser(), EXPIRE_SECOND)) {
-            return;
-        }
-        //起线程处理，快速返回web页面
-        taskPool.execute(() -> {
-            //文件绝对路径
-            String path = ExcelTara.builder(helper, ExportVO.class).exportCsv(param, new ExportFunction<ParamEntity, ResultEntity>() {
-                @Override
-                public List<ResultEntity> pageQuery(ParamEntity param, int pageNum, int pageSize) {
-                   //调用自定义的分页查询方法
-                        List<ResultEntity> result =null；
-                        return result;
-                }
+                        List<UserDTO> list = new ArrayList<>(200);
+                        for (int i = 0; i < 200; i++) {
+                            UserDTO userDTO = new UserDTO();
 
-                @Override
-                public ExportVO convert(ResultEntity queryResult) {
-                      //自定义的转换逻辑
-                        return new ExportVO();
-                }
-            });
-            try {
-               //获取到path后，发送邮件,也可以上传至服务器
-            } catch (Exception e) {
-                log.error("", e)
-            }
+                            userDTO.setA(i);
+                            userDTO.setN(pageNum + "测试姓名" + i);
+                            userDTO.setD("测试地址" + i);
+                            list.add(userDTO);
 
-        });
+                            if (pageNum == 5 && i == 150) {
+                                break;
+                            }
+                        }
+                        return list;
+                    }
+
+                    @Override
+                    public UserInfoVo convert(UserDTO queryResult) {
+                        UserInfoVo userInfoVo = new UserInfoVo();
+                        userInfoVo.setAddress(queryResult.getD());
+                        userInfoVo.setAge(queryResult.getA());
+                        userInfoVo.setName(queryResult.getN());
+                        return userInfoVo;
+                    }
+                });
+
+        File file = ExcelTaraTool.getWorkFile(fileName);
+        //FileUtil.remove(file);
     }
+}
+```
+
+#### 2.导入示例
+
+##### 1)添加导入注解 `@ImportField`
+
+```java
+@Data
+public class ImportParam implements Serializable {
+    @ImportField(index = 1)
+    private String userName;
+
+    @ImportField(index = 3)
+    private Date orderTime;
+
+    @ImportField(index = 6, required = true)
+    private String userPhone;
+  
+    @ImportField(index = 8)
+    private Date commitTime;
+
+    @ImportField(index = 9, range = {"100", "500"})
+    private BigDecimal amount;
+}
+```
+
+##### 2)导入demo
+```java
+
+public class ExcelmportDemo {
+    private static final Logger logger = LoggerFactory.getLogger(ExcelmportDemo.class);
+
+    public void importTest(String filePath) throws Exception {
+
+        File file = new File(filePath);
+        final FileInputStream inputStream = new FileInputStream(file);
+
+        ExcelTara.builder(inputStream, ImportParam.class)
+                .importExcel(true, new ImportFunction<ImportParam>() {
+
+                    /**
+                     * @param sheetIndex 当前执行的Sheet的索引, 从1开始
+                     * @param rowIndex   当前执行的行数, 从1开始
+                     * @param param      Excel行数据的实体
+                     */
+                    @Override
+                    public void onProcess(int sheetIndex, int rowIndex, ImportParam param) {
+                        logger.info("sheet[{}],第{}行，解析数据为:{}", sheetIndex, rowIndex, JSON.toJSONString(param));
+                        try {
+                            //  handleImportData(param);
+                        } catch (Exception e) {
+                            logger.error(" handle record error", e);
+                        }
+                    }
+
+                    /**
+                     * @param errorEntity 错误信息实体
+                     */
+                    @Override
+                    public void onError(ErrorEntity errorEntity) {
+                        //将每条数据非空和正则校验后的错误信息errorEntity进行自定义处理
+
+                        logger.info(errorEntity.toString());
+                        ExcelTaraTool.addErrorEntity(errorEntity);
+                    }
+                });
+        //获取导入错误数据
+        List<List<String>> records = ExcelTaraTool.getErrorEntityRecords();
+        //生成cvs
+        ExcelTaraTool.writeRecords("import_error.csv", records);
+        //获取file对象
+        File workFile = ExcelTaraTool.getWorkFile("import_error.csv");
+    }
+}
+
 ```
 
 ## Contact
