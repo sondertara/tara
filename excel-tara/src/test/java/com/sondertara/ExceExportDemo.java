@@ -1,7 +1,7 @@
 package com.sondertara;
 
+import com.sondertara.common.util.FileUtil;
 import com.sondertara.excel.ExcelTara;
-import com.sondertara.excel.common.ExcelTaraTool;
 import com.sondertara.excel.entity.ExcelHelper;
 import com.sondertara.excel.function.ExportFunction;
 import com.sondertara.model.UserDTO;
@@ -9,7 +9,6 @@ import com.sondertara.model.UserInfoVo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +28,7 @@ public class ExceExportDemo {
         String fileName = "Excel文件名";
         String email = "xhhuangchn@outlook.com";
         final ExcelHelper helper = ExcelHelper.builder().fileName(fileName).user(email).pageSize(200).build();
-        ExcelTara.builder(helper, UserInfoVo.class).exportCsv(null,
+        String path = ExcelTara.builder(helper, UserInfoVo.class).exportCsv(null,
                 new ExportFunction<String, UserDTO>() {
                     @Override
                     public List<UserDTO> pageQuery(String param, int pageNum, int pageSize) {
@@ -59,8 +58,6 @@ public class ExceExportDemo {
                         return userInfoVo;
                     }
                 });
-
-        File file = ExcelTaraTool.getWorkFile(fileName);
-        //FileUtil.remove(file);
+        FileUtil.remove(path);
     }
 }
