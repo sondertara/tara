@@ -17,10 +17,9 @@ import java.util.Properties;
  */
 public class PropertiesUtil {
     private static final Logger logger = LoggerFactory.getLogger(PropertiesUtil.class);
-    private static Map<String, PropertiesUtil> instanceMap = new HashMap<String, PropertiesUtil>();
+    private static Map<String, PropertiesUtil> instanceMap = new HashMap<>();
     private String propertyFileName;
     private Properties properties = null;
-    private ClassLoader oClassLoader = null;
     private URI uri = null;
 
 
@@ -136,8 +135,8 @@ public class PropertiesUtil {
     private void loadProperties() {
         try {
             this.properties = new Properties();
-            this.oClassLoader = Thread.currentThread().getContextClassLoader();
-            this.uri = this.oClassLoader.getResource(propertyFileName + ".properties").toURI();
+            ClassLoader oClassLoader = Thread.currentThread().getContextClassLoader();
+            this.uri = oClassLoader.getResource(propertyFileName + ".properties").toURI();
             InputStream is = oClassLoader.getResourceAsStream(this.propertyFileName + ".properties");
             if (is != null) {
                 this.properties.load(is);

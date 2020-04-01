@@ -30,4 +30,19 @@ public class DingTalkSignUtil {
             throw new TaraException("generate sign error!", e);
         }
     }
+
+    /**
+     * 生成签名的url
+     *
+     * @param webhook webhook url
+     * @param secret  签名
+     * @return url
+     */
+    public static String getUrlWithSign(String webhook, String secret) {
+        long timeMillis = System.currentTimeMillis();
+        String sign = sign(timeMillis, secret);
+        StringBuffer sb = new StringBuffer();
+        sb.append(webhook).append("&timestamp=").append(timeMillis).append("&sign=").append(sign);
+        return sb.toString();
+    }
 }
