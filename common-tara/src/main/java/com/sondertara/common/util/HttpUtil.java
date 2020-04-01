@@ -163,8 +163,8 @@ public class HttpUtil {
     }
 
     public static String sendPostJson(String url, String jsonParam) throws TaraException {
-        logger.info("post url ==>", url);
-        logger.info("post param ==>", url);
+        logger.info("post url ==>[{}]", url);
+        logger.info("post param ==>[{}]", url);
         OutputStream out = null;
         InputStream in = null;
         HttpURLConnection conn = null;
