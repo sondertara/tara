@@ -6,7 +6,7 @@
 
     <groupId>com.sondertara</groupId>
     <artifactId>tara</artifactId>
-    <version>0.0.3.303</version>
+    <version>0.0.3.304</version>
     <packaging>pom</packaging>
     <name>tara</name>
     <description>tara is a awesome java advance Kit.</description>

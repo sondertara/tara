@@ -20,6 +20,8 @@ import java.util.regex.Pattern;
 public class StringUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(StringUtil.class);
+    
+    private static final String  NULL_STR="null";
 
     private static final Pattern PHONE_PATTERN = Pattern.compile("^[1][3,4,5,6,7,8,9][0-9]{9}$");
 
@@ -39,7 +41,7 @@ public class StringUtil {
      * @return is blank
      */
     public static boolean isBlank(Object str) {
-        return str == null || "".equals(str.toString().trim()) || "null".equalsIgnoreCase(str.toString().trim());
+        return str == null || "".equals(str.toString().trim()) || NULL_STR.equalsIgnoreCase(str.toString().trim());
     }
 
     /**
@@ -72,7 +74,7 @@ public class StringUtil {
      * @return str maybe null
      */
     public static String convertNullToNull(Object str) {
-        if (str == null || "".equals(str.toString().trim()) || "null".equalsIgnoreCase(str.toString().trim())) {
+        if (str == null || "".equals(str.toString().trim()) || NULL_STR.equalsIgnoreCase(str.toString().trim())) {
             return null;
         }
         return str.toString();
@@ -88,7 +90,7 @@ public class StringUtil {
      * @return number
      */
     public static String convertToNumber(Object str) {
-        if (str == null || "".equals(str.toString().trim()) || "null".equalsIgnoreCase(str.toString().trim())) {
+        if (str == null || "".equals(str.toString().trim()) || NULL_STR.equalsIgnoreCase(str.toString().trim())) {
             return null;
         }
         String s = org.apache.commons.lang3.StringUtils.deleteWhitespace(str.toString());
@@ -105,11 +107,11 @@ public class StringUtil {
      * 如果字符串为空或者null，会返回默认值
      * </p>
      *
-     * @param str
-     * @return
+     * @param str str
+     * @return number
      */
     public static String convertToNumber(Object str, Number defaultValue) {
-        if (str == null || "".equals(str.toString().trim()) || "null".equalsIgnoreCase(str.toString().trim())) {
+        if (str == null || "".equals(str.toString().trim()) || NULL_STR.equalsIgnoreCase(str.toString().trim())) {
             return String.valueOf(defaultValue);
         }
         String s = StringUtils.deleteWhitespace(str.toString());
@@ -170,8 +172,8 @@ public class StringUtil {
     /**
      * 截取str中以startStr开头，endStr结束的字符串
      *
-     * @param str
-     * @param startStr
+     * @param str str
+     * @param startStr str
      * @param endStr
      * @return 返回以以startStr开头，以endStr结束的字符串，如果startStr不存在，则有str为起始；如果endStr不存在，则以字符串结束为终结
      */
@@ -989,9 +991,9 @@ public class StringUtil {
             return "";
         }
         if (uri.contains(".")) {
-            String[] strs = uri.split("\\.");
-            if (strs.length > 1) {
-                String extension = strs[1];
+            String[] strings = uri.split("\\.");
+            if (strings.length > 1) {
+                String extension = strings[1];
                 if (isNotEmpty(extension)) {
                     return extension;
                 }
