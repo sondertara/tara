@@ -1,5 +1,8 @@
 package com.sondertara.common.util;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -15,6 +18,9 @@ import java.util.Date;
  * date 2019-03-19 16:25
  */
 public class LocalDateTimeUtil {
+
+
+    public final static Logger log = LoggerFactory.getLogger(LocalDateTimeUtil.class);
 
     private static final String FORMATTER = "yyyy-MM-dd HH:mm:ss";
 
@@ -33,36 +39,50 @@ public class LocalDateTimeUtil {
         return dateTime.format(formatter);
     }
 
-    public static LocalDateTime convertToLocalDateTime(String dateTimeStr) {
+    public static LocalDateTime convertLocalDateTime(String dateTimeStr, String formatter) {
+        try {
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(formatter);
+            return LocalDateTime.parse(dateTimeStr, dateTimeFormatter);
+        } catch (Exception e) {
+            log.error("parse time error,dateTimeStr==>{}", dateTimeStr, e);
+        }
+        return null;
+    }
 
+
+    public static LocalDateTime convertToLocalDateTime(String dateTimeStr) {
         DateTimeFormatter formatter;
-        LocalDateTime localDateTime = null;
+        LocalDateTime localDateTime;
+        try {
+            formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            localDateTime = LocalDateTime.parse(dateTimeStr, formatter);
+            return localDateTime;
+        } catch (Exception e) {
+            log.error("convert localDateTime error,dateTimeStr==>{}", dateTimeStr, e);
+        }
+
         try {
             formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
             localDateTime = LocalDateTime.parse(dateTimeStr, formatter);
+            return localDateTime;
         } catch (Exception e) {
+            log.error("convert localDateTime error,dateTimeStr==>{}", dateTimeStr, e);
         }
-        if (localDateTime == null) {
-            try {
-                formatter = DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss");
-                localDateTime = LocalDateTime.parse(dateTimeStr, formatter);
-            } catch (Exception e) {
-            }
 
+        try {
+            formatter = DateTimeFormatter.ofPattern("yyyyMMdd HH:mm:ss");
+            localDateTime = LocalDateTime.parse(dateTimeStr, formatter);
+            return localDateTime;
+        } catch (Exception e) {
+            log.error("convert localDateTime error,dateTimeStr==>{}", dateTimeStr, e);
         }
-        if (localDateTime == null) {
-            try {
-                formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                localDateTime = LocalDateTime.parse(dateTimeStr, formatter);
-            } catch (Exception e) {
-            }
-        }
-        return localDateTime;
+
+        return null;
     }
 
     /**
-     * @param date    jdk8之前的date 
-     * @param pattern
+     * @param date    jdk8之前的date
+     * @param pattern 格式化
      * @return date str
      */
     public static String format(Date date, String pattern) {
@@ -73,7 +93,6 @@ public class LocalDateTimeUtil {
         ZoneId zoneId = ZoneId.systemDefault();
         LocalDateTime localDateTime = instant.atZone(zoneId).toLocalDateTime();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
-        ;
         return localDateTime.format(formatter);
     }
 
@@ -92,21 +111,24 @@ public class LocalDateTimeUtil {
         return localDateTime.format(formatter);
     }
 
-    public static Date parse(String dateTime) {
-        if (dateTime == null) {
+    public static Date parse(String dateTimeStr) {
+        if (dateTimeStr == null) {
             return null;
         }
         Date date = null;
         try {
-            LocalDateTime localDateTime = convertToLocalDateTime(dateTime);
+            LocalDateTime localDateTime = convertToLocalDateTime(dateTimeStr);
+            assert localDateTime != null;
             date = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
         } catch (Exception e) {
+            log.error("parse date error,dateTimeStr==>{}", dateTimeStr, e);
         }
         if (date == null) {
             try {
-                final LocalDate parse = convertToLocalDate(dateTime);
+                final LocalDate parse = convertToLocalDate(dateTimeStr);
                 date = Date.from(parse.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant());
             } catch (Exception e) {
+                log.error("parse date error,dateTimeStr==>{}", dateTimeStr, e);
             }
 
         }
@@ -114,7 +136,7 @@ public class LocalDateTimeUtil {
     }
 
     public static LocalDate convertToLocalDate(String date) {
-        DateTimeFormatter formatter = null;
+        DateTimeFormatter formatter;
         LocalDate parse = null;
         try {
             formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
