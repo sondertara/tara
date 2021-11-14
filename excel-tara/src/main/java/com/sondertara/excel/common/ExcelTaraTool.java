@@ -3,7 +3,7 @@ package com.sondertara.excel.common;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sondertara.common.util.CollectionUtils;
-import com.sondertara.common.util.StringUtil;
+import com.sondertara.common.util.StringUtils;
 import com.sondertara.excel.entity.ErrorEntity;
 import com.sondertara.excel.exception.ExcelTaraException;
 import org.apache.commons.csv.CSVFormat;
@@ -194,7 +194,7 @@ public class ExcelTaraTool {
      */
     public static String generateWorkspaceFilePath(String fileName) throws ExcelTaraException {
 
-        if (StringUtil.isEmpty(fileName)) {
+        if (StringUtils.isEmpty(fileName)) {
             throw new ExcelTaraException("fileName is empty");
         }
 
@@ -226,7 +226,7 @@ public class ExcelTaraTool {
      */
     public static File getWorkFile(String fileName) throws ExcelTaraException {
 
-        if (StringUtil.isEmpty(fileName)) {
+        if (StringUtils.isEmpty(fileName)) {
             throw new ExcelTaraException("fileName is empty");
         }
 

@@ -1,6 +1,6 @@
 package com.sondertara.excel.task;
 
-import com.sondertara.common.util.DateUtil;
+import com.sondertara.common.util.LocalDateTimeUtils;
 import com.sondertara.excel.common.Constant;
 import com.sondertara.excel.entity.ExcelEntity;
 import com.sondertara.excel.entity.ExcelHelper;
@@ -171,7 +171,7 @@ public class ExcelGenerateTask<P, T> implements ExcelRunnable {
             } else if (cellValue instanceof BigDecimal) {
                 cell = (((BigDecimal) cellValue).setScale(property.getScale(), property.getRoundingMode())).toString();
             } else if (cellValue instanceof Date) {
-                cell = DateUtil.formatDate((Date) cellValue, property.getDateFormat());
+                cell = LocalDateTimeUtils.format((Date) cellValue, property.getDateFormat());
             } else {
                 cell = cellValue.toString();
             }

@@ -1,7 +1,7 @@
 package com.sondertara.excel;
 
 
-import com.sondertara.common.util.StringUtil;
+import com.sondertara.common.util.StringUtils;
 import com.sondertara.excel.common.Constant;
 import com.sondertara.excel.entity.ExcelEntity;
 import com.sondertara.excel.entity.ExcelHelper;
@@ -484,10 +484,10 @@ public class ExcelTara {
             throw new ExcelTaraException("param excelHelper is null");
         }
 
-        if (StringUtil.isEmpty(helper.getFileName())) {
+        if (StringUtils.isEmpty(helper.getFileName())) {
             throw new ExcelTaraException("param fileName is null");
         }
-        if (StringUtil.isEmpty(helper.getUser())) {
+        if (StringUtils.isEmpty(helper.getUser())) {
             helper.setUser("default_export");
         }
         if (helper.getPageSize() == null) {

@@ -1,10 +1,10 @@
 package com.sondertara.excel.parser;
 
 
-import com.sondertara.common.util.DateUtil;
+import com.sondertara.common.util.LocalDateTimeUtils;
 import com.sondertara.common.util.NumberUtil;
-import com.sondertara.common.util.RegexUtil;
-import com.sondertara.common.util.StringUtil;
+import com.sondertara.common.util.RegexUtils;
+import com.sondertara.common.util.StringUtils;
 import com.sondertara.excel.annotation.ImportField;
 import com.sondertara.excel.common.Constant;
 import com.sondertara.excel.entity.ErrorEntity;
@@ -14,7 +14,6 @@ import com.sondertara.excel.enums.FieldRangeType;
 import com.sondertara.excel.exception.AllEmptyRowException;
 import com.sondertara.excel.exception.ExcelTaraException;
 import com.sondertara.excel.function.ImportFunction;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.usermodel.BuiltinFormats;
@@ -365,7 +364,7 @@ public class ExcelReader extends DefaultHandler {
             case INLINESTR:
                 return new XSSFRichTextString(value).toString();
             case NUMBER:
-                if (this.formatString != null && !StringUtil.isBlank(value)) {
+                if (this.formatString != null && !StringUtils.isBlank(value)) {
                     return FORMATTER.formatRawCellContents(Double
                             .parseDouble(value), this.formatIndex, this.formatString);
                 } else {
@@ -433,7 +432,7 @@ public class ExcelReader extends DefaultHandler {
     private boolean isAllEmptyRowData() {
         int emptyCellCount = 0;
         for (Object cellData : cellsOnRow) {
-            if (StringUtil.isBlank(cellData)) {
+            if (StringUtils.isBlank(cellData)) {
                 emptyCellCount++;
             }
         }
@@ -453,18 +452,18 @@ public class ExcelReader extends DefaultHandler {
             ParseException, ExecutionException {
         Class filedClazz = mappingProperty.getFieldEntity().getType();
         if (filedClazz == Date.class) {
-            if (!StringUtil.isBlank(cellValue)) {
+            if (!StringUtils.isBlank(cellValue)) {
                 try {
                     double parseDouble = Double.parseDouble(cellValue.toString());
                     cellValue = org.apache.poi.ss.usermodel.DateUtil.getJavaDate(parseDouble, TimeZone.getDefault());
                 } catch (NumberFormatException e) {
-                    cellValue = DateUtil.parse(cellValue.toString());
+                    cellValue = LocalDateTimeUtils.parseToDate(cellValue.toString());
                 }
             } else {
                 cellValue = null;
             }
         } else if (filedClazz == String.class) {
-            cellValue = StringUtil.convertNullToNull(cellValue);
+            cellValue = StringUtils.convertNullToNull(cellValue);
         } else if (filedClazz == Integer.class) {
             cellValue = NumberUtil.toInt(cellValue);
         } else if (filedClazz == Double.class) {
@@ -476,16 +475,16 @@ public class ExcelReader extends DefaultHandler {
         } else if (filedClazz == BigDecimal.class) {
             cellValue = NumberUtil.toBigDecimalWithScale(cellValue, mappingProperty.getScale(), mappingProperty.getRoundingMode());
         } else if (filedClazz == int.class) {
-            cellValue = NumberUtil.toInt(StringUtil.convertToNumber(cellValue, 0));
+            cellValue = NumberUtil.toInt(StringUtils.convertToNumber(cellValue, 0));
         } else if (filedClazz == short.class) {
-            cellValue = NumberUtil.toShort(StringUtil.convertToNumber(cellValue, (short) 0));
+            cellValue = NumberUtil.toShort(StringUtils.convertToNumber(cellValue, (short) 0));
         } else if (filedClazz == double.class) {
-            cellValue = NumberUtil.toDouble(StringUtil.convertToNumber(cellValue, 0d));
+            cellValue = NumberUtil.toDouble(StringUtils.convertToNumber(cellValue, 0d));
         } else if (filedClazz == long.class) {
-            cellValue = NumberUtil.toLong(StringUtil.convertNullToZero(cellValue), 0L);
+            cellValue = NumberUtil.toLong(StringUtils.convertNullToZero(cellValue), 0L);
         } else if (filedClazz == float.class) {
-            cellValue = NumberUtil.toFloat(StringUtil.convertToNumber(cellValue, 0f));
-        } else if (filedClazz != String.class) {
+            cellValue = NumberUtil.toFloat(StringUtils.convertToNumber(cellValue, 0f));
+        } else {
             throw new ExcelTaraException("The field type[{}] not support,import error", filedClazz);
         }
         return cellValue;
@@ -505,7 +504,7 @@ public class ExcelReader extends DefaultHandler {
         // is required
         Boolean required = mappingProperty.getRequired();
         if (null != required && required) {
-            if (null == cellValue || StringUtil.isBlank(cellValue)) {
+            if (null == cellValue || StringUtils.isBlank(cellValue)) {
 
                 String validErrorMessage = String.format("The sheet[{}],row[{}],column[{}] is required,but now is empty!"
                         , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1);
@@ -514,8 +513,8 @@ public class ExcelReader extends DefaultHandler {
         }
         //regex
         String regex = mappingProperty.getRegex();
-        if (!StringUtil.isBlank(cellValue) && !StringUtils.isBlank(regex)) {
-            boolean matches = RegexUtil.isMatch(regex, cellValue.toString());
+        if (!StringUtils.isBlank(cellValue) && !StringUtils.isBlank(regex)) {
+            boolean matches = RegexUtils.isMatch(regex, cellValue.toString());
             if (!matches) {
                 String regularExpMessage = mappingProperty.getRegexMessage();
                 String validErrorMessage = String.format("The sheet[{}],row[{}],column[{}],cell value[%s] not pass the regex validation!"
@@ -528,7 +527,7 @@ public class ExcelReader extends DefaultHandler {
         String[] range = mappingProperty.getRange();
         if (range.length == 0) {
             return null;
-        } else if (StringUtil.isEmpty(range[0]) && StringUtil.isEmpty(range[1])) {
+        } else if (StringUtils.isEmpty(range[0]) && StringUtils.isEmpty(range[1])) {
             return null;
         } else if (range.length != 2) {
             throw new Exception("the ImportFiled annotation attribute[range] should a string[] with two elements!");
@@ -563,7 +562,7 @@ public class ExcelReader extends DefaultHandler {
                 .sheetIndex(currentSheetIndex + 1)
                 .rowIndex(currentRowIndex + 1)
                 .cellIndex(cellIndex + 1)
-                .cellValue(StringUtil.convertNullToEmpty(cellValue))
+                .cellValue(StringUtils.convertNullToEmpty(cellValue))
                 .columnName(titleRow.get(cellIndex))
                 .errorMessage(validErrorMessage)
                 .build();
@@ -622,8 +621,8 @@ public class ExcelReader extends DefaultHandler {
      * @throws Exception
      */
     private ErrorEntity checkRangeDate(Integer cellIndex, Class filedClazz, String[] range, Object cellValue, FieldRangeType rangeType) throws Exception {
-        final Date min = DateUtil.parse(range[0]);
-        final Date max = DateUtil.parse(range[1]);
+        final Date min = LocalDateTimeUtils.parseToDate(range[0]);
+        final Date max = LocalDateTimeUtils.parseToDate(range[1]);
         if (null == min && null == max) {
             throw new Exception("The ImportFiled annotation attribute[range] value must be date string[]");
         } else if (null != max && null != min && max.getTime() <= min.getTime()) {
@@ -631,13 +630,7 @@ public class ExcelReader extends DefaultHandler {
                     ;
         }
         Date v = null;
-        try {
-            v = DateUtil.parse(String.valueOf(cellValue));
-        } catch (ExecutionException e) {
-            String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] must can be parsed to a date!"
-                    , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0], range[1]);
-            return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
-        }
+        v = LocalDateTimeUtils.parseToDate(String.valueOf(cellValue));
         if (null == v) {
             String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s]  is empty after converted!"
                     , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1);

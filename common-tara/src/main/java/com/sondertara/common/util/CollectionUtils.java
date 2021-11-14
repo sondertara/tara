@@ -1,11 +1,6 @@
 package com.sondertara.common.util;
 
-import com.google.common.collect.Maps;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * utils
@@ -53,7 +48,7 @@ public final class CollectionUtils {
     }
 
     public static <K, V> Map<K, Object> convertMapValueToObject(Map<K, V> map) {
-        Map<K, Object> retMap = Maps.newHashMap();
+        Map<K, Object> retMap = new HashMap<K, Object>();
         if (CollectionUtils.isEmpty(map)) {
             return retMap;
         }
@@ -129,5 +124,20 @@ public final class CollectionUtils {
         }
 
         return sb.toString();
+    }
+
+    /**
+     * @param strArr
+     * @description 将String类型数组转成Long类型List
+     * **/
+    public static List<Long> strArrToLongList(String[] strArr) {
+        List<Long> result = new ArrayList<Long>();
+        if (strArr == null || strArr.length == 0) {
+            return result;
+        }
+        for (String str : strArr) {
+            result.add(Long.valueOf(str));
+        }
+        return result;
     }
 }

@@ -1,6 +1,6 @@
 package com.sondertara.common.util;
 
-import org.apache.commons.lang3.StringUtils;
+
 import org.apache.commons.lang3.math.IEEE754rUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 
@@ -102,7 +102,7 @@ public class NumberUtil {
      */
     @SuppressWarnings("unchecked")
     public static <T extends Number> T parse(Class<T> clazz, String number) throws NumberFormatException {
-        if (StringUtil.isEmpty(number)) {
+        if (StringUtils.isEmpty(number)) {
             return null;
         }
         if (clazz.equals(Integer.class)) {
@@ -133,7 +133,7 @@ public class NumberUtil {
      * @return bigDecimal
      */
     public static BigDecimal toBigDecimal(final Object str) {
-        final String s = StringUtil.convertNullToNull(str);
+        final String s = StringUtils.convertNullToNull(str);
         if (null == s) {
             return null;
         }
@@ -147,7 +147,7 @@ public class NumberUtil {
      * @return bigDecimal
      */
     public static BigDecimal toBigDecimalWithScale(final Object str, int newScale, RoundingMode roundingMode) {
-        final String s = StringUtil.convertToNumber(str);
+        final String s = StringUtils.convertToNumber(str);
         if (null == s) {
             return null;
         }
@@ -172,7 +172,7 @@ public class NumberUtil {
      * @since 2.1
      */
     public static Integer toInt(final Object str) {
-        final String s = StringUtil.convertNullToNull(str);
+        final String s = StringUtils.convertNullToNull(str);
         if (null == s) {
             return null;
         }
@@ -221,7 +221,7 @@ public class NumberUtil {
      * @since 2.1
      */
     public static Long toLong(final Object str) {
-        final String s = StringUtil.convertNullToNull(str);
+        final String s = StringUtils.convertNullToNull(str);
         if (null == s) {
             return null;
         }
@@ -273,7 +273,7 @@ public class NumberUtil {
      * @since 2.1
      */
     public static Float toFloat(final Object str) {
-        final String s = StringUtil.convertToNumber(str);
+        final String s = StringUtils.convertToNumber(str);
         if (null == s) {
             return null;
         }
@@ -327,7 +327,7 @@ public class NumberUtil {
      * @since 2.1
      */
     public static Double toDouble(final Object str) {
-        final String s = StringUtil.convertToNumber(str);
+        final String s = StringUtils.convertToNumber(str);
         if (null == s) {
             return null;
         }
@@ -431,7 +431,7 @@ public class NumberUtil {
      */
     public static Short toShort(final String str) {
 
-        if (StringUtil.isEmpty(str)) {
+        if (StringUtils.isEmpty(str)) {
             return null;
         }
         return Short.valueOf(str);

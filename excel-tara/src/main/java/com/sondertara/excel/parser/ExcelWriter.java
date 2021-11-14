@@ -2,8 +2,8 @@
 package com.sondertara.excel.parser;
 
 
-import com.sondertara.common.util.DateUtil;
-import com.sondertara.common.util.StringUtil;
+import com.sondertara.common.util.LocalDateTimeUtils;
+import com.sondertara.common.util.StringUtils;
 import com.sondertara.excel.common.Constant;
 import com.sondertara.excel.entity.ExcelEntity;
 import com.sondertara.excel.entity.ExcelPropertyEntity;
@@ -330,7 +330,7 @@ public class ExcelWriter {
     private void buildCellValue(SXSSFCell cell, Object entity, ExcelPropertyEntity property) throws Exception {
         Field field = property.getFieldEntity();
         Object cellValue = field.get(entity);
-        if (StringUtil.isBlank(cellValue) || "0".equals(cellValue.toString()) || "0.0".equals(cellValue.toString()) || "0.00".equals(cellValue.toString())) {
+        if (StringUtils.isBlank(cellValue) || "0".equals(cellValue.toString()) || "0.0".equals(cellValue.toString()) || "0.00".equals(cellValue.toString())) {
             nullCellCount++;
         }
         if (cellValue == null) {
@@ -339,7 +339,7 @@ public class ExcelWriter {
             cell.setCellValue((((BigDecimal) cellValue).setScale(property.getScale(), property.getRoundingMode())).toString());
 
         } else if (cellValue instanceof Date) {
-            cell.setCellValue(DateUtil.formatDate((Date) cellValue, property.getDateFormat()));
+            cell.setCellValue(LocalDateTimeUtils.format((Date) cellValue, property.getDateFormat()));
         } else {
             cell.setCellValue(cellValue.toString());
         }
