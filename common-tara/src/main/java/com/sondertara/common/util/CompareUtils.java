@@ -7,7 +7,7 @@ import java.util.Comparator;
  *
  * @author looly
  */
-public class CompareUtil {
+public class CompareUtils {
 
     /**
      * 对象比较，比较结果取决于comparator，如果被比较对象为null，传入的comparator对象应处理此情况<br>

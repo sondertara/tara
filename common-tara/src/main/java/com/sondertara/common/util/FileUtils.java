@@ -17,7 +17,7 @@ import java.util.Arrays;
  * @since 1.0
  * date 2019/11/8 1:00 下午
  **/
-public class FileUtil {
+public class FileUtils {
 
 
     /**
@@ -34,7 +34,7 @@ public class FileUtil {
         if (file.isFile()) {
             return file.delete();
         }
-        Arrays.asList(file.listFiles()).forEach(FileUtil::remove);
+        Arrays.asList(file.listFiles()).forEach(FileUtils::remove);
         return file.delete();
 
     }
@@ -54,7 +54,7 @@ public class FileUtil {
         if (file.isFile()) {
             return file.delete();
         }
-        Arrays.asList(file.listFiles()).forEach(FileUtil::remove);
+        Arrays.asList(file.listFiles()).forEach(FileUtils::remove);
         return file.delete();
 
     }

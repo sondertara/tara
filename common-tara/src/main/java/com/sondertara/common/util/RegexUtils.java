@@ -5,8 +5,14 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Sets;
 import com.sondertara.common.function.TaraFunction;
+import com.sondertara.common.lang.Assert;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 import java.util.regex.MatchResult;
@@ -241,7 +247,7 @@ public class RegexUtils {
         }
 
         //提取模板中的编号
-        final TreeSet<Integer> varNums = new TreeSet<>((o1, o2) -> CompareUtil.compare(o2, o1));
+        final TreeSet<Integer> varNums = new TreeSet<>((o1, o2) -> CompareUtils.compare(o2, o1));
         final Matcher matcherForTemplate = PatternPool.GROUP_VAR.matcher(template);
         while (matcherForTemplate.find()) {
             varNums.add(Integer.parseInt(matcherForTemplate.group(1)));
@@ -530,7 +536,7 @@ public class RegexUtils {
         if (null == pattern || null == content) {
             return null;
         }
-        AssertUtils.notNull(collection, "Collection must be not null !");
+        Assert.notNull(collection, "Collection must be not null !");
 
         findAll(pattern, content, (matcher) -> collection.add(matcher.group(group)));
         return collection;

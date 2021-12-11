@@ -1,19 +1,31 @@
 package com.sondertara.common.util;
 
 
-import java.io.*;
+import com.sondertara.common.lang.Assert;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * 字符串工具类
  *
- * @author xiaoleilu
+ * @author huangxiaohu
  */
 public class StringUtils {
 
@@ -62,7 +74,6 @@ public class StringUtils {
 
     public static final String EMPTY_JSON = "{}";
 
-    // ------------------------------------------------------------------------ Blank
 
     /**
      * 字符串是否为空白 空白的定义如下： <br>
@@ -119,7 +130,7 @@ public class StringUtils {
      * @return 是否为非空
      */
     public static boolean isNotBlank(CharSequence str) {
-        return false == isBlank(str);
+        return !isBlank(str);
     }
 
     /**
@@ -201,7 +212,7 @@ public class StringUtils {
      * @return 是否为非空
      */
     public static boolean isNotEmpty(CharSequence str) {
-        return false == isEmpty(str);
+        return !isEmpty(str);
     }
 
     /**
@@ -554,10 +565,7 @@ public class StringUtils {
      */
     public static boolean startWith(CharSequence str, CharSequence prefix, boolean isIgnoreCase) {
         if (null == str || null == prefix) {
-            if (null == str && null == prefix) {
-                return true;
-            }
-            return false;
+            return null == str && null == prefix;
         }
 
         if (isIgnoreCase) {
@@ -633,10 +641,7 @@ public class StringUtils {
      */
     public static boolean endWith(CharSequence str, CharSequence suffix, boolean isIgnoreCase) {
         if (null == str || null == suffix) {
-            if (null == str && null == suffix) {
-                return true;
-            }
-            return false;
+            return null == str && null == suffix;
         }
 
         if (isIgnoreCase) {
@@ -703,6 +708,21 @@ public class StringUtils {
     }
 
     /**
+     * 指定字符串是否在字符串中出现过
+     *
+     * @param str       字符串
+     * @param searchStr 被查找的字符串
+     * @return 是否包含
+     * @since 5.1.1
+     */
+    public static boolean contains(CharSequence str, CharSequence searchStr) {
+        if (null == str || null == searchStr) {
+            return false;
+        }
+        return str.toString().contains(searchStr);
+    }
+
+    /**
      * 查找指定字符串是否包含指定字符串列表中的任意一个字符串
      *
      * @param str      指定字符串
@@ -723,7 +743,7 @@ public class StringUtils {
      * @since 4.1.11
      */
     public static boolean containsAny(CharSequence str, char... testChars) {
-        if (false == isEmpty(str)) {
+        if (!isEmpty(str)) {
             int len = str.length();
             for (int i = 0; i < len; i++) {
                 if (ArrayUtils.contains(testChars, str.charAt(i))) {
@@ -743,10 +763,10 @@ public class StringUtils {
      * @since 4.4.1
      */
     public static boolean containsOnly(CharSequence str, char... testChars) {
-        if (false == isEmpty(str)) {
+        if (isNotEmpty(str)) {
             int len = str.length();
             for (int i = 0; i < len; i++) {
-                if (false == ArrayUtils.contains(testChars, str.charAt(i))) {
+                if (!ArrayUtils.contains(testChars, str.charAt(i))) {
                     return false;
                 }
             }
@@ -927,7 +947,7 @@ public class StringUtils {
         char c;
         for (int i = 0; i < len; i++) {
             c = str.charAt(i);
-            if (false == ArrayUtils.contains(chars, c)) {
+            if (!ArrayUtils.contains(chars, c)) {
                 builder.append(c);
             }
         }
@@ -1222,7 +1242,7 @@ public class StringUtils {
 
         final String str2 = str.toString();
         final String prefix2 = prefix.toString();
-        if (false == str2.startsWith(prefix2)) {
+        if (!str2.startsWith(prefix2)) {
             return prefix2.concat(str2);
         }
         return str2;
@@ -1242,7 +1262,7 @@ public class StringUtils {
 
         final String str2 = str.toString();
         final String suffix2 = suffix.toString();
-        if (false == str2.endsWith(suffix2)) {
+        if (!str2.endsWith(suffix2)) {
             return str2.concat(suffix2);
         }
         return str2;
@@ -1332,7 +1352,7 @@ public class StringUtils {
      * @since 4.0.10
      */
     public static String maxLength(CharSequence string, int length) {
-        AssertUtils.check(length > 0, "empty charSequence");
+        Assert.isTrue(length > 0, "empty charSequence");
         if (null == string) {
             return null;
         }
@@ -2217,7 +2237,7 @@ public class StringUtils {
         Byte dataByte;
         for (int i = 0; i < data.length; i++) {
             dataByte = data[i];
-            bytes[i] = (null == dataByte) ? -1 : dataByte.byteValue();
+            bytes[i] = (null == dataByte) ? -1 : dataByte;
         }
 
         return str(bytes, charset);
@@ -2365,39 +2385,725 @@ public class StringUtils {
         return sb.toString();
     }
 
-    /**
-     * 将下划线方式命名的字符串转换为驼峰式。如果转换前的下划线大写方式命名的字符串为空，则返回空字符串。<br>
-     * 例如：hello_world=》helloWorld
-     *
-     * @param name 转换前的下划线大写方式命名的字符串
-     * @return 转换后的驼峰式命名的字符串
-     */
-    public static String toCamelCase(CharSequence name) {
-        if (null == name) {
-            return null;
+    public static final char EMPTY_CHAR = 0;
+
+    public static String removeAllSpace(String s) {
+        return org.apache.commons.lang3.StringUtils.join(s.split("\\s"), "").trim();
+    }
+
+    public static String trimAllSpace(String s) {
+        return org.apache.commons.lang3.StringUtils.join(s.split("\\s+"), " ");
+    }
+
+    public static String camelToText(String s) {
+        StringBuilder buf = new StringBuilder();
+        char lastChar = ' ';
+        for (char c : s.toCharArray()) {
+            char nc = c;
+            if (Character.isUpperCase(nc) && Character.isLowerCase(lastChar)) {
+                buf.append(" ");
+                nc = Character.toLowerCase(c);
+            } else if (Character.isDigit(lastChar) && Character.isLetter(c) || Character.isDigit(c) && Character.isLetter(lastChar)) {
+                if (lastChar != ' ') {
+                    buf.append(" ");
+                }
+                nc = Character.toLowerCase(c);
+            }
+
+            if (lastChar != ' ' || c != ' ') {
+                buf.append(nc);
+            }
+            lastChar = c;
         }
+        return buf.toString();
+    }
 
-        String name2 = name.toString().toLowerCase();
-        if (name2.contains(UNDERLINE)) {
-            final StringBuilder sb = new StringBuilder(name2.length());
-            boolean upperCase = false;
-            for (int i = 0; i < name2.length(); i++) {
-                char c = name2.charAt(i);
+    /**
+     * inspired by org.apache.commons.text.WordUtils#capitalize
+     */
+    public static String capitalizeFirstWord(String str, char[] delimiters) {
+        if (isEmpty(str)) {
+            return str;
+        } else {
+            boolean done = false;
+            Set<Integer> delimiterSet = generateDelimiterSet(delimiters);
+            int strLen = str.length();
+            int[] newCodePoints = new int[strLen];
+            int outOffset = 0;
+            boolean capitalizeNext = true;
+            int index = 0;
 
-                if (c == CharUtils.UNDERLINE) {
-                    upperCase = true;
-                } else if (upperCase) {
-                    sb.append(Character.toUpperCase(c));
-                    upperCase = false;
+            while (index < strLen) {
+                int codePoint = str.codePointAt(index);
+                if (delimiterSet.contains(codePoint)) {
+                    capitalizeNext = true;
+                    newCodePoints[outOffset++] = codePoint;
+                    index += Character.charCount(codePoint);
+                } else if (!done && capitalizeNext && Character.isLowerCase(codePoint)) {
+                    int titleCaseCodePoint = Character.toTitleCase(codePoint);
+                    newCodePoints[outOffset++] = titleCaseCodePoint;
+                    index += Character.charCount(titleCaseCodePoint);
+                    capitalizeNext = false;
+                    done = true;
                 } else {
-                    sb.append(Character.toLowerCase(c));
+                    newCodePoints[outOffset++] = codePoint;
+                    index += Character.charCount(codePoint);
                 }
             }
-            return sb.toString();
-        } else {
-            return name2;
+
+            return new String(newCodePoints, 0, outOffset);
         }
     }
+
+    public static String capitalizeFirstWord(String str) {
+        if (isEmpty(str)) {
+            return str;
+        } else {
+            StringBuilder buf = new StringBuilder();
+            boolean upperNext = true;
+            char[] chars = str.toCharArray();
+            for (int i = 0; i < chars.length; i++) {
+                char c = chars[i];
+                if (Character.isLetter(c) && upperNext) {
+                    buf.append(Character.toUpperCase(c));
+                    upperNext = false;
+                } else {
+                    if (!Character.isLetterOrDigit(c)) {
+                        upperNext = true;
+                    }
+                    buf.append(c);
+                }
+
+            }
+
+            return buf.toString();
+        }
+    }
+
+    /**
+     * org.apache.commons.text.WordUtils.generateDelimiterSet
+     */
+    public static Set<Integer> generateDelimiterSet(char[] delimiters) {
+        Set<Integer> delimiterHashSet = new HashSet<>();
+        if (delimiters != null && delimiters.length != 0) {
+            for (int index = 0; index < delimiters.length; ++index) {
+                delimiterHashSet.add(Character.codePointAt(delimiters, index));
+            }
+
+            return delimiterHashSet;
+        } else {
+            if (delimiters == null) {
+                delimiterHashSet.add(Character.codePointAt(new char[]{' '}, 0));
+            }
+
+            return delimiterHashSet;
+        }
+    }
+
+    public static String toSoftCamelCase(String s) {
+        String[] words = s.split("[\\s_]");
+
+
+        for (int i = 0; i < words.length; i++) {
+            words[i] = StringUtils.capitalizeFirstWord(words[i]);
+        }
+
+        return org.apache.commons.lang3.StringUtils.join(words);
+    }
+
+    /**
+     * 格式化为驼峰
+     *
+     * @param s str
+     * @return str
+     */
+    public static String toCamelCase(String s) {
+        String[] words = org.apache.commons.lang3.StringUtils.splitByCharacterTypeCamelCase(s);
+
+        boolean firstWord = true;
+        for (int i = 0; i < words.length; i++) {
+            String word = words[i];
+            if (firstWord && startsWithLetter(word)) {
+                words[i] = word.toLowerCase();
+                firstWord = false;
+                if (i > 1 && isBlank(words[i - 1]) && isAllLetterOrDigit(words[i - 2])) {
+                    words[i - 1] = "";
+                }
+            } else if (specialWord(word)) { // multiple camelCases
+                firstWord = true;
+            } else {
+                words[i] = upperFirst(word);
+                if (i > 1 && isBlank(words[i - 1]) && isAllLetterOrDigit(words[i - 2])) {
+                    words[i - 1] = "";
+                }
+            }
+        }
+        String join = org.apache.commons.lang3.StringUtils.join(words);
+        join = replaceSeparatorBetweenLetters(join, '_', EMPTY_CHAR);
+        join = replaceSeparatorBetweenLetters(join, '-', EMPTY_CHAR);
+        join = replaceSeparatorBetweenLetters(join, '.', EMPTY_CHAR);
+        return join;
+    }
+
+    private static boolean isAllLetterOrDigit(String word) {
+        for (char c : word.toCharArray()) {
+            if (!Character.isLetterOrDigit(c)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean specialWord(String word) {
+        if (isBlank(word)) {
+            return false;
+        }
+        for (char c : word.toCharArray()) {
+            if (Character.isDigit(c) || Character.isLetter(c) || isSeparator(c)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean startsWithLetter(String word) {
+        return word.length() > 0 && Character.isLetter(word.charAt(0));
+    }
+
+    private static boolean isNotQuote(String word) {
+        return !"\"".equals(word) && !"\'".equals(word);
+    }
+
+    public static String wordsToConstantCase(String s) {
+        StringBuilder buf = new StringBuilder();
+
+        char lastChar = 'a';
+        for (char c : s.toCharArray()) {
+            if (Character.isWhitespace(lastChar) && (!Character.isWhitespace(c) && '_' != c) && buf.length() > 0 && buf.charAt(buf.length() - 1) != '_') {
+                buf.append("_");
+            }
+            if (!Character.isWhitespace(c)) {
+                buf.append(Character.toUpperCase(c));
+
+            }
+            lastChar = c;
+        }
+        if (Character.isWhitespace(lastChar)) {
+            buf.append("_");
+        }
+
+
+        return buf.toString();
+
+    }
+
+    public static String wordsAndHyphenAndCamelToConstantCase(String s) {
+
+        StringBuilder buf = new StringBuilder();
+        char previousChar = ' ';
+        char[] chars = s.toCharArray();
+        for (int i = 0; i < chars.length; i++) {
+            char c = chars[i];
+            boolean isUpperCaseAndPreviousIsUpperCase = Character.isUpperCase(previousChar) && Character.isUpperCase(c);
+            boolean isUpperCaseAndPreviousIsLowerCase = Character.isLowerCase(previousChar) && Character.isUpperCase(c);
+            if (Character.isLetter(c) && Character.isLetter(previousChar) && (isUpperCaseAndPreviousIsLowerCase || isUpperCaseAndPreviousIsUpperCase)) {
+                buf.append("_");
+                // extra _ after number
+            } else if (Character.isDigit(previousChar) && Character.isLetter(c) || Character.isDigit(c) && Character.isLetter(previousChar)) {
+                buf.append('_');
+            }
+
+
+            //replace separators by _
+            if ((isSeparator(c) || Character.isWhitespace(c)) && Character.isLetterOrDigit(previousChar) && nextIsLetterOrDigit(s, i)) {
+                buf.append('_');
+            } else {
+                buf.append(Character.toUpperCase(c));
+            }
+
+            previousChar = c;
+        }
+        return buf.toString();
+    }
+
+
+    private static boolean betweenLettersOrDigits(char[] chars, int i) {
+        for (int j = i; j < chars.length; j++) {
+            char aChar = chars[j];
+            if (!Character.isLetterOrDigit(aChar) && !Character.isWhitespace(aChar)) {
+                return false;
+            }
+            if (Character.isLetterOrDigit(aChar)) {
+                break;
+            }
+        }
+        for (int j = i; j >= 0; j--) {
+            char aChar = chars[j];
+            if (!Character.isLetterOrDigit(aChar) && !Character.isWhitespace(aChar)) {
+                return false;
+            }
+            if (Character.isLetterOrDigit(aChar)) {
+                break;
+            }
+        }
+        return true;
+    }
+
+    private static boolean isSlash(char c) {
+        return c == '\\' || c == '/';
+    }
+
+    private static boolean isNotBorderQuote(char actualChar, int i, char[] chars) {
+        if (chars.length - 1 == i) {
+            char firstChar = chars[0];
+            if (isQuote(actualChar) && isQuote(firstChar)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean isQuote(char actualChar) {
+        return actualChar == '\'' || actualChar == '\"';
+    }
+
+    /**
+     * 中划线
+     *
+     * @param s str
+     * @return str
+     */
+    public static String toDotCase(String s) {
+        StringBuilder buf = new StringBuilder();
+
+        char lastChar = ' ';
+        for (char c : s.toCharArray()) {
+            boolean isUpperCaseAndPreviousIsLowerCase = Character.isLowerCase(lastChar) && Character.isUpperCase(c);
+            boolean previousIsWhitespace = Character.isWhitespace(lastChar);
+            boolean lastOneIsNotUnderscore = buf.length() > 0 && buf.charAt(buf.length() - 1) != '.';
+            if (lastOneIsNotUnderscore && (isUpperCaseAndPreviousIsLowerCase || previousIsWhitespace)) {
+                buf.append(".");
+            } else if (Character.isDigit(lastChar) && Character.isLetter(c) || Character.isDigit(c) && Character.isLetter(lastChar)) {
+                buf.append(".");
+            }
+
+            if (c == '.') {
+                buf.append('.');
+            } else if (c == '-') {
+                buf.append('.');
+            } else if (c == '_') {
+                buf.append('.');
+            } else if (!Character.isWhitespace(c)) {
+                buf.append(Character.toLowerCase(c));
+            }
+
+            lastChar = c;
+        }
+        if (Character.isWhitespace(lastChar)) {
+            buf.append(".");
+        }
+
+
+        return buf.toString();
+    }
+
+    public static String replaceSeparator(String s1, char s, char s2) {
+        return s1.replace(s, s2);
+    }
+
+    public static String replaceSeparatorBetweenLetters(String s, char from, char to) {
+        StringBuilder buf = new StringBuilder();
+        char lastChar = ' ';
+        char[] charArray = s.toCharArray();
+        for (int i = 0; i < charArray.length; i++) {
+            char c = charArray[i];
+            if (c == from) {
+                boolean lastDigit = Character.isDigit(lastChar);
+                boolean lastLetterOrDigit = Character.isLetterOrDigit(lastChar);
+                boolean nextDigit = nextIsDigit(s, i);
+                boolean nextLetterOrDigit = nextIsLetterOrDigit(s, i);
+
+                if (lastDigit && nextDigit) {
+                    buf.append(c);
+                } else if (lastLetterOrDigit && nextLetterOrDigit) {
+                    if (to != EMPTY_CHAR) {
+                        buf.append(to);
+                    }
+                } else {
+                    buf.append(c);
+                }
+            } else {
+                buf.append(c);
+            }
+            lastChar = c;
+        }
+
+        return buf.toString();
+    }
+
+    private static boolean nextIsDigit(String s, int i) {
+        if (i + 1 >= s.length()) {
+            return false;
+        } else {
+            return Character.isDigit(s.charAt(i + 1));
+        }
+    }
+
+    private static boolean nextIsLetterOrDigit(String s, int i) {
+        if (i + 1 >= s.length()) {
+            return false;
+        } else {
+            return Character.isLetterOrDigit(s.charAt(i + 1));
+        }
+    }
+
+    private static boolean nextIsLetter(String s, int i) {
+        if (i + 1 >= s.length()) {
+            return false;
+        } else {
+            return Character.isLetter(s.charAt(i + 1));
+        }
+    }
+
+    /**
+     * <p>Splits the given input sequence around matches of this pattern.<p/>
+     * <p/>
+     * <p> The array returned by this method contains each substring of the input sequence
+     * that is terminated by another subsequence that matches this pattern or is terminated by
+     * the end of the input sequence.
+     * The substrings in the array are in the order in which they occur in the input.
+     * If this pattern does not match any subsequence of the input then the resulting array
+     * has just one element, namely the input sequence in string form.<p/>
+     * <p/>
+     * <pre>
+     * splitPreserveAllTokens("boo:and:foo", ":") =  { "boo", ":", "and", ":", "foo"}
+     * splitPreserveAllTokens("boo:and:foo", "o") =  { "b", "o", "o", ":and:f", "o", "o"}
+     * </pre>
+     *
+     * @param input The character sequence to be split
+     * @return The array of strings computed by splitting the input around matches of this pattern
+     */
+    public static String[] splitPreserveAllTokens(String input, String regex) {
+        int index = 0;
+        Pattern p = Pattern.compile(regex);
+        ArrayList<String> result = new ArrayList<>();
+        Matcher m = p.matcher(input);
+
+        // Add segments before each match found
+        int lastBeforeIdx = 0;
+        while (m.find()) {
+            if (isNotEmpty(m.group())) {
+                String match = input.subSequence(index, m.start()).toString();
+                if (isNotEmpty(match)) {
+                    result.add(match);
+                }
+                result.add(input.subSequence(m.start(), m.end()).toString());
+                index = m.end();
+            }
+        }
+
+        // If no match was found, return this
+        if (index == 0) {
+            return new String[]{input};
+        }
+
+
+        final String remaining = input.subSequence(index, input.length()).toString();
+        if (isNotEmpty(remaining)) {
+            result.add(remaining);
+        }
+
+        // Construct result
+        return result.toArray(new String[0]);
+
+    }
+
+
+    public static String nonAsciiToUnicode(String s) {
+        StringBuffer sb = new StringBuffer(s.length());
+        for (Character c : s.toCharArray()) {
+            if (!CharUtils.isAscii(c)) {
+                sb.append(org.apache.commons.lang3.CharUtils.unicodeEscaped(c));
+            } else {
+                sb.append(c);
+            }
+        }
+
+        return sb.toString();
+    }
+
+
+    public static String escapedUnicodeToString(String s) {
+        String[] parts = splitPreserveAllTokens(s, "\\\\u[0-9a-fA-F]{4}");
+        for (int i = 0; i < parts.length; i++) {
+            if (parts[i].startsWith("\\u")) {
+                int v = Integer.parseInt(parts[i].substring(2), 16);
+                parts[i] = "" + ((char) v);
+            }
+        }
+
+
+        return org.apache.commons.lang3.StringUtils.join(parts);
+    }
+
+    public static String wordsToHyphenCase(String s) {
+        StringBuilder buf = new StringBuilder();
+        char lastChar = 'a';
+        for (char c : s.toCharArray()) {
+            if (Character.isWhitespace(lastChar) && (!Character.isWhitespace(c) && '-' != c) && buf.length() > 0 && buf.charAt(buf.length() - 1) != '-') {
+                buf.append("-");
+            }
+            if ('_' == c) {
+                buf.append('-');
+            } else if ('.' == c) {
+                buf.append('-');
+            } else if (!Character.isWhitespace(c)) {
+                buf.append(Character.toLowerCase(c));
+            }
+            lastChar = c;
+        }
+        if (Character.isWhitespace(lastChar)) {
+            buf.append("-");
+        }
+        return buf.toString();
+    }
+
+    public static boolean containsLowerCase(String s) {
+        for (char c : s.toCharArray()) {
+            if (Character.isLowerCase(c)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static int indexOfAnyButWhitespace(String cs) {
+        if (isEmpty(cs)) {
+            return cs.length();
+        }
+        final int csLen = cs.length();
+        for (int i = 0; i < csLen; i++) {
+            final char ch = cs.charAt(i);
+            if (Character.isWhitespace(ch)) {
+                continue;
+            }
+            return i;
+        }
+        return cs.length();
+    }
+
+
+    public static String substringUntilSpecialCharacter(String s) {
+        int firstLetterOrDigitOrSeparator = -1;
+        char[] charArray = s.toCharArray();
+        for (int i = 0; i < charArray.length; i++) {
+            char c = charArray[i];
+            if (!Character.isLetterOrDigit(c) && !Character.isWhitespace(c) && !isSeparator(c) && firstLetterOrDigitOrSeparator != -1) {
+                return s.substring(firstLetterOrDigitOrSeparator, i);
+            }
+            if (Character.isLetterOrDigit(c) || Character.isWhitespace(c) || isSeparator(c)) {
+                if (firstLetterOrDigitOrSeparator == -1) {
+                    firstLetterOrDigitOrSeparator = i;
+                }
+            }
+        }
+        return s;
+    }
+
+    public static boolean isSeparator(char c) {
+        return c == '.' || c == '-' || c == '_';
+    }
+
+    public static boolean containsOnlyLettersAndDigits(String s) {
+        for (char c : s.toCharArray()) {
+            if (!Character.isLetterOrDigit(c)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+    public static boolean noUpperCase(String s) {
+        for (char c : s.toCharArray()) {
+            if (Character.isUpperCase(c)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static String removeBorderQuotes(String s) {
+        if (isQuoted(s)) {
+            s = s.substring(1, s.length() - 1);
+        }
+        return s;
+    }
+
+    public static boolean isQuoted(String selectedText) {
+        return selectedText != null && selectedText.length() > 2 && (isBorderChar(selectedText, "\"") || isBorderChar(selectedText, "\'"));
+    }
+
+    public static boolean isBorderChar(String s, String borderChar) {
+        return s.startsWith(borderChar) && s.endsWith(borderChar);
+    }
+
+    public static boolean noLowerCase(String s) {
+        for (char c : s.toCharArray()) {
+            if (Character.isLowerCase(c)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean containsUpperCase(String s) {
+        for (char c : s.toCharArray()) {
+            if (Character.isUpperCase(c)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean containsUpperCaseAfterLowerCase(String s) {
+        char previous = ' ';
+        char[] charArray = s.toCharArray();
+        for (char c : charArray) {
+            if (Character.isUpperCase(c) && Character.isLetter(previous) && Character.isLowerCase(previous)) {
+                return true;
+            }
+            previous = c;
+        }
+        return false;
+    }
+
+    public static boolean isCapitalizedFirstButNotAll(String str) {
+        if (str.length() == 0) {
+            return false;
+        }
+        Set<Integer> delimiterSet = generateDelimiterSet(new char[]{' '});
+        int strLen = str.length();
+        int index = 0;
+
+        int firstCapitalizedIndex = -1;
+        boolean someUncapitalized = false;
+        boolean afterSeparatorOrFirst = true;
+        while (index < strLen) {
+            int codePoint = str.codePointAt(index);
+            if (delimiterSet.contains(codePoint)) {
+                afterSeparatorOrFirst = true;
+            } else {
+                if (Character.isLowerCase(codePoint) && afterSeparatorOrFirst) {
+                    if (firstCapitalizedIndex == -1) {
+                        return false;
+                    }
+                    someUncapitalized = true;
+                    afterSeparatorOrFirst = false;
+                } else if (Character.isUpperCase(codePoint) && afterSeparatorOrFirst) {
+                    if (firstCapitalizedIndex == -1) {
+                        firstCapitalizedIndex = index;
+                    }
+                    afterSeparatorOrFirst = false;
+                }
+            }
+            index += Character.charCount(codePoint);
+        }
+        return firstCapitalizedIndex != -1 && someUncapitalized;
+    }
+
+    public static boolean startsWithUppercase(String s) {
+        char[] charArray = s.toCharArray();
+        for (char c : charArray) {
+            if (Character.isLetter(c) && Character.isLowerCase(c)) {
+                return false;
+            }
+            if (Character.isLetter(c) && Character.isUpperCase(c)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean noSeparators(String s, char... delimiters) {
+        if (s.length() == 0) {
+            return true;
+        }
+        Set<Integer> delimiterSet = generateDelimiterSet(delimiters);
+        boolean letterFound = false;
+        char[] charArray = s.toCharArray();
+        for (int i = 0; i < charArray.length; i++) {
+            char c = charArray[i];
+            if (Character.isLetterOrDigit(c)) {
+                letterFound = true;
+                continue;
+            }
+            if (letterFound && delimiterSet.contains((int) c)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+    public static boolean containsSeparatorBetweenLetters(String s, char separator) {
+        char previous = '?';
+        char[] charArray = s.toCharArray();
+        for (int i = 0; i < charArray.length; i++) {
+            char c = charArray[i];
+            if (c == separator && Character.isLetterOrDigit(previous) && nextIsLetterOrDigit(s, i)) {
+                return true;
+            }
+            previous = c;
+        }
+        return false;
+    }
+
+    public static List<String> splitToTokensBySpace(String originalText) {
+        char[] chars = originalText.toCharArray();
+        List<String> result = new ArrayList<>();
+
+        int whiteSpaceBeginning = -1;
+        int tokenBeginning = -1;
+        for (int i = 0; i < chars.length; i++) {
+            char aChar = chars[i];
+            if (aChar == ' ') {
+                if (whiteSpaceBeginning == -1) {
+                    whiteSpaceBeginning = i;
+                }
+                if (tokenBeginning != -1) {
+                    result.add(new String(Arrays.copyOfRange(chars, tokenBeginning, i)));
+                    tokenBeginning = -1;
+                }
+            } else {
+                if (whiteSpaceBeginning != -1) {
+                    result.add(new String(Arrays.copyOfRange(chars, whiteSpaceBeginning, i)));
+                    whiteSpaceBeginning = -1;
+                }
+                if (tokenBeginning == -1) {
+                    tokenBeginning = i;
+                }
+            }
+        }
+
+        if (tokenBeginning != -1) {
+            result.add(new String(Arrays.copyOfRange(chars, tokenBeginning, chars.length)));
+        }
+        if (whiteSpaceBeginning != -1) {
+            result.add(new String(Arrays.copyOfRange(chars, whiteSpaceBeginning, chars.length)));
+        }
+        return result;
+    }
+
+    public static String toSpringEnvVariable(String s) {
+        return Arrays.stream(split(s, ".")).map(StringUtils::trim).map(str -> StringUtils.replaceChars(str, "-", "")).map(str -> StringUtils.replaceChars(str, "_", "")).collect(Collectors.joining("_")).toUpperCase();
+    }
+
+
+    public static class Constants {
+        public static final char[] DELIMITERS = new char[]{'\'', '\"', ' '};
+    }
+
 
     /**
      * 包装指定字符串<br>
@@ -2473,13 +3179,13 @@ public class StringUtils {
             len += str.length();
         }
         StringBuilder sb = new StringBuilder(len);
-        if (isNotEmpty(prefix) && false == startWith(str, prefix)) {
+        if (isNotEmpty(prefix) && !startWith(str, prefix)) {
             sb.append(prefix);
         }
         if (isNotEmpty(str)) {
             sb.append(str);
         }
-        if (isNotEmpty(suffix) && false == endWith(str, suffix)) {
+        if (isNotEmpty(suffix) && !endWith(str, suffix)) {
             sb.append(suffix);
         }
         return sb.toString();
@@ -3155,7 +3861,7 @@ public class StringUtils {
             return fromIndex;
         }
 
-        if (false == ignoreCase) {
+        if (!ignoreCase) {
             // 不忽略大小写调用JDK方法
             return str.toString().indexOf(searchStr.toString(), fromIndex);
         }
@@ -3218,7 +3924,7 @@ public class StringUtils {
             return fromIndex;
         }
 
-        if (false == ignoreCase) {
+        if (!ignoreCase) {
             // 不忽略大小写调用JDK方法
             return str.toString().lastIndexOf(searchStr.toString(), fromIndex);
         }
@@ -3580,8 +4286,8 @@ public class StringUtils {
      */
     public static int totalLength(CharSequence... strs) {
         int totalLength = 0;
-        for (int i = 0; i < strs.length; i++) {
-            totalLength += (null == strs[i] ? 0 : strs[i].length());
+        for (CharSequence str : strs) {
+            totalLength += (null == str ? 0 : str.length());
         }
         return totalLength;
     }
@@ -3696,7 +4402,7 @@ public class StringUtils {
 
     private static final String NULL_STR = "null";
 
-    private static final Pattern PHONE_PATTERN = Pattern.compile("^[1][3,4,5,6,7,8,9][0-9]{9}$");
+    private static final Pattern PHONE_PATTERN = Pattern.compile("^[1][3456789][0-9]{9}$");
 
     /**
      * empty str
@@ -3822,7 +4528,7 @@ public class StringUtils {
     public static String convertEncode(String strIn, String encoding, String targetEncoding) {
         String strOut = strIn;
         if (strIn == null) {
-            return strOut;
+            return null;
         }
 
         try {
@@ -3847,7 +4553,7 @@ public class StringUtils {
      *
      * @param str      str
      * @param startStr str
-     * @param endStr
+     * @param endStr   end
      * @return 返回以以startStr开头，以endStr结束的字符串，如果startStr不存在，则有str为起始；如果endStr不存在，则以字符串结束为终结
      */
     public static String extractString(String str, String startStr, String endStr) {
@@ -3859,7 +4565,7 @@ public class StringUtils {
             startStr = "";
         }
 
-        int startIdx = 0;
+        int startIdx;
 
         startIdx = str.indexOf(startStr);
 
@@ -3921,12 +4627,12 @@ public class StringUtils {
             return text;
         }
 
-        StringBuffer buf = new StringBuffer(text.length());
+        StringBuilder buf = new StringBuilder(text.length());
         int start = 0;
-        int end = 0;
+        int end;
 
         while ((end = text.indexOf(repl, start)) != -1) {
-            buf.append(text.substring(start, end)).append(with);
+            buf.append(text, start, end).append(with);
             start = end + repl.length();
 
             if (--max == 0) {
@@ -4240,14 +4946,14 @@ public class StringUtils {
             return new String[]{str};
         }
 
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
         if ("".equals(delimiter)) {
             for (int i = 0; i < str.length(); i++) {
                 result.add(str.substring(i, i + 1));
             }
         } else {
             int pos = 0;
-            int delPos = 0;
+            int delPos;
             while ((delPos = str.indexOf(delimiter, pos)) != -1) {
                 result.add(str.substring(pos, delPos));
                 pos = delPos + delimiter.length();
@@ -4272,14 +4978,14 @@ public class StringUtils {
         if (collection == null) {
             return null;
         }
-        return (String[]) collection.toArray(new String[collection.size()]);
+        return collection.toArray(new String[0]);
     }
 
     /**
      * 判断字符串是否为空
      *
-     * @param s
-     * @return
+     * @param s str
+     * @return if is null or str length is zero
      */
     public static boolean isEmpty(String s) {
         return s == null || s.trim().length() == 0;
@@ -4289,8 +4995,8 @@ public class StringUtils {
     /**
      * 其中任意一个是否为空
      *
-     * @param s
-     * @return
+     * @param s arrays
+     * @return if  the arrays has at least one empty element it returns true
      */
     public static boolean isAnyEmpty(String... s) {
         if (s == null) {
@@ -4307,8 +5013,8 @@ public class StringUtils {
     /**
      * 判断是否全部为空
      *
-     * @param s
-     * @return
+     * @param s arrays
+     * @return if all empty
      */
     public static boolean isAllEmpty(String... s) {
         if (s == null) {
@@ -4323,30 +5029,10 @@ public class StringUtils {
     }
 
     /**
-     * 判断字符串是否为不为空
-     *
-     * @param s
-     * @return
-     */
-    public static boolean isNotEmpty(String s) {
-        return s != null && s.trim().length() != 0;
-    }
-
-    /**
-     * 去掉非空字符串两边空格
-     *
-     * @param s
-     * @return
-     */
-    public static String trimBlank(String s) {
-        return s == null ? null : s.trim();
-    }
-
-    /**
      * 反转一个字符串
      *
-     * @param s
-     * @return
+     * @param s str
+     * @return revert
      */
     public static String reverse(String s) {
         if (isEmpty(s)) {
@@ -4359,8 +5045,8 @@ public class StringUtils {
     /**
      * 转义所有"<"和">"符号
      *
-     * @param str str
-     * @return
+     * @param str str str
+     * @return str
      */
     public static String escapeHtml(String str) {
         if (str == null) {
@@ -4371,16 +5057,6 @@ public class StringUtils {
         return str;
     }
 
-    /**
-     * 将字符串截取一定的长度,末尾用...补全
-     *
-     * @param s
-     * @param byteLength
-     * @return
-     */
-    public static String limitString(String s, int byteLength) {
-        return limitString(s, byteLength, "...");
-    }
 
     /**
      * 将字符串截取一定的长度,末尾用omit补全
@@ -4388,7 +5064,7 @@ public class StringUtils {
      * @param s          s
      * @param byteLength g
      * @param omit       g
-     * @return
+     * @return str
      */
     public static String limitString(String s, int byteLength, String omit) {
         if (s == null) {
@@ -4400,18 +5076,18 @@ public class StringUtils {
         if (s.getBytes().length <= byteLength) {
             return s;
         }
-        String r = "";
+        StringBuilder r = new StringBuilder();
         for (int i = 0; i < s.length(); i++) {
             String tmp = s.substring(i, i + 1);
-            if (r.getBytes().length + tmp.getBytes().length > byteLength) {
+            if (r.toString().getBytes().length + tmp.getBytes().length > byteLength) {
                 break;
             }
-            r += tmp;
+            r.append(tmp);
         }
         if (omit != null) {
-            r += omit;
+            r.append(omit);
         }
-        return r;
+        return r.toString();
     }
 
     public static String getPatternMatchStr(String src, String pattern) {
@@ -4425,6 +5101,7 @@ public class StringUtils {
                 return matcher.group();
             }
         } catch (Exception e) {
+            return null;
         }
         return null;
 
@@ -4433,11 +5110,11 @@ public class StringUtils {
     /**
      * 获取固定长度的随机字符串
      *
-     * @param length
-     * @return
+     * @param length len
+     * @return str
      */
     public static String getRandomString(int length) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (int i = 0; i < length; i++) {
             char c = AS.charAt((int) (Math.random() * (AS.length())));
             sb.append(c);
@@ -4445,74 +5122,12 @@ public class StringUtils {
         return sb.toString().toUpperCase();
     }
 
-    /**
-     * 将字符串补齐至一定长度,不足部分用omit补齐
-     *
-     * @param s          原始字符串
-     * @param byteLength 长度
-     * @param omit       填充字符串
-     * @return 新字符串
-     */
-    public static String toSize(String s, int byteLength, String omit) {
-        if (byteLength <= 0) {
-            return "";
-        }
-        if (s == null) {
-            s = "";
-        }
-        if (omit == null) {
-            omit = "...";
-        }
-        int omitSize = omit.getBytes().length;
-
-        if (s.getBytes().length > byteLength) {
-            if (byteLength < omitSize) {
-                s = limitString(s, byteLength);
-            } else {
-                s = limitString(s, byteLength - omitSize, omit);
-            }
-        }
-        while (s.getBytes().length + omitSize <= byteLength) {
-            s += omit;
-        }
-        return s;
-    }
-
-    /**
-     * 将字符串的首字母大写.
-     *
-     * @param str 原始
-     * @return 新
-     */
-    public static String capitalizeFirstLetter(String str) {
-        if (isEmpty(str)) {
-            return null;
-        }
-        String firstLetter = str.substring(0, 1);
-        String result = firstLetter.toUpperCase() + str.substring(1);
-        return result;
-    }
-
-    /**
-     * 将字符串的首字母小写.
-     *
-     * @param str original str
-     * @return new str
-     */
-    public static String lowerFirstLetter(String str) {
-        if (isEmpty(str)) {
-            return null;
-        }
-        String firstLetter = str.substring(0, 1);
-        String result = firstLetter.toLowerCase() + str.substring(1);
-        return result;
-    }
 
     /**
      * 判断某字符串是否都在ascii的范围内
      *
      * @param str str
-     * @return
+     * @return boolean
      */
     public static boolean isAsciiStr(String str) {
         if (str == null) {
@@ -4533,8 +5148,8 @@ public class StringUtils {
     /**
      * 判断某字符串是否数值型
      *
-     * @param str
-     * @return
+     * @param str str
+     * @return str
      */
     public static boolean isNumeric(String str) {
         if (str == null) {
@@ -4601,12 +5216,12 @@ public class StringUtils {
     /**
      * 从inputReader中读出一行
      *
-     * @param inputReader
-     * @return
-     * @throws IOException
+     * @param inputReader reader
+     * @return line
+     * @throws IOException e
      */
     public static String readLine(InputStreamReader inputReader) throws IOException {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
 
         char c;
         int n;
@@ -4626,70 +5241,14 @@ public class StringUtils {
         return sb.toString();
     }
 
-    /**
-     * 获取资源
-     *
-     * @param uri
-     * @return
-     */
-    public static String getResource(String uri) {
-        if (isEmpty(uri)) {
-            return "";
-        }
-        if (uri.contains(".")) {
-            return uri.split("\\.")[0];
-        } else {
-            return uri;
-        }
-    }
-
-    /**
-     * 获取文件后缀名
-     *
-     * @param uri
-     * @return
-     */
-    public static String getExtension(String uri) {
-        if (isEmpty(uri)) {
-            return "";
-        }
-        if (uri.contains(".")) {
-            String[] strings = uri.split("\\.");
-            if (strings.length > 1) {
-                String extension = strings[1];
-                if (isNotEmpty(extension)) {
-                    return extension;
-                }
-            }
-        }
-        return "";
-    }
-
-    /**
-     * 取字符串后面几个len长度
-     *
-     * @param str
-     * @param len
-     * @return
-     */
-    public static String lastSubStr(String str, int len) {
-        if (str == null) {
-            return null;
-        }
-
-        if (str.length() <= len) {
-            return str;
-        }
-
-        return str.substring(str.length() - len);
-
-    }
 
     /**
      * 过滤掉ascii的字符串，主要用于取出中文文字
+     *
+     * @param str str
      */
     public static String filterAsciiStr(String str) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < str.length(); i++) {
             char c = str.charAt(i);
@@ -4703,13 +5262,15 @@ public class StringUtils {
 
     /**
      * 取出ascii的文本
+     *
+     * @param str str
      */
     public static String getAsciiStr(String str) {
         if (str == null) {
             return null;
         }
 
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < str.length(); i++) {
             char c = str.charAt(i);
@@ -4725,14 +5286,15 @@ public class StringUtils {
     /**
      * 去除无用的字符串，只保留字母和数字
      *
-     * @return
+     * @param str str
+     * @return str
      */
     public static String getLetterOrDigit(String str) {
         if (str == null) {
             return "";
         }
 
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         for (int i = 0; i < str.length(); i++) {
             char c = str.charAt(i);
             if (Character.isLetterOrDigit(c)) {
@@ -4754,7 +5316,7 @@ public class StringUtils {
             return false;
         }
         try {
-            boolean b = false;
+            boolean b;
             // 验证手机号
             Matcher m = PHONE_PATTERN.matcher(phone);
             b = m.matches();
@@ -4765,6 +5327,12 @@ public class StringUtils {
     }
 
 
+    /**
+     * 转义字符串
+     *
+     * @param s str
+     * @return str
+     */
     public static String escapeQueryChars(String s) {
         if (isEmpty(s)) {
             return "";
@@ -4773,10 +5341,7 @@ public class StringUtils {
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
             // These characters are part of the query syntax and must be escaped
-            if (c == '\\' || c == '+' || c == '-' || c == '!' || c == '(' || c == ')' || c == ':'
-                    || c == '^' || c == '[' || c == ']' || c == '\"' || c == '{' || c == '}' || c == '~'
-                    || c == '*' || c == '?' || c == '|' || c == '&' || c == ';' || c == '/'
-                    || Character.isWhitespace(c)) {
+            if (c == '\\' || c == '+' || c == '-' || c == '!' || c == '(' || c == ')' || c == ':' || c == '^' || c == '[' || c == ']' || c == '\"' || c == '{' || c == '}' || c == '~' || c == '*' || c == '?' || c == '|' || c == '&' || c == ';' || c == '/' || Character.isWhitespace(c)) {
                 sb.append('\\');
             }
             sb.append(c);
@@ -4785,23 +5350,11 @@ public class StringUtils {
     }
 
 
-    public static String genArrayInSql(String... strings) {
-        if (strings == null || strings.length == 0) {
-            return null;
-        }
-        StringBuilder sb = new StringBuilder();
-        for (String string : strings) {
-            sb.append(",'").append(string).append("'");
-        }
-        return sb.substring(1);
-    }
-
-
     /**
      * 过滤ascii码为32以下的控制码
      *
-     * @param str
-     * @return
+     * @param str str
+     * @return str
      */
     public static String trimCtrlChars(String str) {
         if (isEmpty(str)) {
@@ -4813,11 +5366,12 @@ public class StringUtils {
             char c = str.charAt(i);
             if (c < 32 && c != '\n' && c != '\r') {
                 containCtrlChar = true;
+                break;
             }
         }
 
         if (containCtrlChar) {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             for (int i = 0; i < str.length(); i++) {
                 char c = str.charAt(i);
                 if (c < 32 && c != 10 && c != 13) {
@@ -4833,47 +5387,4 @@ public class StringUtils {
 
     }
 
-    /**
-     * @return
-     */
-    public static String convertToUnderlineStr(String str) {
-        if (str == null) {
-            return null;
-        }
-
-        boolean lastUpper = false;
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < str.length(); i++) {
-            char c = str.charAt(i);
-            if (i > 0 && Character.isUpperCase(c) && !lastUpper) {
-                sb.append('_');
-            }
-            sb.append(Character.toLowerCase(c));
-
-            lastUpper = Character.isUpperCase(c);
-        }
-        return sb.toString();
-    }
-
-    public static String convertToHumpString(String str) {
-        if (str == null) {
-            return null;
-        }
-
-        StringBuilder sb = new StringBuilder();
-        boolean nextUpper = false;
-        for (int i = 0; i < str.length(); i++) {
-            char c = str.charAt(i);
-            if (Character.isLetterOrDigit(c)) {
-                if (nextUpper) {
-                    c = Character.toUpperCase(c);
-                    nextUpper = false;
-                }
-                sb.append(c);
-            } else if (sb.length() > 0) {
-                nextUpper = true;
-            }
-        }
-        return sb.toString();
-    }
 }

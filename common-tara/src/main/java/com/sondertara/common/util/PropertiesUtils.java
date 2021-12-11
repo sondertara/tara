@@ -4,7 +4,12 @@ import com.sondertara.common.exception.TaraException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,15 +20,15 @@ import java.util.Properties;
  *
  * @author huangxiaohu
  */
-public class PropertiesUtil {
-    private static final Logger logger = LoggerFactory.getLogger(PropertiesUtil.class);
-    private static Map<String, PropertiesUtil> instanceMap = new HashMap<>();
+public class PropertiesUtils {
+    private static final Logger logger = LoggerFactory.getLogger(PropertiesUtils.class);
+    private static Map<String, PropertiesUtils> instanceMap = new HashMap<>();
     private String propertyFileName;
     private Properties properties = null;
     private URI uri = null;
 
 
-    private PropertiesUtil(String propertyFileName) {
+    private PropertiesUtils(String propertyFileName) {
         this.propertyFileName = propertyFileName;
         loadProperties();
     }
@@ -118,12 +123,12 @@ public class PropertiesUtil {
      * @param propertyFileName 文件名称
      * @return PropertiesUtil
      */
-    public static PropertiesUtil getInstance(String propertyFileName) {
+    public static PropertiesUtils getInstance(String propertyFileName) {
         if (instanceMap.get(propertyFileName) != null) {
-            return (PropertiesUtil) instanceMap.get(propertyFileName);
+            return (PropertiesUtils) instanceMap.get(propertyFileName);
         }
         //实例化
-        PropertiesUtil instance = new PropertiesUtil(propertyFileName);
+        PropertiesUtils instance = new PropertiesUtils(propertyFileName);
         instanceMap.put(propertyFileName, instance);
 
         return instance;

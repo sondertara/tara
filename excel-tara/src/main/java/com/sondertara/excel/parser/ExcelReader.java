@@ -2,7 +2,7 @@ package com.sondertara.excel.parser;
 
 
 import com.sondertara.common.util.LocalDateTimeUtils;
-import com.sondertara.common.util.NumberUtil;
+import com.sondertara.common.util.NumberUtils;
 import com.sondertara.common.util.RegexUtils;
 import com.sondertara.common.util.StringUtils;
 import com.sondertara.excel.annotation.ImportField;
@@ -465,25 +465,25 @@ public class ExcelReader extends DefaultHandler {
         } else if (filedClazz == String.class) {
             cellValue = StringUtils.convertNullToNull(cellValue);
         } else if (filedClazz == Integer.class) {
-            cellValue = NumberUtil.toInt(cellValue);
+            cellValue = NumberUtils.toInt(cellValue);
         } else if (filedClazz == Double.class) {
-            cellValue = NumberUtil.toDouble(cellValue);
+            cellValue = NumberUtils.toDouble(cellValue);
         } else if (filedClazz == Long.class) {
-            cellValue = NumberUtil.toLong(cellValue);
+            cellValue = NumberUtils.toLong(cellValue);
         } else if (filedClazz == Float.class) {
-            cellValue = NumberUtil.toFloat(cellValue);
+            cellValue = NumberUtils.toFloat(cellValue);
         } else if (filedClazz == BigDecimal.class) {
-            cellValue = NumberUtil.toBigDecimalWithScale(cellValue, mappingProperty.getScale(), mappingProperty.getRoundingMode());
+            cellValue = NumberUtils.toBigDecimalWithScale(cellValue, mappingProperty.getScale(), mappingProperty.getRoundingMode());
         } else if (filedClazz == int.class) {
-            cellValue = NumberUtil.toInt(StringUtils.convertToNumber(cellValue, 0));
+            cellValue = NumberUtils.toInt(StringUtils.convertToNumber(cellValue, 0));
         } else if (filedClazz == short.class) {
-            cellValue = NumberUtil.toShort(StringUtils.convertToNumber(cellValue, (short) 0));
+            cellValue = NumberUtils.toShort(StringUtils.convertToNumber(cellValue, (short) 0));
         } else if (filedClazz == double.class) {
-            cellValue = NumberUtil.toDouble(StringUtils.convertToNumber(cellValue, 0d));
+            cellValue = NumberUtils.toDouble(StringUtils.convertToNumber(cellValue, 0d));
         } else if (filedClazz == long.class) {
-            cellValue = NumberUtil.toLong(StringUtils.convertNullToZero(cellValue), 0L);
+            cellValue = NumberUtils.toLong(StringUtils.convertNullToZero(cellValue), 0L);
         } else if (filedClazz == float.class) {
-            cellValue = NumberUtil.toFloat(StringUtils.convertToNumber(cellValue, 0f));
+            cellValue = NumberUtils.toFloat(StringUtils.convertToNumber(cellValue, 0f));
         } else {
             throw new ExcelTaraException("The field type[{}] not support,import error", filedClazz);
         }
@@ -719,14 +719,14 @@ public class ExcelReader extends DefaultHandler {
         Double min = null;
         Double max = null;
         try {
-            min = NumberUtil.toDouble(range[0]);
-            max = NumberUtil.toDouble(range[1]);
+            min = NumberUtils.toDouble(range[0]);
+            max = NumberUtils.toDouble(range[1]);
         } catch (Exception e) {
             throw new Exception("the ImportFiled annotation attribute[range] value must be number string[]");
         }
         Double v = null;
         try {
-            v = NumberUtil.toDouble(cellValue);
+            v = NumberUtils.toDouble(cellValue);
         } catch (Exception e) {
         }
         if (null == min && null == max) {

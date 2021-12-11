@@ -1,7 +1,7 @@
 package com.sondertara.notify.dingtalk.client;
 
 import com.sondertara.common.model.ResultDTO;
-import com.sondertara.common.util.PropertiesUtil;
+import com.sondertara.common.util.PropertiesUtils;
 import com.sondertara.notify.dingtalk.util.DingTalkSignUtil;
 import org.junit.jupiter.api.Test;
 
@@ -18,7 +18,7 @@ public class DingTalkClientTest {
     @Test
     public void sendText() {
 
-        String url = PropertiesUtil.getInstance("dingtalk").getProperty("webhook");
+        String url = PropertiesUtils.getInstance("dingtalk").getProperty("webhook");
         // direct send dingtalk msg;
         {
             ResultDTO resultDTO = DingTalkClient.getInstance().sendTextMsg(url, "我是谁");
@@ -27,7 +27,7 @@ public class DingTalkClientTest {
         //send dingtalk msg with secret;
         {
             long timeMillis = System.currentTimeMillis();
-            String sign = DingTalkSignUtil.sign(timeMillis, PropertiesUtil.getInstance("dingtalk").getProperty("secret"));
+            String sign = DingTalkSignUtil.sign(timeMillis, PropertiesUtils.getInstance("dingtalk").getProperty("secret"));
 
             String webhook = url + "&timestamp=" + timeMillis + "&sign=" + sign;
 

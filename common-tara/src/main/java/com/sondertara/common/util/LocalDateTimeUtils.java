@@ -6,8 +6,12 @@ import com.google.common.cache.LoadingCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.text.SimpleDateFormat;
-import java.time.*;
+import javax.annotation.Nonnull;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
@@ -25,15 +29,12 @@ public class LocalDateTimeUtils {
     private static final String PATTERN = "yyyy-MM-dd HH:mm:ss";
 
 
-    private static final LoadingCache<String, DateTimeFormatter> LOAD_CACHE =
-            CacheBuilder.newBuilder()
-                    .maximumSize(16)
-                    .build(new CacheLoader<String, DateTimeFormatter>() {
-                        @Override
-                        public DateTimeFormatter load(String pattern) {
-                            return DateTimeFormatter.ofPattern(pattern);
-                        }
-                    });
+    private static final LoadingCache<String, DateTimeFormatter> LOAD_CACHE = CacheBuilder.newBuilder().maximumSize(16).build(new CacheLoader<String, DateTimeFormatter>() {
+        @Override
+        public DateTimeFormatter load(@Nonnull String pattern) {
+            return DateTimeFormatter.ofPattern(pattern);
+        }
+    });
     private static final String DATE_TIME_FORMATTER = "yyyy-MM-dd HH:mm:ss";
     private static final String DATE_FORMATTER = "yyyy-MM-dd";
 
@@ -154,6 +155,7 @@ public class LocalDateTimeUtils {
         Date date = null;
         try {
             LocalDateTime localDateTime = convertToLocalDateTime(dateTime, pattern);
+            assert localDateTime != null;
             date = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
         } catch (Exception e) {
         }
@@ -173,7 +175,7 @@ public class LocalDateTimeUtils {
      *
      * @param startDate 开始日期
      * @param endDate   结束日期
-     * @return
+     * @return the two date delay
      */
     public static Integer getDelay(String startDate, String endDate) {
 
@@ -190,7 +192,7 @@ public class LocalDateTimeUtils {
      * 获取某一天零点
      *
      * @param dateStr 20120920
-     * @return
+     * @return 20120920
      */
     public static String getDayStart(String dateStr) {
         LocalDate localDate = LocalDate.parse(dateStr, DateTimeFormatter.ofPattern(DATE_FORMATTER));
@@ -202,8 +204,8 @@ public class LocalDateTimeUtils {
     /**
      * 获取某一天零点
      *
-     * @param localDate
-     * @return
+     * @param localDate the local date
+     * @return the
      */
     public static String getDayStart(LocalDate localDate) {
 
@@ -215,7 +217,7 @@ public class LocalDateTimeUtils {
      * 获取某一天结束
      *
      * @param dateStr 20120920
-     * @return
+     * @return the end str 2012-09-20 23:59:59
      */
     public static String getDayEnd(String dateStr) {
         LocalDate localDate = LocalDate.parse(dateStr, DateTimeFormatter.ofPattern(DATE_FORMATTER));
@@ -225,9 +227,9 @@ public class LocalDateTimeUtils {
     }
 
     /**
-     * 获取某一天结束
+     * get end of a day
      *
-     * @return
+     * @return the end str 2012-09-20 23:59:59
      */
     public static String getDayEnd(LocalDate localDate) {
 
@@ -235,10 +237,10 @@ public class LocalDateTimeUtils {
         return formatLocalDateTime(dateTime);
     }
 
-
     public static void main(String[] args) {
-        String start = getDayEnd("2019-01-20");
-        System.out.println(start);
+        String end = getDayEnd("2012-09-20");
+
+        System.out.println(end);
     }
 
 }

@@ -18,10 +18,6 @@ public class ExcelHelper implements Serializable {
      * 文件名称,不带后缀，必填
      */
     private String fileName;
-    /**
-     * 操作空间,防止多个操作人文件混乱
-     */
-    private String user;
     /***
      * 开始页码，不填默认是1
      */
@@ -39,13 +35,20 @@ public class ExcelHelper implements Serializable {
      */
     private String workspace;
 
-    private ExcelHelper(String fileName, String user, Integer pageStart, Integer pageEnd, Integer pageSize) {
+    /**
+     * enable open cell auto column width ,to keep high performance has removed.
+     */
+    private Boolean openAutoColumWidth;
+
+    public ExcelHelper(String fileName, String workspace, Integer pageStart, Integer pageEnd, Integer pageSize, Boolean openAutoColumWidth) {
         this.fileName = fileName;
-        this.user = user;
         this.pageStart = pageStart;
         this.pageEnd = pageEnd;
         this.pageSize = pageSize;
+        this.workspace = workspace;
+        this.openAutoColumWidth = openAutoColumWidth;
     }
+
 
     public static Builder builder() {
         return new Builder();
@@ -55,7 +58,7 @@ public class ExcelHelper implements Serializable {
 
         private String fileName;
 
-        private String user;
+        private String workspace;
 
         private Integer pageStart;
 
@@ -63,14 +66,23 @@ public class ExcelHelper implements Serializable {
 
         private Integer pageSize;
 
+        private Boolean openAutoColumWidth = false;
+
 
         public Builder fileName(final String fileName) {
             this.fileName = fileName;
             return this;
         }
 
-        public Builder user(final String user) {
-            this.user = user;
+
+        public Builder openAutoColumWidth(final Boolean openAutoColumWidth) {
+            this.openAutoColumWidth = openAutoColumWidth;
+            return this;
+        }
+
+
+        public Builder workspace(final String workspace) {
+            this.workspace = workspace;
             return this;
         }
 
@@ -90,7 +102,7 @@ public class ExcelHelper implements Serializable {
         }
 
         public ExcelHelper build() {
-            return new ExcelHelper(this.fileName, this.user, this.pageStart, this.pageEnd, this.pageSize);
+            return new ExcelHelper(this.fileName, this.workspace, this.pageStart, this.pageEnd, this.pageSize, this.openAutoColumWidth);
         }
     }
 }

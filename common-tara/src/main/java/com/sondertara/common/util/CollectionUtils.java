@@ -1,6 +1,10 @@
 package com.sondertara.common.util;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * utils
@@ -13,8 +17,7 @@ public final class CollectionUtils {
         if (isEmpty(list)) {
             return null;
         }
-        @SuppressWarnings("unchecked")
-        T[] array = ((T[]) new Object[list.size()]);
+        @SuppressWarnings("unchecked") T[] array = ((T[]) new Object[list.size()]);
         list.toArray(array);
         return array;
     }
@@ -61,27 +64,21 @@ public final class CollectionUtils {
     /**
      * list is empty
      *
-     * @param list
+     * @param list list
      * @return is empty
      */
     public static boolean isEmpty(Collection<? extends Object> list) {
-        if (list == null || list.isEmpty()) {
-            return true;
-        }
-        return false;
+        return list == null || list.isEmpty();
     }
 
     /**
      * list is  not empty
      *
-     * @param list
+     * @param list list
      * @return is  not empty
      */
     public static boolean isNotEmpty(Collection<? extends Object> list) {
-        if (list == null || list.isEmpty()) {
-            return false;
-        }
-        return true;
+        return list != null && !list.isEmpty();
     }
 
     /**
@@ -89,7 +86,7 @@ public final class CollectionUtils {
      *
      * @param lists       original list
      * @param combineChar char
-     * @return strs
+     * @return strs list
      */
     public static <T> String combineListToString(List<T> lists, char combineChar) {
         StringBuffer sb = new StringBuffer();
@@ -99,7 +96,7 @@ public final class CollectionUtils {
                 sb.append(combineChar);
             }
             i++;
-            sb.append(String.valueOf(l));
+            sb.append(l);
         }
 
         return sb.toString();
@@ -108,8 +105,8 @@ public final class CollectionUtils {
     /**
      * 把list转换成string，中间以combineChar来连接
      *
-     * @param lists
-     * @param combineStr
+     * @param lists      list
+     * @param combineStr list
      * @return new String
      */
     public static <T> String combineListToString(List<T> lists, String combineStr) {
@@ -120,16 +117,17 @@ public final class CollectionUtils {
                 sb.append(combineStr);
             }
             i++;
-            sb.append(String.valueOf(l));
+            sb.append(l);
         }
 
         return sb.toString();
     }
 
     /**
-     * @param strArr
-     * @description 将String类型数组转成Long类型List
-     * **/
+     * 将String类型数组转成Long类型List
+     *
+     * @param strArr list
+     **/
     public static List<Long> strArrToLongList(String[] strArr) {
         List<Long> result = new ArrayList<Long>();
         if (strArr == null || strArr.length == 0) {

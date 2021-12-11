@@ -6,21 +6,21 @@
 
     <groupId>com.sondertara</groupId>
     <artifactId>tara</artifactId>
-    <version>0.0.3.305</version>
+    <version>0.0.4.0</version>
     <packaging>pom</packaging>
     <name>tara</name>
     <description>tara is a awesome java advance Kit.</description>
     <url>https://github.com/sondertara/tara</url>
     <licenses>
         <license>
-            <name>MIT License</name>
-            <url>https://opensource.org/licenses/MIT</url>
+            <name>Apache-2.0 License</name>
+            <url>https://opensource.org/licenses/Apache-2.0</url>
         </license>
     </licenses>
     <scm>
-        <url>https://github.com/sondertara/tara</url>
-        <connection>https://github.com/sondertara/tara.git</connection>
-        <developerConnection>https://github.com/sondertara/tara</developerConnection>
+        <url>https://github.com/sondertara/jost-tara</url>
+        <connection>https://github.com/sondertara/jost-tara.git</connection>
+        <developerConnection>https://github.com/sondertara/jost-tara</developerConnection>
     </scm>
     <developers>
         <developer>
@@ -31,6 +31,8 @@
 
     <properties>
         <java.version>1.8</java.version>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
         <timestamp>${maven.build.timestamp}</timestamp>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -42,7 +44,17 @@
 
     <dependencyManagement>
         <dependencies>
-            <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
+            <dependency>
+                <groupId>net.sf.dozer</groupId>
+                <artifactId>dozer</artifactId>
+                <version>5.5.1</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>commons-beanutils</artifactId>
+                        <groupId>commons-beanutils</groupId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
@@ -126,11 +138,6 @@
                 <version>5.5.2</version>
                 <scope>test</scope>
             </dependency>
-            <dependency>
-                <groupId>org.testng</groupId>
-                <artifactId>testng</artifactId>
-                <version>7.0</version>
-            </dependency>
             <!-- 测试相关 end -->
 
             <!-- log start -->
@@ -139,12 +146,6 @@
                 <artifactId>slf4j-api</artifactId>
                 <version>${slf4j.version}</version>
             </dependency>
-            <!--<dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>log4j-over-slf4j</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>-->
-            <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-log4j12 -->
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-log4j12</artifactId>
@@ -209,6 +210,13 @@
                 <configuration>
                     <show>private</show>
                     <nohelp>true</nohelp>
+                    <tags>
+                        <tag>
+                            <name>date</name>
+                            <placement>a</placement>
+                            <head>create time</head>
+                        </tag>
+                    </tags>
                     <charset>UTF-8</charset>
                     <encoding>UTF-8</encoding>
                     <docencoding>UTF-8</docencoding>

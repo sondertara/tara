@@ -1,6 +1,6 @@
 package com.sondertara.notify.email;
 
-import com.sondertara.common.util.PropertiesUtil;
+import com.sondertara.common.util.PropertiesUtils;
 import com.sondertara.notify.email.entity.EmailEntity;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -32,7 +32,7 @@ public class EmailServiceTest {
 
 
         final EmailEntity excelEntity = EmailEntity.builder().to(to).subject(subject).from(from).content("这是一个测试").build();
-        Properties properties = PropertiesUtil.getInstance("email").getProperties();
+        Properties properties = PropertiesUtils.getInstance("email").getProperties();
 
         emailService = new EmailService(excelEntity, properties);
 

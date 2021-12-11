@@ -5,6 +5,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
+import javax.annotation.Nonnull;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
@@ -175,16 +176,13 @@ public class PatternPool {
     /**
      * Pattern池
      */
-    private final static LoadingCache<RegexWithFlag, Pattern> POOL =
-            CacheBuilder.newBuilder()
-                    .maximumSize(30)
-                    .build(new CacheLoader<RegexWithFlag, Pattern>() {
-                        @Override
-                        public Pattern load(RegexWithFlag regexWithFlag) {
-                            return Pattern.compile(regexWithFlag.regex);
-                        }
+    private final static LoadingCache<RegexWithFlag, Pattern> POOL = CacheBuilder.newBuilder().maximumSize(30).build(new CacheLoader<RegexWithFlag, Pattern>() {
+        @Override
+        public Pattern load(@Nonnull RegexWithFlag regexWithFlag) {
+            return Pattern.compile(regexWithFlag.regex);
+        }
 
-                    });
+    });
 
     /**
      * 先从Pattern池中查找正则对应的{@link Pattern}，找不到则编译正则表达式并入池。
@@ -224,7 +222,6 @@ public class PatternPool {
      *
      * @param regex 正则
      * @param flags 标识
-     * @return 移除的{@link Pattern}，可能为{@code null}
      */
     public static void remove(String regex, int flags) {
         POOL.invalidate(new RegexWithFlag(regex, flags));

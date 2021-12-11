@@ -12,16 +12,16 @@ public interface ImportFunction<T> {
     /**
      * 导入常规校验通过后执行的操作
      *
-     * @param sheetIndex
-     * @param rowIndex
-     * @param entity
+     * @param sheetIndex sheet
+     * @param rowIndex   row
+     * @param entity     the entity
      */
     void onProcess(int sheetIndex, int rowIndex, T entity);
 
     /**
      * 导入常规校验失败后执行的操作
      *
-     * @param errorEntity
+     * @param errorEntity error
      */
     void onError(ErrorEntity errorEntity);
 }

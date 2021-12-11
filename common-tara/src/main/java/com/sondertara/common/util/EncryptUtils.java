@@ -16,7 +16,7 @@ import java.security.SecureRandom;
  *
  * @author huangxiaohu
  */
-public class EncryptUtil {
+public class EncryptUtils {
     public static final String MD5 = "MD5";
     public static final String SHA1 = "SHA1";
     public static final String HmacMD5 = "HmacMD5";
@@ -37,18 +37,18 @@ public class EncryptUtil {
      */
     public int keysizeAES = 128;
 
-    public static volatile EncryptUtil me;
+    public static volatile EncryptUtils me;
 
-    private EncryptUtil() {
+    private EncryptUtils() {
         //单例
     }
 
     //双重锁
-    public static EncryptUtil getInstance() {
+    public static EncryptUtils getInstance() {
         if (me == null) {
-            synchronized (EncryptUtil.class) {
+            synchronized (EncryptUtils.class) {
                 if (me == null) {
-                    me = new EncryptUtil();
+                    me = new EncryptUtils();
                 }
             }
         }

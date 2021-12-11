@@ -3,6 +3,7 @@ package com.sondertara.common.util;
 /**
  * 提供可变值类型接口
  *
+ * @author SonderTara
  * @param <T> 值得类型
  * @since 3.0.1
  */

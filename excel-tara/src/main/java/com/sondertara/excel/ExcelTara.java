@@ -1,6 +1,7 @@
 package com.sondertara.excel;
 
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.sondertara.common.util.StringUtils;
 import com.sondertara.excel.common.Constant;
 import com.sondertara.excel.entity.ExcelEntity;
@@ -13,6 +14,7 @@ import com.sondertara.excel.parser.ExcelReader;
 import com.sondertara.excel.parser.ExcelWriter;
 import com.sondertara.excel.task.ExcelGenerateTask;
 import com.sondertara.excel.task.ExcelRunnable;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +26,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -45,12 +48,14 @@ public class ExcelTara {
      * http response
      */
     private HttpServletResponse httpServletResponse;
+
     /**
-     * output stream the excel  file to flush
+     * output stream the Excel  file to flush
      */
     private OutputStream outputStream;
+
     /**
-     * input stream the excel file to read
+     * input stream the Excel file to read
      */
     private InputStream inputStream;
     /**
@@ -60,7 +65,7 @@ public class ExcelTara {
      * <p>
      * {@link com.sondertara.excel.annotation.ImportField}
      */
-    private Class excelClass;
+    private Class<?> excelClass;
     /**
      * excel export helper
      */
@@ -73,10 +78,7 @@ public class ExcelTara {
      * pre sheet rows count,when export large data will generate multi sheet.
      */
     private Integer recordCountPerSheet;
-    /**
-     * enable open cell auto column width ,to keep high performance has removed.
-     */
-    private Boolean openAutoColumWidth;
+
 
     public ExcelTara() {
     }
@@ -84,45 +86,36 @@ public class ExcelTara {
     /**
      * the constructor for import
      */
-    protected ExcelTara(InputStream inputStream, Class excelClass) {
-        this(null, null, inputStream, null, excelClass, null, null, null);
+    protected ExcelTara(InputStream inputStream, Class<?> excelClass) {
+        this(null, null, inputStream, null, null, excelClass, null, null, null);
     }
 
-    /**
-     * OutputStream  export constructor ,can use to export  to ftp server
-     */
-    protected ExcelTara(OutputStream outputStream, ExcelHelper helper, Class excelClass) {
-        this(null, outputStream, null, helper, excelClass,
-                Constant.DEFAULT_ROW_ACCESS_WINDOW_SIZE, Constant.DEFAULT_RECORD_COUNT_PEER_SHEET,
-                Constant.OPEN_AUTO_COLUMN_WIDTH);
+    protected ExcelTara(OutputStream outputStream, ExcelHelper helper, Class<?> excelClass) {
+        this(null, outputStream, null, null, helper, excelClass, Constant.DEFAULT_ROW_ACCESS_WINDOW_SIZE, Constant.DEFAULT_RECORD_COUNT_PEER_SHEET, Constant.OPEN_AUTO_COLUMN_WIDTH);
     }
+
 
     /**
      * HttpServletResponse export constructor,can use to browser
      */
-    protected ExcelTara(HttpServletResponse response, ExcelHelper helper, Class excelClass) {
-        this(response, null, null, helper, excelClass,
-                Constant.DEFAULT_ROW_ACCESS_WINDOW_SIZE, Constant.DEFAULT_RECORD_COUNT_PEER_SHEET,
-                Constant.OPEN_AUTO_COLUMN_WIDTH);
+    protected ExcelTara(HttpServletResponse response, ExcelHelper helper, Class<?> excelClass) {
+        this(response, null, null, null, helper, excelClass, Constant.DEFAULT_ROW_ACCESS_WINDOW_SIZE, Constant.DEFAULT_RECORD_COUNT_PEER_SHEET, Constant.OPEN_AUTO_COLUMN_WIDTH);
     }
 
     /**
      * constructor for export
      *
-     * @param helper
-     * @param clazz
+     * @param helper the Excel tools
+     * @param clazz  the export or import class
      */
-    protected ExcelTara(ExcelHelper helper, Class clazz) {
-        this(null, null, null, helper, clazz, null, null, null);
+    protected ExcelTara(ExcelHelper helper, Class<?> clazz) {
+        this(null, null, null, null, helper, clazz, null, null, null);
     }
 
     /**
      * the base constructor
      */
-    protected ExcelTara(HttpServletResponse response, OutputStream outputStream,
-                        InputStream inputStream
-            , ExcelHelper helper, Class excelClass, Integer rowAccessWindowSize,
-                        Integer recordCountPerSheet, Boolean openAutoColumWidth) {
+    protected ExcelTara(HttpServletResponse response, OutputStream outputStream, InputStream inputStream, Workbook workbook, ExcelHelper helper, Class<?> excelClass, Integer rowAccessWindowSize, Integer recordCountPerSheet, Boolean openAutoColumWidth) {
         this.httpServletResponse = response;
         this.outputStream = outputStream;
         this.inputStream = inputStream;
@@ -132,61 +125,51 @@ public class ExcelTara {
         this.helper = helper;
         this.rowAccessWindowSize = rowAccessWindowSize;
         this.recordCountPerSheet = recordCountPerSheet;
-        this.openAutoColumWidth = openAutoColumWidth;
 
-        this.taskPool = new ThreadPoolExecutor(8, 16, 60,
-                TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(10),
-                new ThreadPoolExecutor.CallerRunsPolicy());
+        ThreadFactory build = new ThreadFactoryBuilder().setDaemon(true).setNameFormat("Excel-worker-%d").build();
+        this.taskPool = new ThreadPoolExecutor(8, 16, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<>(10), build, new ThreadPoolExecutor.CallerRunsPolicy());
     }
 
     /**
      * export to HttpServletResponse,when export excel to browser.
      */
-    public static ExcelTara builder(HttpServletResponse httpServletResponse, ExcelHelper helper,
-                                    Class clazz) {
+    public static ExcelTara builder(HttpServletResponse httpServletResponse, ExcelHelper helper, Class<?> clazz) {
         return new ExcelTara(httpServletResponse, helper, clazz);
     }
 
     /**
      * export to OutputStream, when export large excel for long time or to ftp server.
      */
-    public static ExcelTara builder(OutputStream outputStream, ExcelHelper helper, Class clazz) {
+    public static ExcelTara builder(OutputStream outputStream, ExcelHelper helper, Class<?> clazz) {
         return new ExcelTara(outputStream, helper, clazz);
     }
 
     /**
      * export to csv file  async with multi thread,when export large data.
      */
-    public static ExcelTara builder(ExcelHelper helper, Class clazz) {
+    public static ExcelTara builder(ExcelHelper helper, Class<?> clazz) {
         return new ExcelTara(helper, clazz);
     }
 
     /**
      * export to HttpServletResponse with row cache config .
      */
-    public static ExcelTara builder(HttpServletResponse response, ExcelHelper helper,
-                                    Class excelClass, Integer rowAccessWindowSize, Integer recordCountPerSheet,
-                                    Boolean openAutoColumWidth) {
-        return new ExcelTara(response, null, null
-                , helper, excelClass, rowAccessWindowSize, recordCountPerSheet,
-                openAutoColumWidth);
+    public static ExcelTara builder(HttpServletResponse response, ExcelHelper helper, Class<?> excelClass, Integer rowAccessWindowSize, Integer recordCountPerSheet, Boolean openAutoColumWidth) {
+        return new ExcelTara(response, null, null, null, helper, excelClass, rowAccessWindowSize, recordCountPerSheet, openAutoColumWidth);
     }
+
 
     /**
      * export to OutputStream with cache config.
      */
-    public static ExcelTara builder(OutputStream outputStream, ExcelHelper helper,
-                                    Class excelClass, Integer rowAccessWindowSize, Integer recordCountPerSheet, Boolean openAutoColumWidth) {
-        return new ExcelTara(null, outputStream, null
-                , helper, excelClass, rowAccessWindowSize, recordCountPerSheet,
-                openAutoColumWidth);
+    public static ExcelTara builder(OutputStream outputStream, ExcelHelper helper, Class<?> excelClass, Integer rowAccessWindowSize, Integer recordCountPerSheet, Boolean openAutoColumWidth) {
+        return new ExcelTara(null, outputStream, null, null, helper, excelClass, rowAccessWindowSize, recordCountPerSheet, openAutoColumWidth);
     }
 
     /**
      * import excel builder.
      */
-    public static ExcelTara builder(InputStream inputStream, Class clazz) {
+    public static ExcelTara builder(InputStream inputStream, Class<?> clazz) {
         return new ExcelTara(inputStream, clazz);
     }
 
@@ -199,8 +182,7 @@ public class ExcelTara {
             try {
                 verifyResponse();
                 sxssfWorkbook = commonSingleSheet(param, exportFunction);
-                download(sxssfWorkbook, httpServletResponse,
-                        URLEncoder.encode(helper.getFileName() + ".xlsx", "UTF-8"));
+                download(sxssfWorkbook, httpServletResponse, URLEncoder.encode(helper.getFileName() + ".xlsx", "UTF-8"));
             } finally {
                 if (sxssfWorkbook != null) {
                     sxssfWorkbook.close();
@@ -215,18 +197,24 @@ public class ExcelTara {
     }
 
     /**
-     * export to OutputStream to generate large excel file or upload ftp server
+     * export to Workbook
+     */
+    public <R, T> SXSSFWorkbook exportWorkbook(R param, ExportFunction<R, T> exportFunction) {
+        try {
+            return commonSingleSheet(param, exportFunction);
+        } catch (Exception e) {
+            throw new ExcelTaraException(e);
+        }
+    }
+
+
+    /**
+     * export to OutputStream to generate large Excel file or upload ftp server
      */
     public <R, T> void exportStream(R param, ExportFunction<R, T> exportFunction) {
-        OutputStream outputStream = null;
         try {
-            try {
-                outputStream = generateStream(param, exportFunction);
+            try (OutputStream outputStream = generateStream(param, exportFunction)) {
                 close(outputStream);
-            } finally {
-                if (outputStream != null) {
-                    outputStream.close();
-                }
             }
         } catch (Exception e) {
             throw new ExcelTaraException(e);
@@ -241,9 +229,9 @@ public class ExcelTara {
         try {
             verifyAndBuildParams();
             ExcelEntity excelMapping = ExcelMappingFactory.loadExportExcelClass(excelClass, helper.getFileName());
-            final String workPath = Constant.FILE_PATH + helper.getUser() + File.separator + helper.getFileName() + File.separator;
+            final String workPath = Constant.FILE_PATH + helper.getWorkspace() + File.separator + helper.getFileName() + File.separator;
             helper.setWorkspace(workPath);
-            ExcelRunnable excelRunnable = new ExcelGenerateTask<R, T>(param, exportFunction, excelMapping, helper);
+            ExcelRunnable excelRunnable = new ExcelGenerateTask<>(param, exportFunction, excelMapping, helper);
             for (int i = 0; i < Constant.PRODUCER_COUNT; i++) {
 
                 taskPool.submit((excelRunnable.newRunnableProducer()));
@@ -275,8 +263,7 @@ public class ExcelTara {
     /**
      * generate export stream.
      */
-    private <R, T> OutputStream generateStream(R param, ExportFunction<R, T> exportFunction)
-            throws IOException {
+    private <R, T> OutputStream generateStream(R param, ExportFunction<R, T> exportFunction) throws IOException {
         SXSSFWorkbook sxssfWorkbook = null;
         try {
             verifyStream();
@@ -301,8 +288,7 @@ public class ExcelTara {
             try {
                 verifyResponse();
                 sxssfWorkbook = commonMultiSheet(param, exportFunction);
-                download(sxssfWorkbook, httpServletResponse,
-                        URLEncoder.encode(helper.getFileName() + ".xlsx", "UTF-8"));
+                download(sxssfWorkbook, httpServletResponse, URLEncoder.encode(helper.getFileName() + ".xlsx", "UTF-8"));
             } finally {
                 if (sxssfWorkbook != null) {
                     sxssfWorkbook.close();
@@ -317,15 +303,9 @@ public class ExcelTara {
      * export  multi sheets to http output stream
      */
     public <R, T> void exportMultiSheetStream(R param, ExportFunction<R, T> exportFunction) {
-        OutputStream outputStream = null;
         try {
-            try {
-                outputStream = generateMultiSheetStream(param, exportFunction);
+            try (OutputStream outputStream = generateMultiSheetStream(param, exportFunction)) {
                 close(outputStream);
-            } finally {
-                if (outputStream != null) {
-                    outputStream.close();
-                }
             }
         } catch (Exception e) {
             throw new ExcelTaraException(e);
@@ -335,8 +315,7 @@ public class ExcelTara {
     /**
      * generate multi sheets to output stream
      */
-    private <R, T> OutputStream generateMultiSheetStream(R param,
-                                                         ExportFunction<R, T> exportFunction) throws IOException {
+    private <R, T> OutputStream generateMultiSheetStream(R param, ExportFunction<R, T> exportFunction) throws IOException {
         SXSSFWorkbook sxssfWorkbook = null;
         try {
             verifyStream();
@@ -353,7 +332,7 @@ public class ExcelTara {
     }
 
     /**
-     * export  excel tmplate for import
+     * export  excel template for import
      */
     public void exportTemplate() {
         SXSSFWorkbook sxssfWorkbook = null;
@@ -361,13 +340,10 @@ public class ExcelTara {
             try {
                 verifyResponse();
                 verifyAndBuildParams();
-                ExcelEntity excelMapping = ExcelMappingFactory
-                        .loadExportExcelClass(excelClass, helper.getFileName());
-                ExcelWriter excelWriter = new ExcelWriter(excelMapping, helper.getPageSize(),
-                        rowAccessWindowSize, recordCountPerSheet);
+                ExcelEntity excelMapping = ExcelMappingFactory.loadExportExcelClass(excelClass, helper.getFileName());
+                ExcelWriter excelWriter = new ExcelWriter(excelMapping, helper.getPageSize(), rowAccessWindowSize, recordCountPerSheet);
                 sxssfWorkbook = excelWriter.generateTemplateWorkbook();
-                download(sxssfWorkbook, httpServletResponse,
-                        URLEncoder.encode(helper.getFileName() + ".xlsx", "UTF-8"));
+                download(sxssfWorkbook, httpServletResponse, URLEncoder.encode(helper.getFileName() + ".xlsx", "UTF-8"));
             } finally {
                 if (sxssfWorkbook != null) {
                     sxssfWorkbook.close();
@@ -382,9 +358,9 @@ public class ExcelTara {
     }
 
     /**
-     * import all excel sheet
+     * import all Excel sheet
      */
-    public void importExcel(Boolean enableIndex, ImportFunction importFunction) {
+    public <T> void importExcel(Boolean enableIndex, ImportFunction<T> importFunction) {
         try {
             if (importFunction == null) {
                 throw new ExcelTaraException("excel read handler importFunction is null!");
@@ -403,30 +379,26 @@ public class ExcelTara {
     }
 
     /**
-     * genetare one sheet.
+     * generate one sheet.
      *
      * @param param          query param
      * @param exportFunction export function
      * @param <R>            query class
      * @param <T>            export class via {@link com.sondertara.excel.annotation.ExportField}
      * @return workbook
-     * @throws Exception
+     * @throws Exception e
      */
-    private <R, T> SXSSFWorkbook commonSingleSheet(R param, ExportFunction<R, T> exportFunction)
-            throws Exception {
+    private <R, T> SXSSFWorkbook commonSingleSheet(R param, ExportFunction<R, T> exportFunction) throws Exception {
         verifyAndBuildParams();
         ExcelEntity excelMapping = ExcelMappingFactory.loadExportExcelClass(excelClass, helper.getFileName());
-        ExcelWriter excelWriter = new ExcelWriter(excelMapping, helper.getPageSize(), rowAccessWindowSize,
-                recordCountPerSheet);
+        ExcelWriter excelWriter = new ExcelWriter(excelMapping, helper.getPageSize(), rowAccessWindowSize, recordCountPerSheet);
         return excelWriter.generateWorkbook(param, exportFunction);
     }
 
-    private <R, T> SXSSFWorkbook commonMultiSheet(R param, ExportFunction<R, T> exportFunction)
-            throws Exception {
+    private <R, T> SXSSFWorkbook commonMultiSheet(R param, ExportFunction<R, T> exportFunction) throws Exception {
         verifyAndBuildParams();
         ExcelEntity excelMapping = ExcelMappingFactory.loadExportExcelClass(excelClass, helper.getFileName());
-        ExcelWriter excelWriter = new ExcelWriter(excelMapping, helper.getPageSize(), rowAccessWindowSize,
-                recordCountPerSheet);
+        ExcelWriter excelWriter = new ExcelWriter(excelMapping, helper.getPageSize(), rowAccessWindowSize, recordCountPerSheet);
         return excelWriter.generateMultiSheetWorkbook(param, exportFunction);
     }
 
@@ -442,13 +414,10 @@ public class ExcelTara {
     /**
      * flush excel workbook to file.
      */
-    private void download(SXSSFWorkbook wb, HttpServletResponse response, String filename)
-            throws IOException {
+    private void download(SXSSFWorkbook wb, HttpServletResponse response, String filename) throws IOException {
         OutputStream out = response.getOutputStream();
-        response
-                .setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        response.setHeader("Content-disposition",
-                String.format("attachment; filename=%s", filename));
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-disposition", String.format("attachment; filename=%s", filename));
         if (null != out) {
             wb.write(out);
             out.flush();
@@ -487,8 +456,8 @@ public class ExcelTara {
         if (StringUtils.isEmpty(helper.getFileName())) {
             throw new ExcelTaraException("param fileName is null");
         }
-        if (StringUtils.isEmpty(helper.getUser())) {
-            helper.setUser("default_export");
+        if (StringUtils.isEmpty(helper.getWorkspace())) {
+            helper.setWorkspace("default_export");
         }
         if (helper.getPageSize() == null) {
             helper.setPageSize(Constant.DEFAULT_PAGE_SIZE);

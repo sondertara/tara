@@ -1,4 +1,3 @@
-
 package com.sondertara.excel.parser;
 
 
@@ -11,7 +10,14 @@ import com.sondertara.excel.function.ExportFunction;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.io.FileUtils;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.BorderStyle;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.xssf.streaming.SXSSFCell;
 import org.apache.poi.xssf.streaming.SXSSFRow;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
@@ -28,11 +34,18 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
  * excel write
+ *
  * @author huangxiaohu
  */
 public class ExcelWriter {
@@ -40,13 +53,14 @@ public class ExcelWriter {
     private static final Logger logger = LoggerFactory.getLogger(ExcelReader.class);
 
     private Integer rowAccessWindowSize;
-    private ExcelEntity excelEntity;
+    private final ExcelEntity excelEntity;
     private Integer pageSize;
     private Integer nullCellCount = 0;
     private Integer recordCountPerSheet;
     private XSSFCellStyle headCellStyle;
-    private Map<Integer, Integer> columnWidthMap = new HashMap<Integer, Integer>();
+    private final Map<Integer, Integer> columnWidthMap = new HashMap<Integer, Integer>();
     private String workPath;
+
 
     public ExcelWriter(ExcelEntity excelEntity, Integer pageSize, Integer rowAccessWindowSize, Integer recordCountPerSheet) {
         this.excelEntity = excelEntity;
@@ -58,23 +72,21 @@ public class ExcelWriter {
     public ExcelWriter(ExcelEntity excelEntity, String workPath) {
         this.excelEntity = excelEntity;
         this.workPath = workPath;
+
     }
 
     public void generateCsv() {
-
-
         try {
             File path = new File(workPath);
 
             List<File> fileList = new ArrayList<File>();
             if (path.exists()) {
                 File[] files = path.listFiles();
+                assert files != null;
                 if (files.length <= 0) {
                     return;
                 }
-                for (File file : files) {
-                    fileList.add(file);
-                }
+                Collections.addAll(fileList, files);
                 final List<File> collect = fileList.stream().sorted(Comparator.comparing(File::getName)).collect(Collectors.toList());
                 File csvFile = new File(workPath + excelEntity.getFileName() + ".csv");
 
@@ -85,7 +97,7 @@ public class ExcelWriter {
                 }
                 Appendable printWriter = new PrintWriter(csvFile, Constant.CHARSET);
                 final List<String> excelColNames = excelEntity.getPropertyList().stream().map(ExcelPropertyEntity::getColumnName).collect(Collectors.toList());
-                CSVPrinter csvPrinter = CSVFormat.EXCEL.withHeader(excelColNames.toArray(new String[excelColNames.size()])).print(printWriter);
+                CSVPrinter csvPrinter = CSVFormat.EXCEL.withHeader(excelColNames.toArray(new String[0])).print(printWriter);
 
                 csvPrinter.flush();
                 csvPrinter.close();
@@ -112,10 +124,10 @@ public class ExcelWriter {
      * @param <P>            query class
      * @param <T>            export pojo
      * @return workbook
-     * @throws InvocationTargetException
-     * @throws NoSuchMethodException
-     * @throws ParseException
-     * @throws IllegalAccessException
+     * @throws InvocationTargetException e
+     * @throws NoSuchMethodException     e
+     * @throws ParseException            e
+     * @throws IllegalAccessException    e
      */
     public <P, T> SXSSFWorkbook generateWorkbook(P param, ExportFunction<P, T> exportFunction) throws Exception {
         SXSSFWorkbook workbook = new SXSSFWorkbook(rowAccessWindowSize);
@@ -124,6 +136,9 @@ public class ExcelWriter {
         List<ExcelPropertyEntity> propertyList = excelEntity.getPropertyList();
         //generate first row head.
         SXSSFSheet sheet = generateHeader(workbook, propertyList, excelEntity.getFileName());
+
+        List<Sheet> sheets = new ArrayList<>();
+        sheets.add(sheet);
 
         // generate data rows
         int firstPageNo = 1;
@@ -139,6 +154,7 @@ public class ExcelWriter {
                 break;
             }
             int dataSize = data.size();
+
             for (int i = 1; i <= dataSize; i++, rowNum++) {
                 T queryResult = data.get(i - 1);
                 Object convertResult = exportFunction.convert(queryResult);
@@ -199,15 +215,15 @@ public class ExcelWriter {
     /**
      * 构建多Sheet Excel
      *
-     * @param param
-     * @param exportFunction
-     * @param <R>
-     * @param <T>
+     * @param param          param
+     * @param exportFunction export
+     * @param <R>            the type of param
+     * @param <T>            the class of Result
      * @return workbook
-     * @throws InvocationTargetException
-     * @throws NoSuchMethodException
-     * @throws ParseException
-     * @throws IllegalAccessException
+     * @throws InvocationTargetException e
+     * @throws NoSuchMethodException     e
+     * @throws ParseException            e
+     * @throws IllegalAccessException    e
      */
     public <R, T> SXSSFWorkbook generateMultiSheetWorkbook(R param, ExportFunction<R, T> exportFunction) throws Exception {
         int pageNo = 1;
@@ -260,10 +276,11 @@ public class ExcelWriter {
     }
 
     /**
+     * auto size of chinese
      * 自动适配中文单元格
      *
-     * @param sheet
-     * @param columnSize
+     * @param sheet      sheet
+     * @param columnSize size
      */
     private void sizeColumnWidth(SXSSFSheet sheet, Integer columnSize) {
         if (Constant.OPEN_AUTO_COLUMN_WIDTH) {
@@ -278,8 +295,8 @@ public class ExcelWriter {
     /**
      * 自动适配中文单元格
      *
-     * @param cell
-     * @param columnIndex
+     * @param cell        cell
+     * @param columnIndex index
      */
     private void calculateColumnWidth(SXSSFCell cell, Integer columnIndex) {
         if (Constant.OPEN_AUTO_COLUMN_WIDTH) {
@@ -297,9 +314,9 @@ public class ExcelWriter {
     /**
      * 初始化第一行的属性
      *
-     * @param workbook
-     * @param propertyList
-     * @param sheetName
+     * @param workbook     workbook
+     * @param propertyList the Excel properties
+     * @param sheetName    sheet name
      * @return SXSSFSheet
      */
     private SXSSFSheet generateHeader(SXSSFWorkbook workbook, List<ExcelPropertyEntity> propertyList, String sheetName) {
@@ -321,11 +338,12 @@ public class ExcelWriter {
     }
 
     /**
+     * create the column of row start at the second row
      * 构造 除第一行以外的其他行的列值
      *
-     * @param cell
-     * @param entity
-     * @param property
+     * @param cell     cell
+     * @param entity   data
+     * @param property Excel properties
      */
     private void buildCellValue(SXSSFCell cell, Object entity, ExcelPropertyEntity property) throws Exception {
         Field field = property.getFieldEntity();
