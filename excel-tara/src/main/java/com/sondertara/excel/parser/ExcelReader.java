@@ -19,6 +19,7 @@ import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.usermodel.BuiltinFormats;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
+import org.apache.poi.xssf.model.SharedStrings;
 import org.apache.poi.xssf.model.SharedStringsTable;
 import org.apache.poi.xssf.model.StylesTable;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -83,7 +84,7 @@ public class ExcelReader extends DefaultHandler {
     /**
      * shared strings table
      */
-    private SharedStringsTable mSharedStringsTable;
+    private SharedStrings mSharedStringsTable;
     /**
      * current cell value
      */
@@ -205,7 +206,7 @@ public class ExcelReader extends DefaultHandler {
      * @return XMLReader
      * @throws SAXException exception
      */
-    private XMLReader fetchSheetParser(SharedStringsTable sst) throws SAXException {
+    private XMLReader fetchSheetParser(SharedStrings sst) throws SAXException {
         XMLReader parser = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser");
         this.mSharedStringsTable = sst;
         parser.setContentHandler(this);
