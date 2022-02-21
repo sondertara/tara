@@ -32,7 +32,7 @@ public class ErrorEntity {
      */
     private String columnName;
     /**
-     * 错误信息 fff
+     * 错误信息
      */
     private String errorMessage;
 }
