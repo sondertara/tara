@@ -21,8 +21,7 @@ public class ExcelEntity implements Cloneable {
     @Override
     public Object clone() {
         try {
-            ExcelEntity entity = (ExcelEntity) super.clone();
-            return entity;
+            return (ExcelEntity) super.clone();
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
             return null;

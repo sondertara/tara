@@ -11,5 +11,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE})
 public @interface ExcelExport {
-    String sheetName() default "Sheet1";
+    String sheetName() default "Sheet";
 }

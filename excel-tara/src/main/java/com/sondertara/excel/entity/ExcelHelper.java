@@ -26,21 +26,22 @@ public class ExcelHelper implements Serializable {
      * 分页大小默认2000
      */
     private Integer pageSize;
+
     /**
-     * 工作空间，excel生成的目录空间
+     * the Excel workspace
      */
     private String workspace;
+
 
     /**
      * enable open cell auto column width ,to keep high performance has removed.
      */
     private Boolean openAutoColumWidth;
 
-    public ExcelHelper(String workspace, Integer pageStart, Integer pageEnd, Integer pageSize, Boolean openAutoColumWidth) {
+    public ExcelHelper(Integer pageStart, Integer pageEnd, Integer pageSize, Boolean openAutoColumWidth) {
         this.pageStart = pageStart;
         this.pageEnd = pageEnd;
         this.pageSize = pageSize;
-        this.workspace = workspace;
         this.openAutoColumWidth = openAutoColumWidth;
     }
 
@@ -50,9 +51,6 @@ public class ExcelHelper implements Serializable {
     }
 
     public static class Builder {
-
-
-        private String workspace;
 
         private Integer pageStart;
 
@@ -68,11 +66,6 @@ public class ExcelHelper implements Serializable {
             return this;
         }
 
-
-        public Builder workspace(final String workspace) {
-            this.workspace = workspace;
-            return this;
-        }
 
         public Builder pageStart(final Integer pageStart) {
             this.pageStart = pageStart;
@@ -90,7 +83,7 @@ public class ExcelHelper implements Serializable {
         }
 
         public ExcelHelper build() {
-            return new ExcelHelper(this.workspace, this.pageStart, this.pageEnd, this.pageSize, this.openAutoColumWidth);
+            return new ExcelHelper(this.pageStart, this.pageEnd, this.pageSize, this.openAutoColumWidth);
         }
     }
 }

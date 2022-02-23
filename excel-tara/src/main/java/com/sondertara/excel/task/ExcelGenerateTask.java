@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -37,17 +39,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ExcelGenerateTask<P, T> implements ExcelRunnable {
     private static final Logger logger = LoggerFactory.getLogger(ExcelGenerateTask.class);
 
-    private AtomicBoolean flag = new AtomicBoolean(true);
-    private AtomicInteger page = new AtomicInteger(1);
+    private final AtomicBoolean flag = new AtomicBoolean(true);
+    private final AtomicInteger page = new AtomicInteger(1);
 
-    private P param;
 
-    private ExportFunction<P, T> exportFunction;
+    private final P param;
 
-    private BlockingQueue<ExcelQueryEntity<T>> queue;
-    private ExcelEntity excelEntity;
+    private final ExportFunction<P, T> exportFunction;
 
-    private ExcelHelper helper;
+    private final BlockingQueue<ExcelQueryEntity<T>> queue;
+    private final ExcelEntity excelEntity;
+
+    private final ExcelHelper helper;
 
     public ExcelGenerateTask(P param, ExportFunction<P, T> exportFunction, ExcelEntity e, final ExcelHelper helper) {
         this.param = param;
@@ -59,31 +62,38 @@ public class ExcelGenerateTask<P, T> implements ExcelRunnable {
     }
 
     @Override
-    public Runnable newRunnableConsumer() {
-        return new ExcelQueryDataConsumer();
+    public Runnable newRunnableConsumer(CyclicBarrier cyclicBarrier) {
+        return new ExcelQueryDataConsumer(cyclicBarrier);
     }
 
     @Override
-    public Runnable newRunnableProducer() {
-        return new ExcelQueryDataProducer();
+    public Runnable newRunnableProducer(CyclicBarrier cyclicBarrier) {
+        return new ExcelQueryDataProducer(cyclicBarrier);
     }
 
     private class ExcelQueryDataProducer extends AbstractProducer {
+
+        private final CyclicBarrier cyclicBarrier;
+
+        private ExcelQueryDataProducer(CyclicBarrier cyclicBarrier) {
+            this.cyclicBarrier = cyclicBarrier;
+        }
 
         @Override
         public void produce() throws InterruptedException {
             if (!flag.get()) {
                 super.isDone = true;
                 logger.warn("producer thread exit");
+                await();
                 return;
             }
             logger.info("start query pageSize[{}]", helper.getPageSize());
-
             final int queryPage = page.getAndIncrement();
             if (queryPage > helper.getPageEnd()) {
                 logger.warn("page query end!");
                 super.isDone = true;
                 flag.set(false);
+                await();
                 return;
             }
             logger.info("start query page[{}]...", queryPage);
@@ -93,6 +103,7 @@ public class ExcelGenerateTask<P, T> implements ExcelRunnable {
                 logger.warn("query data is empty,query exit !");
                 super.isDone = true;
                 flag.set(false);
+                await();
                 return;
             }
             ExcelQueryEntity<T> entity = new ExcelQueryEntity<>();
@@ -103,27 +114,45 @@ public class ExcelGenerateTask<P, T> implements ExcelRunnable {
                 logger.warn("current data  size is [{}],less than pageSize[{}],is the last page,query exit!", data.size(), helper.getPageSize());
                 super.isDone = true;
                 flag.set(false);
+                await();
+            }
+        }
+
+        private void await() {
+            try {
+                cyclicBarrier.await();
+            } catch (InterruptedException | BrokenBarrierException e) {
+                e.printStackTrace();
             }
         }
     }
 
     private class ExcelQueryDataConsumer extends AbstractConsumer {
+
+        private final CyclicBarrier cyclicBarrier;
+
+        private ExcelQueryDataConsumer(CyclicBarrier cyclicBarrier) {
+            this.cyclicBarrier = cyclicBarrier;
+        }
+
         @Override
         public void consume() throws InterruptedException {
 
             if (!flag.get() && queue.isEmpty()) {
                 super.isDone = true;
                 logger.warn("consumer[{}] exit...", Thread.currentThread().getName());
+                await();
                 return;
             }
             ExcelQueryEntity<T> excelQueryEntity = queue.poll(3000, TimeUnit.MILLISECONDS);
             if (null == excelQueryEntity) {
+                await();
                 return;
             }
 
             logger.info("current dir is {}", helper.getWorkspace());
 
-            logger.info("start handle data of page[{}]  ...", excelQueryEntity.getPage());
+            logger.info("Data of page[{}] processing  is starting ......", excelQueryEntity.getPage());
             try {
                 File file = new File(helper.getWorkspace());
                 if (!file.exists()) {
@@ -141,12 +170,19 @@ public class ExcelGenerateTask<P, T> implements ExcelRunnable {
 
                 csvPrinter.flush();
                 csvPrinter.close();
-                logger.info("end handle data of page[{}]...", excelQueryEntity.getPage());
+                logger.info("Data of page[{}] processing has been completed...", excelQueryEntity.getPage());
             } catch (Exception e) {
                 logger.error("write into file error:", e);
             }
+            await();
+        }
 
-
+        private void await() {
+            try {
+                cyclicBarrier.await();
+            } catch (InterruptedException | BrokenBarrierException e) {
+                e.printStackTrace();
+            }
         }
 
     }

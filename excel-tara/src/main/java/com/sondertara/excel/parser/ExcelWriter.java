@@ -75,7 +75,7 @@ public class ExcelWriter {
 
     }
 
-    public void generateCsv() {
+    public void generateCsv(String fileName) {
         try {
             File path = new File(workPath);
 
@@ -88,7 +88,7 @@ public class ExcelWriter {
                 }
                 Collections.addAll(fileList, files);
                 final List<File> collect = fileList.stream().sorted(Comparator.comparing(File::getName)).collect(Collectors.toList());
-                File csvFile = new File(workPath + excelEntity.getFileName() + ".csv");
+                File csvFile = new File(workPath + fileName + ".csv");
 
                 if (csvFile.exists()) {
                     csvFile.delete();
@@ -106,7 +106,7 @@ public class ExcelWriter {
                         byte[] bytes = FileUtils.readFileToByteArray(file);
                         FileUtils.writeByteArrayToFile(csvFile, bytes, true);
                     }
-                    if (!file.getName().contains(excelEntity.getFileName())) {
+                    if (!file.getName().contains(fileName)) {
                         file.delete();
                     }
                 }
@@ -135,7 +135,7 @@ public class ExcelWriter {
         int rowNum = 1;
         List<ExcelPropertyEntity> propertyList = excelEntity.getPropertyList();
         //generate first row head.
-        SXSSFSheet sheet = generateHeader(workbook, propertyList, excelEntity.getFileName());
+        SXSSFSheet sheet = generateHeader(workbook, propertyList, excelEntity.getSheetName());
 
         List<Sheet> sheets = new ArrayList<>();
         sheets.add(sheet);
@@ -162,7 +162,7 @@ public class ExcelWriter {
                     if (Constant.OPEN_CELL_STYLE) {
                         sizeColumnWidth(sheet, propertyList.size());
                     }
-                    sheet = generateHeader(workbook, propertyList, excelEntity.getFileName() + "_" + sheetNo);
+                    sheet = generateHeader(workbook, propertyList, excelEntity.getSheetName() + "_" + sheetNo);
                     sheetNo++;
                     rowNum = 1;
                     columnWidthMap.clear();
@@ -200,7 +200,7 @@ public class ExcelWriter {
         SXSSFWorkbook workbook = new SXSSFWorkbook(rowAccessWindowSize);
 
         List<ExcelPropertyEntity> propertyList = excelEntity.getPropertyList();
-        SXSSFSheet sheet = generateHeader(workbook, propertyList, excelEntity.getFileName());
+        SXSSFSheet sheet = generateHeader(workbook, propertyList, excelEntity.getSheetName());
 
         SXSSFRow row = sheet.createRow(1);
         for (int j = 0; j < propertyList.size(); j++) {
@@ -231,7 +231,7 @@ public class ExcelWriter {
         int rowNum = 1;
         SXSSFWorkbook workbook = new SXSSFWorkbook(rowAccessWindowSize);
         List<ExcelPropertyEntity> propertyList = excelEntity.getPropertyList();
-        SXSSFSheet sheet = generateHeader(workbook, propertyList, excelEntity.getFileName());
+        SXSSFSheet sheet = generateHeader(workbook, propertyList, excelEntity.getSheetName());
 
         while (true) {
             List<T> data = exportFunction.pageQuery(param, pageNo, pageSize);
@@ -247,7 +247,7 @@ public class ExcelWriter {
                 Object convertResult = exportFunction.convert(queryResult);
                 if (rowNum > recordCountPerSheet) {
                     sizeColumnWidth(sheet, propertyList.size());
-                    sheet = generateHeader(workbook, propertyList, excelEntity.getFileName() + "_" + sheetNo);
+                    sheet = generateHeader(workbook, propertyList, excelEntity.getSheetName() + "_" + sheetNo);
                     sheetNo++;
                     rowNum = 1;
                     columnWidthMap.clear();

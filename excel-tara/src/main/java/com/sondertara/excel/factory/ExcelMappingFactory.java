@@ -22,15 +22,17 @@ public class ExcelMappingFactory {
      *
      * @param clazz
      * @return excel 属性
-     * @throws IllegalAccessException
-     * @throws InstantiationException
      */
     public static ExcelEntity loadImportExcelClass(Class<?> clazz) {
-        List<ExcelPropertyEntity> propertyList = new ArrayList<ExcelPropertyEntity>();
-
+        List<ExcelPropertyEntity> propertyList = new ArrayList<>();
+        ExcelEntity excelMapping = new ExcelEntity();
         ExcelExport annotation = clazz.getAnnotation(ExcelExport.class);
         if (annotation != null) {
             String s = annotation.sheetName();
+            excelMapping.setSheetName(s);
+        } else {
+            excelMapping.setSheetName("Sheet");
+
         }
 
         Field[] fields = clazz.getDeclaredFields();
@@ -45,7 +47,7 @@ public class ExcelMappingFactory {
         if (propertyList.isEmpty()) {
             throw new ExcelTaraException("[{}] 类未找到标注@ImportField注解的属性!", clazz.getName());
         }
-        ExcelEntity excelMapping = new ExcelEntity();
+
         excelMapping.setPropertyList(propertyList);
         return excelMapping;
 

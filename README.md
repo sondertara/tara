@@ -11,13 +11,7 @@ Tara是一个纯java项目,包括常用util工具类和excel处理两个模块
 
 - Language: Java 8
 - Environment: MacOS, Windows,Linux
-
-## TODO
-
-- [x] excel导入导出优化
-- [x] 上传maven仓库
-- [x] 通知模块
-- [ ] java doc
+- 
 
 ## Quick Start
 
@@ -80,8 +74,7 @@ public class ExportVO {
     @RequestMapping("/exportDemo")
     public void exportResponse(@RequestParam(value = "fieldValues") String fieldValues, HttpServletResponse httpServletResponse) {
         ParamEntity param = JSON.parseObject(fieldValues, ParamEntity.class);
-        ExcelTara.builder(httpServletResponse, ExcelHelper.builder().fileName("导出列表").build(), ExportVO.class).exportResponse(param,
-                new ExportFunction<ParamEntity, ResultEntity>() {
+        ExcelTara.of(ExportVO.class).handler(param,  new ExportFunction<ParamEntity, ResultEntity>() {
                     /**
                      * @param queryQaram 查询条件对象
                      * @param pageNum    当前页数,从1开始
@@ -108,55 +101,52 @@ public class ExportVO {
                         //自定义的转换逻辑
                         return new ExportVO();
                     }
-                });
+                }).export("测试文件",httpServletResponse);
     }
 ```
 
 #### 3)异步导出
 
-该方案会异步多线程生成csv格式的Excel文件，并返回文件所在的路径.其中`ExcelHelper` 使用build构建
+该方案会异步多线程生成csv格式的Excel文件，并返回文件所在的路径.
 
 ```java
 public class ExceExportDemo {
     private static final Logger logger = LoggerFactory.getLogger(ExceExportDemo.class);
 
     public void exportCsvDemo() {
-        String fileName = "Excel文件名";
-        String email = "xhhuangchn@outlook.com";
-        final ExcelHelper helper = ExcelHelper.builder().fileName(fileName).user(email).pageSize(200).build();
-        ExcelTara.builder(helper, UserInfoVo.class).exportCsv(null,
-                new ExportFunction<String, UserDTO>() {
-                    @Override
-                    public List<UserDTO> pageQuery(String param, int pageNum, int pageSize) {
+        String path = ExcelTara.of(UserInfoVo.class).pagination(1, 5000, 200).handler(null, new ExportFunction<String, UserDTO>() {
+            @Override
+            public List<UserDTO> pageQuery(String param, int pageNum, int pageSize) {
 
-                        List<UserDTO> list = new ArrayList<>(200);
-                        for (int i = 0; i < 200; i++) {
-                            UserDTO userDTO = new UserDTO();
+                List<UserDTO> list = new ArrayList<>(200);
+                for (int i = 0; i < 200; i++) {
+                    UserDTO userDTO = new UserDTO();
 
-                            userDTO.setA(i);
-                            userDTO.setN(pageNum + "测试姓名" + i);
-                            userDTO.setD("测试地址" + i);
-                            list.add(userDTO);
+                    userDTO.setA(i);
+                    userDTO.setN(pageNum + "测试姓名" + i);
+                    userDTO.setD("测试地址" + i);
+                    list.add(userDTO);
 
-                            if (pageNum == 5 && i == 150) {
-                                break;
-                            }
-                        }
-                        return list;
+                    if (pageNum == 5 && i == 150) {
+                        break;
                     }
+                }
+                atomicInteger.getAndAdd(list.size());
+                return list;
+            }
 
-                    @Override
-                    public UserInfoVo convert(UserDTO queryResult) {
-                        UserInfoVo userInfoVo = new UserInfoVo();
-                        userInfoVo.setAddress(queryResult.getD());
-                        userInfoVo.setAge(queryResult.getA());
-                        userInfoVo.setName(queryResult.getN());
-                        return userInfoVo;
-                    }
-                });
-
-        File file = ExcelTaraTool.getWorkFile(fileName);
-        //FileUtil.remove(file);
+            @Override
+            public UserInfoVo convert(UserDTO queryResult) {
+                UserInfoVo userInfoVo = new UserInfoVo();
+                userInfoVo.setAddress(queryResult.getD());
+                userInfoVo.setAge(queryResult.getA());
+                userInfoVo.setName(queryResult.getN());
+                return userInfoVo;
+            }
+        }).exportCsv("Excel-Test");
+        logger.info("path:{}", path);
+        logger.info("data list size:{}", atomicInteger.get());
+        //FileUtils.remove(path);
     }
 }
 ```

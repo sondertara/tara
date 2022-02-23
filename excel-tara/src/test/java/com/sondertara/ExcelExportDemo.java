@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * the export demo
@@ -24,11 +25,10 @@ import java.util.List;
 public class ExcelExportDemo {
     private static final Logger logger = LoggerFactory.getLogger(ExcelExportDemo.class);
 
+    private final AtomicInteger atomicInteger = new AtomicInteger(0);
+
     public void exportCsvDemo() {
-        String fileName = "Excel文件名";
-        String email = "xhhuangchn@outlook.com";
-        //final ExcelHelper helper = ExcelHelper.builder().fileName(fileName).workspace(email).pageSize(200).build();
-        String path = ExcelTara.of(UserInfoVo.class).pagination(1, 5000, 2000).handler(null, new ExportFunction<String, UserDTO>() {
+        String path = ExcelTara.of(UserInfoVo.class).pagination(1, 5000, 200).handler(null, new ExportFunction<String, UserDTO>() {
             @Override
             public List<UserDTO> pageQuery(String param, int pageNum, int pageSize) {
 
@@ -45,6 +45,7 @@ public class ExcelExportDemo {
                         break;
                     }
                 }
+                atomicInteger.getAndAdd(list.size());
                 return list;
             }
 
@@ -57,6 +58,12 @@ public class ExcelExportDemo {
                 return userInfoVo;
             }
         }).exportCsv("Excel-Test");
-        FileUtils.remove(path);
+        logger.info("path:{}", path);
+        logger.info("data list size:{}", atomicInteger.get());
+        //FileUtils.remove(path);
+    }
+
+    public static void main(String[] args) {
+        new ExcelExportDemo().exportCsvDemo();
     }
 }

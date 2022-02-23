@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
+import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -167,33 +168,26 @@ public class ExcelTara {
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     public String exportCsv(String fileName) {
-        logger.info("开始导出csv");
+        logger.info("CSV exporting is starting...");
         try {
             verifyAndBuildParams();
             ExcelEntity excelMapping = ExcelMappingFactory.loadExportExcelClass(excelClass);
-            final String workPath = Constant.FILE_PATH + excelHelper.getWorkspace() + File.separator + fileName + File.separator;
+            final String workPath = Constant.FILE_PATH + File.separator + fileName + File.separator;
             excelHelper.setWorkspace(workPath);
+            CyclicBarrier cyclicBarrier = new CyclicBarrier(Constant.PRODUCER_COUNT + Constant.CONSUMER_COUNT + 1);
             ExcelRunnable excelRunnable = new ExcelGenerateTask<>(param, exportFunction, excelMapping, excelHelper);
             for (int i = 0; i < Constant.PRODUCER_COUNT; i++) {
-
-                taskPool.submit((excelRunnable.newRunnableProducer()));
+                taskPool.submit((excelRunnable.newRunnableProducer(cyclicBarrier)));
             }
-
             for (int i = 0; i < Constant.CONSUMER_COUNT; i++) {
-                taskPool.submit(excelRunnable.newRunnableConsumer());
+                taskPool.submit(excelRunnable.newRunnableConsumer(cyclicBarrier));
             }
-
-            taskPool.shutdown();
-            while (true) {
-                if (taskPool.isTerminated()) {
-                    logger.info("文件处理结束");
-                    //合并文件
-                    ExcelWriter excelWriter = new ExcelWriter(excelMapping, workPath);
-                    excelWriter.generateCsv();
-                    logger.info("csv生成完毕");
-                    break;
-                }
-            }
+            cyclicBarrier.await();
+            logger.info("CSV exporting is merging...");
+            //合并文件
+            ExcelWriter excelWriter = new ExcelWriter(excelMapping, workPath);
+            excelWriter.generateCsv(fileName);
+            logger.info("CSV exporting has been completed...");
             //返回文件path
             return workPath + fileName + ".csv";
         } catch (Exception e) {
@@ -384,5 +378,4 @@ public class ExcelTara {
             this.rowAccessWindowSize = Constant.DEFAULT_ROW_ACCESS_WINDOW_SIZE;
         }
     }
-
 }

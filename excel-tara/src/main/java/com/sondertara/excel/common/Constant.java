@@ -1,4 +1,3 @@
-
 package com.sondertara.excel.common;
 
 import java.io.File;
@@ -66,7 +65,7 @@ public final class Constant {
     /**
      * async csv file workspace.
      */
-    public static final String FILE_PATH = System.getProperties().getProperty("user.dir") + File.separator + "export" + File.separator;
+    public static final String FILE_PATH = System.getProperties().getProperty("user.dir") + File.separator + "export_tmp" + File.separator;
     /**
      * the num query thread
      */
