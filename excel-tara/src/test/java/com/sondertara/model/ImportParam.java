@@ -1,7 +1,7 @@
 package com.sondertara.model;
 
 
-import com.sondertara.excel.annotation.ImportField;
+import com.sondertara.excel.annotation.ExcelExportField;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -15,43 +15,43 @@ import java.util.Date;
  */
 @Data
 public class ImportParam implements Serializable {
-    @ImportField(index = 1)
+    @ExcelExportField(index = 1)
     private String recordNo;
 
-    @ImportField(index = 3)
+    @ExcelExportField(index = 3)
     private Date orderTime;
 
-    @ImportField(index = 6, required = true)
+    @ExcelExportField(index = 6, required = true)
     private String vin;
 
-    @ImportField(index = 7, required = true)
+    @ExcelExportField(index = 7, required = true)
     private String policyNo;
 
-    @ImportField(index = 8)
+    @ExcelExportField(index = 8)
     private String correctNo;
-    @ImportField(index = 11)
+    @ExcelExportField(index = 11)
     private String bizType;
 
-    @ImportField(index = 13)
+    @ExcelExportField(index = 13)
     private String insuredName;
 
-    @ImportField(index = 14)
+    @ExcelExportField(index = 14)
     private String insurerName;
 
-    @ImportField(index = 15)
+    @ExcelExportField(index = 15)
     private String cityName;
-    @ImportField(index = 16)
+    @ExcelExportField(index = 16)
     private String categoryName;
 
-    @ImportField(index = 17, scale = 4)
+    @ExcelExportField(index = 17, scale = 4)
     private BigDecimal discount;
-    @ImportField(index = 18, required = true)
+    @ExcelExportField(index = 18, required = true)
     private BigDecimal premium;
-    @ImportField(index = 21)
+    @ExcelExportField(index = 21)
     private String specialInvoiceNo;
-    @ImportField(index = 26)
+    @ExcelExportField(index = 26)
     private Date commitTime;
-    @ImportField(index = 27, range = {"100", "500"})
+    @ExcelExportField(index = 27, range = {"100", "500"})
     private BigDecimal commissionAmount;
 
 

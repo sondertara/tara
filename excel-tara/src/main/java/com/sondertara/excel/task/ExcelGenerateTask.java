@@ -1,6 +1,7 @@
 package com.sondertara.excel.task;
 
 import com.sondertara.common.util.LocalDateTimeUtils;
+import com.sondertara.excel.annotation.ExcelImportFiled;
 import com.sondertara.excel.common.Constant;
 import com.sondertara.excel.entity.ExcelEntity;
 import com.sondertara.excel.entity.ExcelHelper;
@@ -154,7 +155,7 @@ public class ExcelGenerateTask<P, T> implements ExcelRunnable {
      * build data row except first row in excel.
      *
      * @param entity      data
-     * @param excelEntity excel entity via {@link com.sondertara.excel.annotation.ExportField}
+     * @param excelEntity excel entity via {@link ExcelImportFiled}
      */
     private List<String> buildRow(Object entity, ExcelEntity excelEntity) throws ExecutionException, IllegalAccessException {
 

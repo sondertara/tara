@@ -5,7 +5,7 @@ import com.sondertara.common.util.LocalDateTimeUtils;
 import com.sondertara.common.util.NumberUtils;
 import com.sondertara.common.util.RegexUtils;
 import com.sondertara.common.util.StringUtils;
-import com.sondertara.excel.annotation.ImportField;
+import com.sondertara.excel.annotation.ExcelExportField;
 import com.sondertara.excel.common.Constant;
 import com.sondertara.excel.entity.ErrorEntity;
 import com.sondertara.excel.entity.ExcelEntity;
@@ -20,7 +20,6 @@ import org.apache.poi.ss.usermodel.BuiltinFormats;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
 import org.apache.poi.xssf.model.SharedStrings;
-import org.apache.poi.xssf.model.SharedStringsTable;
 import org.apache.poi.xssf.model.StylesTable;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
@@ -122,7 +121,7 @@ public class ExcelReader extends DefaultHandler {
      * <p>
      * if true the index value  is the column in excel,else the field and column one-to-one
      *
-     * @see ImportField#index()
+     * @see ExcelExportField#index()
      * </p>
      */
     private Boolean enableIndex = false;
@@ -441,9 +440,9 @@ public class ExcelReader extends DefaultHandler {
     }
 
     /**
-     * parse cell value to pojo via {@link ImportField}
+     * parse cell value to pojo via {@link ExcelExportField}
      *
-     * @param mappingProperty pojo filed attribute in {@link ImportField}
+     * @param mappingProperty pojo filed attribute in {@link ExcelExportField}
      * @param cellValue       cell value
      * @return the qualified value
      * @throws ParseException
@@ -492,7 +491,7 @@ public class ExcelReader extends DefaultHandler {
     }
 
     /**
-     * check the cell value via {@link ImportField}
+     * check the cell value via {@link ExcelExportField}
      *
      * @param cellIndex       cell index
      * @param mappingProperty pojo field attribute

@@ -1,4 +1,3 @@
-
 package com.sondertara.excel.entity;
 
 import lombok.Getter;
@@ -12,10 +11,8 @@ import java.util.List;
 @Setter
 @Getter
 public class ExcelEntity implements Cloneable {
-    /**
-     * 文件名
-     */
-    private String fileName;
+
+    private String sheetName;
     /**
      * excel属性
      */

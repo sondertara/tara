@@ -12,7 +12,7 @@ import java.math.RoundingMode;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface ExportField {
+public @interface ExcelImportFiled {
 
     /**
      * excel列名称

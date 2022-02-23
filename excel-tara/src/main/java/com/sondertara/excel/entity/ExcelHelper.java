@@ -14,10 +14,6 @@ public class ExcelHelper implements Serializable {
     private ExcelHelper() {
     }
 
-    /**
-     * 文件名称,不带后缀，必填
-     */
-    private String fileName;
     /***
      * 开始页码，不填默认是1
      */
@@ -40,8 +36,7 @@ public class ExcelHelper implements Serializable {
      */
     private Boolean openAutoColumWidth;
 
-    public ExcelHelper(String fileName, String workspace, Integer pageStart, Integer pageEnd, Integer pageSize, Boolean openAutoColumWidth) {
-        this.fileName = fileName;
+    public ExcelHelper(String workspace, Integer pageStart, Integer pageEnd, Integer pageSize, Boolean openAutoColumWidth) {
         this.pageStart = pageStart;
         this.pageEnd = pageEnd;
         this.pageSize = pageSize;
@@ -56,7 +51,6 @@ public class ExcelHelper implements Serializable {
 
     public static class Builder {
 
-        private String fileName;
 
         private String workspace;
 
@@ -67,12 +61,6 @@ public class ExcelHelper implements Serializable {
         private Integer pageSize;
 
         private Boolean openAutoColumWidth = false;
-
-
-        public Builder fileName(final String fileName) {
-            this.fileName = fileName;
-            return this;
-        }
 
 
         public Builder openAutoColumWidth(final Boolean openAutoColumWidth) {
@@ -102,7 +90,7 @@ public class ExcelHelper implements Serializable {
         }
 
         public ExcelHelper build() {
-            return new ExcelHelper(this.fileName, this.workspace, this.pageStart, this.pageEnd, this.pageSize, this.openAutoColumWidth);
+            return new ExcelHelper(this.workspace, this.pageStart, this.pageEnd, this.pageSize, this.openAutoColumWidth);
         }
     }
 }

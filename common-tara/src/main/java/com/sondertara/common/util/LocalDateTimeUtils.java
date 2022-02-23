@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
@@ -36,6 +37,7 @@ public class LocalDateTimeUtils {
         }
     });
     private static final String DATE_TIME_FORMATTER = "yyyy-MM-dd HH:mm:ss";
+    private static final String DATE_TIME_MILLS_FORMATTER = "yyyy-MM-dd HH:mm:ss.SSS";
     private static final String DATE_FORMATTER = "yyyy-MM-dd";
 
     public static String getNow() {
@@ -237,10 +239,145 @@ public class LocalDateTimeUtils {
         return formatLocalDateTime(dateTime);
     }
 
-    public static void main(String[] args) {
-        String end = getDayEnd("2012-09-20");
 
-        System.out.println(end);
+    /**
+     * 获取时间戳
+     *
+     * @param timeStr   时间字符串
+     * @param formatter 格式化
+     * @return 时间
+     */
+    public static Long getTimeStamp(String timeStr, String formatter) {
+        try {
+            LocalDateTime localDateTime = LocalDateTime.parse(timeStr, DateTimeFormatter.ofPattern(formatter));
+            return localDateTime.toInstant(ZoneOffset.of("+8")).toEpochMilli();
+        } catch (Exception e) {
+            log.error("", e);
+        }
+        try {
+            LocalDate localDate = LocalDate.parse(timeStr, DateTimeFormatter.ofPattern(formatter));
+            return localDate.atStartOfDay(ZoneOffset.ofHours(8)).toInstant().toEpochMilli();
+        } catch (Exception e) {
+            log.error("", e);
+        }
+        return null;
+    }
+
+    /**
+     * 尝试获取时间戳
+     *
+     * @param timeStr 时间str
+     * @return 时间戳
+     */
+    public static Long getTimeStamp(String timeStr) {
+
+        try {
+            LocalDateTime localDateTime = LocalDateTime.parse(timeStr, DateTimeFormatter.ofPattern(DATE_TIME_MILLS_FORMATTER));
+            return localDateTime.toInstant(ZoneOffset.of("+8")).toEpochMilli();
+        } catch (Exception e) {
+
+        }
+
+        try {
+            LocalDateTime localDateTime = LocalDateTime.parse(timeStr, DateTimeFormatter.ofPattern(DATE_TIME_FORMATTER));
+            return localDateTime.toInstant(ZoneOffset.of("+8")).toEpochMilli();
+        } catch (Exception e) {
+        }
+
+
+        try {
+            LocalDate localDate = LocalDate.parse(timeStr, DateTimeFormatter.ofPattern(DATE_FORMATTER));
+            return localDate.atStartOfDay(ZoneOffset.ofHours(8)).toInstant().toEpochMilli();
+        } catch (Exception e) {
+        }
+
+        return null;
+    }
+
+    /**
+     * 时间戳获取时间
+     *
+     * @param timestamp timestamp
+     * @return localDateTime
+     */
+    public static LocalDateTime getLocalDateTime(long timestamp) {
+        try {
+            return Instant.ofEpochMilli(timestamp).atZone(ZoneOffset.of("+8")).toLocalDateTime();
+        } catch (Exception e) {
+
+        }
+        try {
+            return Instant.ofEpochSecond(timestamp).atZone(ZoneOffset.of("+8")).toLocalDateTime();
+        } catch (Exception e) {
+
+        }
+
+        throw new RuntimeException("timestamp is invalid:" + timestamp);
+
+    }
+
+    /**
+     * 时间戳获取时间
+     *
+     * @param timestamp timestamp
+     * @return localDate
+     */
+    public static LocalDate getLocalDate(long timestamp) {
+        try {
+            return Instant.ofEpochMilli(timestamp).atZone(ZoneOffset.of("+8")).toLocalDate();
+        } catch (Exception e) {
+
+        }
+        try {
+            return Instant.ofEpochSecond(timestamp).atZone(ZoneOffset.of("+8")).toLocalDate();
+        } catch (Exception e) {
+
+        }
+
+        throw new RuntimeException("timestamp is invalid:" + timestamp);
+
+    }
+
+    /**
+     * 时间戳获取秒日期
+     *
+     * @param timestamp timestamp
+     * @return date time
+     */
+    public static String getDateTimeSecondStr(long timestamp) {
+        LocalDateTime localDateTime = getLocalDateTime(timestamp);
+        if (null != localDateTime) {
+            return localDateTime.format(DateTimeFormatter.ofPattern(DATE_TIME_FORMATTER));
+        }
+        throw new RuntimeException("timestamp is invalid:" + timestamp);
+    }
+
+    /**
+     * 时间戳获取毫秒时间
+     *
+     * @param timestamp timestamp
+     * @return data time
+     */
+    public static String getDateTimeMillsStr(long timestamp) {
+        LocalDateTime localDateTime = getLocalDateTime(timestamp);
+        if (null != localDateTime) {
+            localDateTime.format(DateTimeFormatter.ofPattern(DATE_TIME_MILLS_FORMATTER));
+        }
+        throw new RuntimeException("timestamp is invalid:" + timestamp);
+    }
+
+    /**
+     * 时间戳获取日期
+     *
+     * @param timestamp timestamp
+     * @return data str
+     */
+    public static String getDateStr(long timestamp) {
+        LocalDate localDate = getLocalDate(timestamp);
+        if (null != localDate) {
+            localDate.format(DateTimeFormatter.ofPattern(DATE_FORMATTER));
+        }
+        throw new RuntimeException("timestamp is invalid:" + timestamp);
     }
 
 }

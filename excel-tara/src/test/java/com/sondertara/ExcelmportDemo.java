@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.sondertara.excel.ExcelTara;
 import com.sondertara.excel.common.ExcelTaraTool;
 import com.sondertara.excel.entity.ErrorEntity;
+import com.sondertara.excel.entity.ExcelEntity;
 import com.sondertara.excel.function.ImportFunction;
 import com.sondertara.model.ImportParam;
 import org.slf4j.Logger;
@@ -59,6 +60,20 @@ public class ExcelmportDemo {
                         ExcelTaraTool.addErrorEntity(errorEntity);
                     }
                 });
+
+        ExcelTara.of(ExcelEntity.class).from(inputStream).importExcel(true, new ImportFunction<Object>() {
+            @Override
+            public void onProcess(int sheetIndex, int rowIndex, Object entity) {
+
+            }
+
+            @Override
+            public void onError(ErrorEntity errorEntity) {
+
+            }
+        });
+
+        ExcelTara.of(ExcelEntity.class).exportResponse();
         //获取导入错误数据
         List<List<String>> records = ExcelTaraTool.getErrorEntityRecords();
         //生成cvs

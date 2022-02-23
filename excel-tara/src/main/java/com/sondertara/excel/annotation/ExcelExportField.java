@@ -14,7 +14,7 @@ import java.math.RoundingMode;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface ImportField {
+public @interface ExcelExportField {
 
     /**
      * 对应excel中的列
