@@ -27,8 +27,8 @@ public class ExcelExportDemo {
     public void exportCsvDemo() {
         String fileName = "Excel文件名";
         String email = "xhhuangchn@outlook.com";
-        final ExcelHelper helper = ExcelHelper.builder().fileName(fileName).workspace(email).pageSize(200).build();
-        String path = ExcelTara.builder(helper, UserInfoVo.class).exportCsv(null, new ExportFunction<String, UserDTO>() {
+        //final ExcelHelper helper = ExcelHelper.builder().fileName(fileName).workspace(email).pageSize(200).build();
+        String path = ExcelTara.of(UserInfoVo.class).pagination(1, 5000, 2000).handler(null, new ExportFunction<String, UserDTO>() {
             @Override
             public List<UserDTO> pageQuery(String param, int pageNum, int pageSize) {
 
@@ -56,7 +56,7 @@ public class ExcelExportDemo {
                 userInfoVo.setName(queryResult.getN());
                 return userInfoVo;
             }
-        });
+        }).exportCsv("Excel-Test");
         FileUtils.remove(path);
     }
 }

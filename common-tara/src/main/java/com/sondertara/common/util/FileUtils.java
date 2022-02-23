@@ -8,6 +8,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * file util
@@ -34,7 +35,7 @@ public class FileUtils {
         if (file.isFile()) {
             return file.delete();
         }
-        Arrays.asList(file.listFiles()).forEach(FileUtils::remove);
+        Arrays.asList(Objects.requireNonNull(file.listFiles())).forEach(FileUtils::remove);
         return file.delete();
 
     }
@@ -54,7 +55,7 @@ public class FileUtils {
         if (file.isFile()) {
             return file.delete();
         }
-        Arrays.asList(file.listFiles()).forEach(FileUtils::remove);
+        Arrays.asList(Objects.requireNonNull(file.listFiles())).forEach(FileUtils::remove);
         return file.delete();
 
     }
@@ -90,8 +91,7 @@ public class FileUtils {
      */
     public static BasicFileAttributes getAttributes(String filePath) throws IOException {
 
-        BasicFileAttributes attributes = Files.readAttributes(new File(filePath).toPath(), BasicFileAttributes.class);
-        return attributes;
+        return Files.readAttributes(new File(filePath).toPath(), BasicFileAttributes.class);
 
 
     }

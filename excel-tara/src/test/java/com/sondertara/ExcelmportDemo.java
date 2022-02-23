@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.sondertara.excel.ExcelTara;
 import com.sondertara.excel.common.ExcelTaraTool;
 import com.sondertara.excel.entity.ErrorEntity;
-import com.sondertara.excel.entity.ExcelEntity;
 import com.sondertara.excel.function.ImportFunction;
 import com.sondertara.model.ImportParam;
 import org.slf4j.Logger;
@@ -31,49 +30,34 @@ public class ExcelmportDemo {
         File file = new File(filePath);
         final FileInputStream inputStream = new FileInputStream(file);
 
-        ExcelTara.builder(inputStream, ImportParam.class)
-                .importExcel(true, new ImportFunction<ImportParam>() {
+        ExcelTara.of(ImportParam.class).handler(new ImportFunction<ImportParam>() {
 
-                    /**
-                     * @param sheetIndex 当前执行的Sheet的索引, 从1开始
-                     * @param rowIndex   当前执行的行数, 从1开始
-                     * @param param      Excel行数据的实体
-                     */
-                    @Override
-                    public void onProcess(int sheetIndex, int rowIndex, ImportParam param) {
-                        logger.info("sheet[{}],第{}行，解析数据为:{}", sheetIndex, rowIndex, JSON.toJSONString(param));
-                        try {
-                            //  handleImportData(param);
-                        } catch (Exception e) {
-                            logger.error(" handle record error", e);
-                        }
-                    }
-
-                    /**
-                     * @param errorEntity 错误信息实体
-                     */
-                    @Override
-                    public void onError(ErrorEntity errorEntity) {
-                        //将每条数据非空和正则校验后的错误信息errorEntity进行自定义处理
-
-                        logger.info(errorEntity.toString());
-                        ExcelTaraTool.addErrorEntity(errorEntity);
-                    }
-                });
-
-        ExcelTara.of(ExcelEntity.class).from(inputStream).importExcel(true, new ImportFunction<Object>() {
+            /**
+             * @param sheetIndex 当前执行的Sheet的索引, 从1开始
+             * @param rowIndex   当前执行的行数, 从1开始
+             * @param param      Excel行数据的实体
+             */
             @Override
-            public void onProcess(int sheetIndex, int rowIndex, Object entity) {
-
+            public void onProcess(int sheetIndex, int rowIndex, ImportParam param) {
+                logger.info("sheet[{}],第{}行，解析数据为:{}", sheetIndex, rowIndex, JSON.toJSONString(param));
+                try {
+                    //  handleImportData(param);
+                } catch (Exception e) {
+                    logger.error(" handle record error", e);
+                }
             }
 
+            /**
+             * @param errorEntity 错误信息实体
+             */
             @Override
             public void onError(ErrorEntity errorEntity) {
+                //将每条数据非空和正则校验后的错误信息errorEntity进行自定义处理
 
+                logger.info(errorEntity.toString());
+                ExcelTaraTool.addErrorEntity(errorEntity);
             }
-        });
-
-        ExcelTara.of(ExcelEntity.class).exportResponse();
+        }).readExcel(true, inputStream);
         //获取导入错误数据
         List<List<String>> records = ExcelTaraTool.getErrorEntityRecords();
         //生成cvs

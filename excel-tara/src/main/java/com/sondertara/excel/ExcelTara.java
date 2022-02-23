@@ -104,19 +104,20 @@ public class ExcelTara {
         return new ExcelTara(excelClass);
     }
 
-    public ExcelTara from(InputStream in) {
-        this.inputStream = in;
-        return this;
-    }
 
     public ExcelTara pagination(Integer pageStart, Integer pageEnd, Integer pageSize) {
         this.excelHelper = ExcelHelper.builder().pageSize(pageSize).pageStart(pageStart).pageEnd(pageEnd).build();
         return this;
     }
 
-    public <R, EF> ExcelTara function(R param, ExportFunction<R, EF> exportFunction) {
+    public <R, EF> ExcelTara handler(R param, ExportFunction<R, EF> exportFunction) {
         this.param = param;
         this.exportFunction = exportFunction;
+        return this;
+    }
+
+    public <R> ExcelTara handler(ImportFunction<R> importFunction) {
+        this.importFunction = importFunction;
         return this;
     }
 
@@ -124,18 +125,11 @@ public class ExcelTara {
     /**
      * export to http response with browser
      */
-    @SuppressWarnings("unchecked")
     public void export(String fileName, HttpServletResponse response) {
-        SXSSFWorkbook sxssfWorkbook = null;
         try {
-            try {
-                verifyResponse();
-                sxssfWorkbook = commonSingleSheet(param, exportFunction);
+            try (SXSSFWorkbook sxssfWorkbook = commonSingleSheet()) {
                 download(sxssfWorkbook, response, URLEncoder.encode(fileName + ".xlsx", "UTF-8"));
             } finally {
-                if (sxssfWorkbook != null) {
-                    sxssfWorkbook.close();
-                }
                 if (response != null && response.getOutputStream() != null) {
                     response.getOutputStream().close();
                 }
@@ -148,10 +142,9 @@ public class ExcelTara {
     /**
      * export to Workbook
      */
-    @SuppressWarnings("unchecked")
     public SXSSFWorkbook exportWorkbook() {
         try {
-            return commonSingleSheet(param, exportFunction);
+            return commonSingleSheet();
         } catch (Exception e) {
             throw new ExcelTaraException(e);
         }
@@ -177,7 +170,7 @@ public class ExcelTara {
         logger.info("开始导出csv");
         try {
             verifyAndBuildParams();
-            ExcelEntity excelMapping = ExcelMappingFactory.loadExportExcelClass(excelClass, fileName);
+            ExcelEntity excelMapping = ExcelMappingFactory.loadExportExcelClass(excelClass);
             final String workPath = Constant.FILE_PATH + excelHelper.getWorkspace() + File.separator + fileName + File.separator;
             excelHelper.setWorkspace(workPath);
             ExcelRunnable excelRunnable = new ExcelGenerateTask<>(param, exportFunction, excelMapping, excelHelper);
@@ -212,15 +205,13 @@ public class ExcelTara {
     /**
      * generate export stream.
      */
-    @SuppressWarnings({"unchecked"})
     private void generateStream(OutputStream outputStream) throws IOException {
         SXSSFWorkbook sxssfWorkbook = null;
         if (outputStream == null) {
             throw new ExcelTaraException("outputStream is null");
         }
         try {
-
-            sxssfWorkbook = commonSingleSheet(param, exportFunction);
+            sxssfWorkbook = commonSingleSheet();
             sxssfWorkbook.write(outputStream);
         } catch (Exception e) {
             logger.error("generate excel stream error!", e);
@@ -300,7 +291,7 @@ public class ExcelTara {
     /**
      * import all Excel sheet
      */
-    public void read(Boolean enableIndex, InputStream inputStream) {
+    public void readExcel(Boolean enableIndex, InputStream inputStream) {
         try {
             if (importFunction == null) {
                 throw new ExcelTaraException("excel read handler importFunction is null!");
