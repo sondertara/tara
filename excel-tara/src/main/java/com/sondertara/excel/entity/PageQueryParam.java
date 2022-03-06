@@ -1,51 +1,73 @@
 package com.sondertara.excel.entity;
 
+import lombok.Getter;
+
 import java.io.Serializable;
 
 /**
  * @author huangxiaohu
  */
-
+@Getter
 public class PageQueryParam implements Serializable {
 
-    private Integer pageSize;
+    private final Integer pageSize;
 
-    private Integer pageStart;
+    private final Integer pageStart;
+    private final Integer pageEnd;
+
+    public static PageQueryParam.Builder builder() {
+        return new Builder();
+    }
+
+
+    private PageQueryParam(Integer pageSize, Integer pageStart, Integer pageEnd) {
+        this.pageSize = pageSize;
+        this.pageStart = pageStart;
+        this.pageEnd = pageEnd;
+    }
 
     @Override
     public String toString() {
         return "PageQueryDTO{" + "pageSize=" + pageSize + ", pageStart=" + pageStart + ", pageEnd=" + pageEnd + '}';
     }
 
-    private Integer pageEnd;
+    public static class Builder {
 
-    public Integer getPageSize() {
-        return pageSize;
+        private Integer pageSize;
+
+        private Integer pageStart;
+        private Integer pageEnd;
+
+        public Builder pageSize(Integer pageSize) {
+            this.pageSize = pageSize;
+            return this;
+        }
+
+        public Builder pageStart(Integer pageStart) {
+            this.pageStart = pageStart;
+            return this;
+        }
+
+        public Builder pageEnd(Integer pageEnd) {
+            this.pageEnd = pageEnd;
+            return this;
+        }
+
+        public PageQueryParam build() {
+
+            if (this.pageStart == null) {
+                this.pageStart = 1;
+            }
+            if (this.pageEnd == null) {
+                this.pageEnd = Integer.MAX_VALUE;
+            }
+            if (this.pageSize == null) {
+                this.pageSize = 2000;
+
+            }
+            return new PageQueryParam(this.pageSize, this.pageStart, this.pageEnd);
+        }
     }
 
-    public void setPageSize(Integer pageSize) {
-        this.pageSize = pageSize;
-    }
 
-    public Integer getPageStart() {
-        return pageStart;
-    }
-
-    public void setPageStart(Integer pageStart) {
-        this.pageStart = pageStart;
-    }
-
-    public Integer getPageEnd() {
-        return pageEnd;
-    }
-
-    public void setPageEnd(Integer pageEnd) {
-        this.pageEnd = pageEnd;
-    }
-
-    public PageQueryParam() {
-        this.pageStart = 1;
-        this.pageSize = 2000;
-        this.pageEnd = Integer.MAX_VALUE;
-    }
 }

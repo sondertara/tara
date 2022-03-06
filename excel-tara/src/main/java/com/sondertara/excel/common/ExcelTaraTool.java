@@ -34,8 +34,8 @@ public class ExcelTaraTool {
     private static final Logger logger = LoggerFactory.getLogger(ExcelTaraTool.class);
     public static final String WORKSPACE = System.getProperty("user.dir") + File.separator + FILE_STORAGE_PREFIX;
 
-    private static ThreadLocal<List<List<String>>> errorEntityRecordsLocal = new ThreadLocal<>();
-    private static ThreadLocal<Map<String, CSVPrinter>> printerThreadLocal = new ThreadLocal<>();
+    private static final ThreadLocal<List<List<String>>> errorEntityRecordsLocal = new ThreadLocal<>();
+    private static final ThreadLocal<Map<String, CSVPrinter>> printerThreadLocal = new ThreadLocal<>();
 
     public static List<List<String>> getErrorEntityRecords() {
 

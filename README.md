@@ -11,7 +11,7 @@ Tara是一个纯java项目,包括常用util工具类和excel处理两个模块
 
 - Language: Java 8
 - Environment: MacOS, Windows,Linux
-- 
+-
 
 ## Quick Start
 
@@ -26,7 +26,8 @@ Tara是一个纯java项目,包括常用util工具类和excel处理两个模块
 #### 引入maven依赖,version为上方maven仓库中版本
 
 ```xml
- <dependency>
+
+<dependency>
     <groupId>com.sondertara</groupId>
     <artifactId>excel-tara</artifactId>
     <version>${version}</version>
@@ -38,14 +39,15 @@ Tara是一个纯java项目,包括常用util工具类和excel处理两个模块
 ##### 1)添加导出注解 `@ExportField`
 
 ```java
+
 @Data
 public class ExportVO {
 
-    @ExportField(columnName = "姓名")
+    @ExcelExportField(columnName = "姓名")
     private String name;
-    @ExportField(columnName = "年龄")
+    @ExcelExportField(columnName = "年龄")
     private Integer age;
-    @ExportField(columnName = "住址")
+    @ExcelExportField(columnName = "住址")
     private String address;
 }
 ```
@@ -62,7 +64,7 @@ public class ExportVO {
      * <p>
      * <p>
      * ExportVO是标注注解的类,Excel映射的导出类，需要自己定义
-     * ParamEntity是查询的参数对象，需要自己定义
+     * ParamEntity是查询的参数对象，继承PageQueryParam 需要自己定义,设置起止页和分页大小
      * ResultEntity是分页查询到的结果List内部元素，需要自己定义
      * <p>
      * ExportVO可以和ResultEntity使用同一个对象,即直接在查询的结果对象上标注注解(建议使用两个对象, 实现解耦)
@@ -74,7 +76,7 @@ public class ExportVO {
     @RequestMapping("/exportDemo")
     public void exportResponse(@RequestParam(value = "fieldValues") String fieldValues, HttpServletResponse httpServletResponse) {
         ParamEntity param = JSON.parseObject(fieldValues, ParamEntity.class);
-        ExcelTara.of(ExportVO.class).handler(param,  new ExportFunction<ParamEntity, ResultEntity>() {
+        ExcelExpoerTara.of(ExportVO.class).query(param,  new ExportFunction<ParamEntity, ResultEntity>() {
                     /**
                      * @param queryQaram 查询条件对象
                      * @param pageNum    当前页数,从1开始
@@ -82,10 +84,9 @@ public class ExportVO {
                      * @return
                      */
                     @Override
-                    public List<ResultEntity> pageQuery(ParamEntity queryQaram, int pageNum, int pageSize) {
+                    public List<ResultEntity> pageQuery(ParamEntity queryQaram, int pageNum) {
 
                         //1.将pageNum和pageSize传入使用本组件的开发者自己项目的分页逻辑中
-
                         //2.调用自定义的分页查询方法
                         List<ResultEntity> result = null；
                         return result;
@@ -114,35 +115,33 @@ public class ExceExportDemo {
     private static final Logger logger = LoggerFactory.getLogger(ExceExportDemo.class);
 
     public void exportCsvDemo() {
-        String path = ExcelTara.of(UserInfoVo.class).pagination(1, 5000, 200).handler(null, new ExportFunction<String, UserDTO>() {
-            @Override
-            public List<UserDTO> pageQuery(String param, int pageNum, int pageSize) {
+        PageQueryParam query = PageQueryParam.builder().build();
+        String path = ExcelExportTara.of(UserInfoVo.class).query(query, pageNo -> {
+            // query list data from db
+            List<UserDTO> list = new ArrayList<>(200);
+            for (int i = 0; i < 200; i++) {
+                UserDTO userDTO = new UserDTO();
 
-                List<UserDTO> list = new ArrayList<>(200);
-                for (int i = 0; i < 200; i++) {
-                    UserDTO userDTO = new UserDTO();
+                userDTO.setA(i);
+                userDTO.setN(pageNo + "测试姓名" + i);
+                userDTO.setD("测试地址" + i);
+                list.add(userDTO);
 
-                    userDTO.setA(i);
-                    userDTO.setN(pageNum + "测试姓名" + i);
-                    userDTO.setD("测试地址" + i);
-                    list.add(userDTO);
-
-                    if (pageNum == 5 && i == 150) {
-                        break;
-                    }
+                if (pageNo == 5 && i == 150) {
+                    break;
                 }
-                atomicInteger.getAndAdd(list.size());
-                return list;
             }
+            atomicInteger.getAndAdd(list.size());
 
-            @Override
-            public UserInfoVo convert(UserDTO queryResult) {
+            // convert to target data list
+            return list.stream().map(u -> {
                 UserInfoVo userInfoVo = new UserInfoVo();
-                userInfoVo.setAddress(queryResult.getD());
-                userInfoVo.setAge(queryResult.getA());
-                userInfoVo.setName(queryResult.getN());
+                userInfoVo.setAddress(u.getD());
+                userInfoVo.setAge(u.getA());
+                userInfoVo.setName(u.getN());
                 return userInfoVo;
-            }
+            }).collect(Collectors.toList());
+
         }).exportCsv("Excel-Test");
         logger.info("path:{}", path);
         logger.info("data list size:{}", atomicInteger.get());
@@ -156,6 +155,7 @@ public class ExceExportDemo {
 ##### 1)添加导入注解 `@ImportField`
 
 ```java
+
 @Data
 public class ImportParam implements Serializable {
     @ImportField(index = 1)
@@ -166,7 +166,7 @@ public class ImportParam implements Serializable {
 
     @ImportField(index = 6, required = true)
     private String userPhone;
-  
+
     @ImportField(index = 8)
     private Date commitTime;
 
@@ -176,6 +176,7 @@ public class ImportParam implements Serializable {
 ```
 
 ##### 2)导入demo
+
 ```java
 
 public class ExcelmportDemo {
@@ -226,6 +227,15 @@ public class ExcelmportDemo {
 
 ```
 
+### TODO
+
+- `ExcelExportField` 注解支持样式
+- 模板导出Excel
+- 简易导入导出数据
+- 代码注释和性能优化
+
 ## Contact
+
+My email :814494432@qq.com / xhhuangchn@outlook.com
 
 

@@ -2,8 +2,6 @@ package com.sondertara.excel;
 
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.sondertara.common.util.StringUtils;
-import com.sondertara.excel.annotation.ExcelExport;
 import com.sondertara.excel.annotation.ExcelExportField;
 import com.sondertara.excel.annotation.ExcelImportFiled;
 import com.sondertara.excel.common.Constant;
@@ -80,7 +78,7 @@ public class ExcelExportTara<U> {
 
 
     public static <U> ExcelExportTara<U> of(Class<U> excelClass) {
-        return new ExcelExportTara<U>(excelClass);
+        return new ExcelExportTara<>(excelClass);
     }
 
     public ExcelExportTara<U> customizer(ExcelHelper excelHelper) {
@@ -88,8 +86,7 @@ public class ExcelExportTara<U> {
         return this;
     }
 
-
-    public <T extends PageQueryParam, R> ExcelExportTara<U> query(T param, ExportFunction<T, R> exportFunction) {
+    public <R> ExcelExportTara<U> query(PageQueryParam param, ExportFunction<R> exportFunction) {
         this.param = param;
         this.exportFunction = exportFunction;
         return this;

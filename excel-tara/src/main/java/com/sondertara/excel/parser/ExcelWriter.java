@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -57,7 +58,7 @@ public class ExcelWriter {
     private final ExcelEntity excelEntity;
     private Integer nullCellCount = 0;
     private XSSFCellStyle headCellStyle;
-    private final Map<Integer, Integer> columnWidthMap = new HashMap<Integer, Integer>();
+    private final Map<Integer, Integer> columnWidthMap = new HashMap<>();
 
 
     public ExcelWriter(ExcelEntity excelEntity) {
@@ -88,9 +89,15 @@ public class ExcelWriter {
                 File csvFile = new File(workPath + fileName + ".csv");
 
                 if (csvFile.exists()) {
-                    csvFile.delete();
+                    boolean delete = csvFile.delete();
+                    if (!delete) {
+                        throw new IOException("Delete file:" + csvFile.getAbsolutePath() + " failed");
+                    }
                 } else {
-                    csvFile.createNewFile();
+                    boolean newFile = csvFile.createNewFile();
+                    if (!newFile) {
+                        throw new IOException("Create file:" + csvFile.getAbsolutePath() + " failed");
+                    }
                 }
                 Appendable printWriter = new PrintWriter(csvFile, Constant.CHARSET);
                 CSVPrinter csvPrinter = CSVFormat.EXCEL.builder().setHeader(excelEntity.getPropertyList().stream().map(ExcelPropertyEntity::getColumnName).toArray(String[]::new)).build().print(printWriter);
@@ -115,9 +122,8 @@ public class ExcelWriter {
     }
 
     /**
-     * @param param          query param
+     * @param param          pagination param
      * @param exportFunction export function
-     * @param <T>            query class
      * @param <R>            export pojo
      * @return workbook
      * @throws InvocationTargetException e
@@ -125,7 +131,7 @@ public class ExcelWriter {
      * @throws ParseException            e
      * @throws IllegalAccessException    e
      */
-    public <T extends PageQueryParam, R> SXSSFWorkbook generateWorkbook(T param, ExportFunction<T, R> exportFunction) throws Exception {
+    public <R> SXSSFWorkbook generateWorkbook(PageQueryParam param, ExportFunction<R> exportFunction) throws Exception {
         SXSSFWorkbook workbook = new SXSSFWorkbook(excelHelper.getRowAccessWindowSize());
         int sheetNo = 1;
         int rowNum = 1;
@@ -136,7 +142,7 @@ public class ExcelWriter {
         // generate data rows
         int firstPageNo = 1;
         while (true) {
-            List<R> data = exportFunction.pageQuery(param, firstPageNo);
+            List<R> data = exportFunction.apply(firstPageNo);
             if (data == null || data.isEmpty()) {
                 if (rowNum != 1) {
                     if (Constant.OPEN_CELL_STYLE) {
@@ -150,7 +156,6 @@ public class ExcelWriter {
 
             for (int i = 1; i <= dataSize; i++, rowNum++) {
                 R queryResult = data.get(i - 1);
-                Object convertResult = exportFunction.convert(queryResult);
                 if (rowNum > Constant.MAX_RECORD_COUNT_PEER_SHEET) {
                     if (Constant.OPEN_CELL_STYLE) {
                         sizeColumnWidth(sheet, propertyList.size());
@@ -163,7 +168,7 @@ public class ExcelWriter {
                 SXSSFRow row = sheet.createRow(rowNum);
                 for (int j = 0; j < propertyList.size(); j++) {
                     SXSSFCell cell = row.createCell(j);
-                    buildCellValue(cell, convertResult, propertyList.get(j));
+                    buildCellValue(cell, queryResult, propertyList.get(j));
                     calculateColumnWidth(cell, j);
                 }
                 if (nullCellCount == propertyList.size()) {
@@ -208,17 +213,16 @@ public class ExcelWriter {
     /**
      * 构建多Sheet Excel
      *
-     * @param param          param
+     * @param param          pagination param
      * @param exportFunction export
      * @param <R>            the type of param
-     * @param <T>            the class of Result
      * @return workbook
      * @throws InvocationTargetException e
      * @throws NoSuchMethodException     e
      * @throws ParseException            e
      * @throws IllegalAccessException    e
      */
-    public <T extends PageQueryParam, R> SXSSFWorkbook generateMultiSheetWorkbook(T param, ExportFunction<T, R> exportFunction) throws Exception {
+    public <R> SXSSFWorkbook generateMultiSheetWorkbook(PageQueryParam param, ExportFunction<R> exportFunction) throws Exception {
         int pageNo = 1;
         int sheetNo = 1;
         int rowNum = 1;
@@ -227,7 +231,7 @@ public class ExcelWriter {
         SXSSFSheet sheet = generateHeader(workbook, propertyList, excelEntity.getSheetName());
 
         while (true) {
-            List<R> data = exportFunction.pageQuery(param, pageNo);
+            List<R> data = exportFunction.apply(pageNo);
             if (data == null || data.isEmpty()) {
                 if (rowNum != 1) {
                     sizeColumnWidth(sheet, propertyList.size());
@@ -237,7 +241,6 @@ public class ExcelWriter {
             }
             for (int i = 1; i <= data.size(); i++, rowNum++) {
                 R queryResult = data.get(i - 1);
-                Object convertResult = exportFunction.convert(queryResult);
                 if (rowNum > excelHelper.getRecordCountPerSheet()) {
                     sizeColumnWidth(sheet, propertyList.size());
                     sheet = generateHeader(workbook, propertyList, excelEntity.getSheetName() + "_" + sheetNo);
@@ -248,7 +251,7 @@ public class ExcelWriter {
                 SXSSFRow bodyRow = sheet.createRow(rowNum);
                 for (int j = 0; j < propertyList.size(); j++) {
                     SXSSFCell cell = bodyRow.createCell(j);
-                    buildCellValue(cell, convertResult, propertyList.get(j));
+                    buildCellValue(cell, queryResult, propertyList.get(j));
                     calculateColumnWidth(cell, j);
                 }
                 if (nullCellCount == propertyList.size()) {

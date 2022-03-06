@@ -5,6 +5,9 @@ import com.sondertara.excel.common.Constant;
 import java.io.Serializable;
 
 
+/**
+ * @author SonderTara
+ */
 public class ExcelHelper implements Serializable {
     private Integer recordCountPerSheet;
     private Boolean openAutoColumWidth;
