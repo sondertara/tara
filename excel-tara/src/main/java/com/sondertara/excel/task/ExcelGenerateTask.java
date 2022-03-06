@@ -7,6 +7,7 @@ import com.sondertara.excel.entity.ExcelEntity;
 import com.sondertara.excel.entity.ExcelHelper;
 import com.sondertara.excel.entity.ExcelPropertyEntity;
 import com.sondertara.excel.entity.ExcelQueryEntity;
+import com.sondertara.excel.entity.PageQueryParam;
 import com.sondertara.excel.function.ExportFunction;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -32,33 +33,34 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * generate csv excel file
  *
- * @param <P> query param
- * @param <T> query result
+ * @param <T> query param
+ * @param <R> query result
  * @author huangxiaohu
  */
-public class ExcelGenerateTask<P, T> implements ExcelRunnable {
+public class ExcelGenerateTask<T extends PageQueryParam, R> implements ExcelRunnable {
     private static final Logger logger = LoggerFactory.getLogger(ExcelGenerateTask.class);
 
     private final AtomicBoolean flag = new AtomicBoolean(true);
     private final AtomicInteger page = new AtomicInteger(1);
 
 
-    private final P param;
+    private final T param;
 
-    private final ExportFunction<P, T> exportFunction;
+    private final ExportFunction<T, R> exportFunction;
 
-    private final BlockingQueue<ExcelQueryEntity<T>> queue;
+    private final BlockingQueue<ExcelQueryEntity<R>> queue;
     private final ExcelEntity excelEntity;
 
-    private final ExcelHelper helper;
+    private final String fileName;
 
-    public ExcelGenerateTask(P param, ExportFunction<P, T> exportFunction, ExcelEntity e, final ExcelHelper helper) {
+
+    public ExcelGenerateTask(T param, ExportFunction<T, R> exportFunction, ExcelEntity e, String fileName) {
         this.param = param;
         this.exportFunction = exportFunction;
         this.excelEntity = e;
-        this.helper = helper;
         queue = new LinkedBlockingQueue<>(8);
-        page.set(helper.getPageStart());
+        page.set(param.getPageStart());
+        this.fileName = fileName;
     }
 
     @Override
@@ -87,9 +89,9 @@ public class ExcelGenerateTask<P, T> implements ExcelRunnable {
                 await();
                 return;
             }
-            logger.info("start query pageSize[{}]", helper.getPageSize());
+            logger.info("start query pageSize[{}]", param.getPageSize());
             final int queryPage = page.getAndIncrement();
-            if (queryPage > helper.getPageEnd()) {
+            if (queryPage > param.getPageEnd()) {
                 logger.warn("page query end!");
                 super.isDone = true;
                 flag.set(false);
@@ -97,7 +99,7 @@ public class ExcelGenerateTask<P, T> implements ExcelRunnable {
                 return;
             }
             logger.info("start query page[{}]...", queryPage);
-            List<T> data = exportFunction.pageQuery(param, queryPage, helper.getPageSize());
+            List<R> data = exportFunction.pageQuery(param, queryPage);
             logger.info("end query page[{}]...", queryPage);
             if (data == null || data.isEmpty()) {
                 logger.warn("query data is empty,query exit !");
@@ -106,12 +108,12 @@ public class ExcelGenerateTask<P, T> implements ExcelRunnable {
                 await();
                 return;
             }
-            ExcelQueryEntity<T> entity = new ExcelQueryEntity<>();
+            ExcelQueryEntity<R> entity = new ExcelQueryEntity<>();
             entity.setData(data);
             entity.setPage(queryPage);
             queue.put(entity);
-            if (data.size() < helper.getPageSize()) {
-                logger.warn("current data  size is [{}],less than pageSize[{}],is the last page,query exit!", data.size(), helper.getPageSize());
+            if (data.size() < param.getPageSize()) {
+                logger.warn("current data  size is [{}],less than pageSize[{}],is the last page,query exit!", data.size(), param.getPageSize());
                 super.isDone = true;
                 flag.set(false);
                 await();
@@ -144,25 +146,24 @@ public class ExcelGenerateTask<P, T> implements ExcelRunnable {
                 await();
                 return;
             }
-            ExcelQueryEntity<T> excelQueryEntity = queue.poll(3000, TimeUnit.MILLISECONDS);
+            ExcelQueryEntity<R> excelQueryEntity = queue.poll(3000, TimeUnit.MILLISECONDS);
             if (null == excelQueryEntity) {
                 await();
                 return;
             }
 
-            logger.info("current dir is {}", helper.getWorkspace());
-
             logger.info("Data of page[{}] processing  is starting ......", excelQueryEntity.getPage());
             try {
-                File file = new File(helper.getWorkspace());
+                final String workPath = Constant.FILE_PATH + File.separator + fileName + File.separator;
+                File file = new File(workPath);
                 if (!file.exists()) {
                     file.mkdirs();
                 }
-                Appendable printWriter = new PrintWriter(helper.getWorkspace() + excelQueryEntity.getPage() + ".csv", Constant.CHARSET);
+                Appendable printWriter = new PrintWriter(workPath + excelQueryEntity.getPage() + ".csv", Constant.CHARSET);
                 CSVPrinter csvPrinter = CSVFormat.EXCEL.print(printWriter);
 
-                final List<T> list = excelQueryEntity.getData();
-                for (T data : list) {
+                final List<R> list = excelQueryEntity.getData();
+                for (R data : list) {
                     Object o = exportFunction.convert(data);
                     List<String> row = buildRow(o, excelEntity);
                     csvPrinter.printRecord(row);

@@ -1,7 +1,7 @@
 package com.sondertara;
 
 import com.alibaba.fastjson.JSON;
-import com.sondertara.excel.ExcelTara;
+import com.sondertara.excel.ExcelImportTara;
 import com.sondertara.excel.common.ExcelTaraTool;
 import com.sondertara.excel.entity.ErrorEntity;
 import com.sondertara.excel.function.ImportFunction;
@@ -22,15 +22,15 @@ import java.util.List;
  * @version 1.0
  * @since 1.0
  **/
-public class ExcelmportDemo {
-    private static final Logger logger = LoggerFactory.getLogger(ExcelmportDemo.class);
+public class ExcelImportDemo {
+    private static final Logger logger = LoggerFactory.getLogger(ExcelImportDemo.class);
 
     public void importTest(String filePath) throws Exception {
 
         File file = new File(filePath);
         final FileInputStream inputStream = new FileInputStream(file);
 
-        ExcelTara.of(ImportParam.class).handler(new ImportFunction<ImportParam>() {
+        ExcelImportTara.of(ImportParam.class).handler(new ImportFunction<ImportParam>() {
 
             /**
              * @param sheetIndex 当前执行的Sheet的索引, 从1开始

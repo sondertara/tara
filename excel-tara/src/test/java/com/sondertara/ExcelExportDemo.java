@@ -1,8 +1,7 @@
 package com.sondertara;
 
-import com.sondertara.common.util.FileUtils;
-import com.sondertara.excel.ExcelTara;
-import com.sondertara.excel.entity.ExcelHelper;
+import com.sondertara.excel.ExcelExportTara;
+import com.sondertara.excel.entity.PageQueryParam;
 import com.sondertara.excel.function.ExportFunction;
 import com.sondertara.model.UserDTO;
 import com.sondertara.model.UserInfoVo;
@@ -28,20 +27,26 @@ public class ExcelExportDemo {
     private final AtomicInteger atomicInteger = new AtomicInteger(0);
 
     public void exportCsvDemo() {
-        String path = ExcelTara.of(UserInfoVo.class).pagination(1, 5000, 200).handler(null, new ExportFunction<String, UserDTO>() {
-            @Override
-            public List<UserDTO> pageQuery(String param, int pageNum, int pageSize) {
 
+        PageQueryParam query = new PageQueryParam();
+        query.setPageStart(1);
+        query.setPageEnd(10);
+        query.setPageSize(1000);
+        String path = ExcelExportTara.of(UserInfoVo.class).query(query, new ExportFunction<PageQueryParam, UserDTO>() {
+            @Override
+            public List<UserDTO> pageQuery(PageQueryParam param, int pageNo) {
+
+                // query list data from db
                 List<UserDTO> list = new ArrayList<>(200);
                 for (int i = 0; i < 200; i++) {
                     UserDTO userDTO = new UserDTO();
 
                     userDTO.setA(i);
-                    userDTO.setN(pageNum + "测试姓名" + i);
+                    userDTO.setN(pageNo + "测试姓名" + i);
                     userDTO.setD("测试地址" + i);
                     list.add(userDTO);
 
-                    if (pageNum == 5 && i == 150) {
+                    if (pageNo == 5 && i == 150) {
                         break;
                     }
                 }
@@ -51,6 +56,7 @@ public class ExcelExportDemo {
 
             @Override
             public UserInfoVo convert(UserDTO queryResult) {
+                // convert query result
                 UserInfoVo userInfoVo = new UserInfoVo();
                 userInfoVo.setAddress(queryResult.getD());
                 userInfoVo.setAge(queryResult.getA());

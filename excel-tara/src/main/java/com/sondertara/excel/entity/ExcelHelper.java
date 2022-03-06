@@ -1,89 +1,77 @@
 package com.sondertara.excel.entity;
 
-
-import lombok.Data;
+import com.sondertara.excel.common.Constant;
 
 import java.io.Serializable;
 
-/**
- * @author huangxiaohu
- */
-@Data
+
 public class ExcelHelper implements Serializable {
-
-    private ExcelHelper() {
-    }
-
-    /***
-     * 开始页码，不填默认是1
-     */
-    private Integer pageStart;
-    /**
-     * 截止页码，为空会导出所有查询的数据
-     */
-    private Integer pageEnd;
-    /**
-     * 分页大小默认2000
-     */
-    private Integer pageSize;
-
-    /**
-     * the Excel workspace
-     */
-    private String workspace;
-
-
-    /**
-     * enable open cell auto column width ,to keep high performance has removed.
-     */
+    private Integer recordCountPerSheet;
     private Boolean openAutoColumWidth;
+    private Integer rowAccessWindowSize;
 
-    public ExcelHelper(Integer pageStart, Integer pageEnd, Integer pageSize, Boolean openAutoColumWidth) {
-        this.pageStart = pageStart;
-        this.pageEnd = pageEnd;
-        this.pageSize = pageSize;
+    public static ExcelHelper.ExcelHelperBuilder builder() {
+        return new ExcelHelper.ExcelHelperBuilder();
+    }
+
+    public Integer getRecordCountPerSheet() {
+        return this.recordCountPerSheet;
+    }
+
+    public Boolean getOpenAutoColumWidth() {
+        return this.openAutoColumWidth;
+    }
+
+    public Integer getRowAccessWindowSize() {
+        return this.rowAccessWindowSize;
+    }
+
+    public ExcelHelper(Integer recordCountPerSheet, Boolean openAutoColumWidth, Integer rowAccessWindowSize) {
+        this.recordCountPerSheet = recordCountPerSheet;
         this.openAutoColumWidth = openAutoColumWidth;
+        this.rowAccessWindowSize = rowAccessWindowSize;
     }
 
+    public static class ExcelHelperBuilder {
+        private Integer recordCountPerSheet;
+        private Boolean openAutoColumWidth;
+        private Integer rowAccessWindowSize;
 
-    public static Builder builder() {
-        return new Builder();
-    }
+        ExcelHelperBuilder() {
+        }
 
-    public static class Builder {
+        public ExcelHelper.ExcelHelperBuilder recordCountPerSheet(Integer recordCountPerSheet) {
+            this.recordCountPerSheet = recordCountPerSheet;
+            return this;
+        }
 
-        private Integer pageStart;
-
-        private Integer pageEnd;
-
-        private Integer pageSize;
-
-        private Boolean openAutoColumWidth = false;
-
-
-        public Builder openAutoColumWidth(final Boolean openAutoColumWidth) {
+        public ExcelHelper.ExcelHelperBuilder openAutoColumWidth(Boolean openAutoColumWidth) {
             this.openAutoColumWidth = openAutoColumWidth;
             return this;
         }
 
-
-        public Builder pageStart(final Integer pageStart) {
-            this.pageStart = pageStart;
-            return this;
-        }
-
-        public Builder pageEnd(final Integer pageEnd) {
-            this.pageEnd = pageEnd;
-            return this;
-        }
-
-        public Builder pageSize(final Integer pageSize) {
-            this.pageSize = pageSize;
+        public ExcelHelper.ExcelHelperBuilder rowAccessWindowSize(Integer rowAccessWindowSize) {
+            this.rowAccessWindowSize = rowAccessWindowSize;
             return this;
         }
 
         public ExcelHelper build() {
-            return new ExcelHelper(this.pageStart, this.pageEnd, this.pageSize, this.openAutoColumWidth);
+
+            if (this.openAutoColumWidth == null) {
+                this.openAutoColumWidth = Constant.OPEN_AUTO_COLUMN_WIDTH;
+            }
+            if (this.rowAccessWindowSize == null) {
+                this.rowAccessWindowSize = Constant.DEFAULT_ROW_ACCESS_WINDOW_SIZE;
+            }
+            if (this.recordCountPerSheet == null) {
+                this.recordCountPerSheet = Constant.DEFAULT_RECORD_COUNT_PEER_SHEET;
+            }
+            return new ExcelHelper(this.recordCountPerSheet, this.openAutoColumWidth, this.rowAccessWindowSize);
+        }
+
+        @Override
+        public String toString() {
+            return "ExcelHelper.ExcelHelperBuilder(recordCountPerSheet=" + this.recordCountPerSheet + ", openAutoColumWidth=" + this.openAutoColumWidth + ", rowAccessWindowSize=" + this.rowAccessWindowSize + ")";
         }
     }
 }

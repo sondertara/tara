@@ -5,7 +5,9 @@ import com.sondertara.common.util.LocalDateTimeUtils;
 import com.sondertara.common.util.StringUtils;
 import com.sondertara.excel.common.Constant;
 import com.sondertara.excel.entity.ExcelEntity;
+import com.sondertara.excel.entity.ExcelHelper;
 import com.sondertara.excel.entity.ExcelPropertyEntity;
+import com.sondertara.excel.entity.PageQueryParam;
 import com.sondertara.excel.function.ExportFunction;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -16,7 +18,6 @@ import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.xssf.streaming.SXSSFCell;
 import org.apache.poi.xssf.streaming.SXSSFRow;
@@ -51,32 +52,28 @@ import java.util.stream.Collectors;
 public class ExcelWriter {
 
     private static final Logger logger = LoggerFactory.getLogger(ExcelReader.class);
+    private final ExcelHelper excelHelper;
 
-    private Integer rowAccessWindowSize;
     private final ExcelEntity excelEntity;
-    private Integer pageSize;
     private Integer nullCellCount = 0;
-    private Integer recordCountPerSheet;
     private XSSFCellStyle headCellStyle;
     private final Map<Integer, Integer> columnWidthMap = new HashMap<Integer, Integer>();
-    private String workPath;
 
 
-    public ExcelWriter(ExcelEntity excelEntity, Integer pageSize, Integer rowAccessWindowSize, Integer recordCountPerSheet) {
+    public ExcelWriter(ExcelEntity excelEntity) {
         this.excelEntity = excelEntity;
-        this.pageSize = pageSize;
-        this.rowAccessWindowSize = rowAccessWindowSize;
-        this.recordCountPerSheet = recordCountPerSheet;
+        this.excelHelper = ExcelHelper.builder().build();
     }
 
-    public ExcelWriter(ExcelEntity excelEntity, String workPath) {
+    public ExcelWriter(ExcelEntity excelEntity, ExcelHelper excelHelper) {
         this.excelEntity = excelEntity;
-        this.workPath = workPath;
-
+        this.excelHelper = excelHelper;
     }
+
 
     public void generateCsv(String fileName) {
         try {
+            final String workPath = Constant.FILE_PATH + File.separator + fileName + File.separator;
             File path = new File(workPath);
 
             List<File> fileList = new ArrayList<File>();
@@ -96,8 +93,7 @@ public class ExcelWriter {
                     csvFile.createNewFile();
                 }
                 Appendable printWriter = new PrintWriter(csvFile, Constant.CHARSET);
-                final List<String> excelColNames = excelEntity.getPropertyList().stream().map(ExcelPropertyEntity::getColumnName).collect(Collectors.toList());
-                CSVPrinter csvPrinter = CSVFormat.EXCEL.withHeader(excelColNames.toArray(new String[0])).print(printWriter);
+                CSVPrinter csvPrinter = CSVFormat.EXCEL.builder().setHeader(excelEntity.getPropertyList().stream().map(ExcelPropertyEntity::getColumnName).toArray(String[]::new)).build().print(printWriter);
 
                 csvPrinter.flush();
                 csvPrinter.close();
@@ -121,29 +117,26 @@ public class ExcelWriter {
     /**
      * @param param          query param
      * @param exportFunction export function
-     * @param <P>            query class
-     * @param <T>            export pojo
+     * @param <T>            query class
+     * @param <R>            export pojo
      * @return workbook
      * @throws InvocationTargetException e
      * @throws NoSuchMethodException     e
      * @throws ParseException            e
      * @throws IllegalAccessException    e
      */
-    public <P, T> SXSSFWorkbook generateWorkbook(P param, ExportFunction<P, T> exportFunction) throws Exception {
-        SXSSFWorkbook workbook = new SXSSFWorkbook(rowAccessWindowSize);
+    public <T extends PageQueryParam, R> SXSSFWorkbook generateWorkbook(T param, ExportFunction<T, R> exportFunction) throws Exception {
+        SXSSFWorkbook workbook = new SXSSFWorkbook(excelHelper.getRowAccessWindowSize());
         int sheetNo = 1;
         int rowNum = 1;
         List<ExcelPropertyEntity> propertyList = excelEntity.getPropertyList();
         //generate first row head.
         SXSSFSheet sheet = generateHeader(workbook, propertyList, excelEntity.getSheetName());
 
-        List<Sheet> sheets = new ArrayList<>();
-        sheets.add(sheet);
-
         // generate data rows
         int firstPageNo = 1;
         while (true) {
-            List<T> data = exportFunction.pageQuery(param, firstPageNo, pageSize);
+            List<R> data = exportFunction.pageQuery(param, firstPageNo);
             if (data == null || data.isEmpty()) {
                 if (rowNum != 1) {
                     if (Constant.OPEN_CELL_STYLE) {
@@ -156,7 +149,7 @@ public class ExcelWriter {
             int dataSize = data.size();
 
             for (int i = 1; i <= dataSize; i++, rowNum++) {
-                T queryResult = data.get(i - 1);
+                R queryResult = data.get(i - 1);
                 Object convertResult = exportFunction.convert(queryResult);
                 if (rowNum > Constant.MAX_RECORD_COUNT_PEER_SHEET) {
                     if (Constant.OPEN_CELL_STYLE) {
@@ -181,9 +174,9 @@ public class ExcelWriter {
                 nullCellCount = 0;
 
             }
-            if (data.size() < pageSize) {
+            if (data.size() < param.getPageSize()) {
                 sizeColumnWidth(sheet, propertyList.size());
-                logger.warn("current query data size is [{}],less than pageSize[{}],is the last page,query exit!", data.size(), pageSize);
+                logger.warn("current query data size is [{}],less than pageSize[{}],is the last page,query exit!", data.size(), param.getPageSize());
                 break;
             }
             firstPageNo++;
@@ -197,7 +190,7 @@ public class ExcelWriter {
      * @return workbook
      */
     public SXSSFWorkbook generateTemplateWorkbook() {
-        SXSSFWorkbook workbook = new SXSSFWorkbook(rowAccessWindowSize);
+        SXSSFWorkbook workbook = new SXSSFWorkbook(excelHelper.getRowAccessWindowSize());
 
         List<ExcelPropertyEntity> propertyList = excelEntity.getPropertyList();
         SXSSFSheet sheet = generateHeader(workbook, propertyList, excelEntity.getSheetName());
@@ -225,16 +218,16 @@ public class ExcelWriter {
      * @throws ParseException            e
      * @throws IllegalAccessException    e
      */
-    public <R, T> SXSSFWorkbook generateMultiSheetWorkbook(R param, ExportFunction<R, T> exportFunction) throws Exception {
+    public <T extends PageQueryParam, R> SXSSFWorkbook generateMultiSheetWorkbook(T param, ExportFunction<T, R> exportFunction) throws Exception {
         int pageNo = 1;
         int sheetNo = 1;
         int rowNum = 1;
-        SXSSFWorkbook workbook = new SXSSFWorkbook(rowAccessWindowSize);
+        SXSSFWorkbook workbook = new SXSSFWorkbook(excelHelper.getRowAccessWindowSize());
         List<ExcelPropertyEntity> propertyList = excelEntity.getPropertyList();
         SXSSFSheet sheet = generateHeader(workbook, propertyList, excelEntity.getSheetName());
 
         while (true) {
-            List<T> data = exportFunction.pageQuery(param, pageNo, pageSize);
+            List<R> data = exportFunction.pageQuery(param, pageNo);
             if (data == null || data.isEmpty()) {
                 if (rowNum != 1) {
                     sizeColumnWidth(sheet, propertyList.size());
@@ -243,9 +236,9 @@ public class ExcelWriter {
                 break;
             }
             for (int i = 1; i <= data.size(); i++, rowNum++) {
-                T queryResult = data.get(i - 1);
+                R queryResult = data.get(i - 1);
                 Object convertResult = exportFunction.convert(queryResult);
-                if (rowNum > recordCountPerSheet) {
+                if (rowNum > excelHelper.getRecordCountPerSheet()) {
                     sizeColumnWidth(sheet, propertyList.size());
                     sheet = generateHeader(workbook, propertyList, excelEntity.getSheetName() + "_" + sheetNo);
                     sheetNo++;
@@ -265,9 +258,9 @@ public class ExcelWriter {
                 }
                 nullCellCount = 0;
             }
-            if (data.size() < pageSize) {
+            if (data.size() < param.getPageSize()) {
                 sizeColumnWidth(sheet, propertyList.size());
-                logger.warn("current query data size is [{}],less than pageSize[{}],is the last page,query exit!", data.size(), pageSize);
+                logger.warn("current query data size is [{}],less than pageSize[{}],is the last page,query exit!", data.size(), param.getPageSize());
                 break;
             }
             pageNo++;

@@ -103,7 +103,7 @@ public class ExcelTaraTool {
             if (CollectionUtils.isEmpty(title)) {
                 csvPrinter = CSVFormat.EXCEL.print(writer);
             } else {
-                csvPrinter = CSVFormat.EXCEL.withHeader(title.toArray(new String[title.size()])).print(writer);
+                csvPrinter = CSVFormat.EXCEL.builder().setHeader(title.toArray(new String[0])).build().print(writer);
             }
             printerMap = Maps.newHashMap();
             printerMap.put(fileName, csvPrinter);
@@ -117,7 +117,7 @@ public class ExcelTaraTool {
                 if (CollectionUtils.isEmpty(title)) {
                     csvPrinter = CSVFormat.EXCEL.print(writer);
                 } else {
-                    csvPrinter = CSVFormat.EXCEL.withHeader(title.toArray(new String[title.size()])).print(writer);
+                    csvPrinter = CSVFormat.EXCEL.builder().setHeader(title.toArray(new String[0])).build().print(writer);
                 }
 
                 printerMap.put(fileName, csvPrinter);

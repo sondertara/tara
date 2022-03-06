@@ -3,16 +3,16 @@ package com.sondertara.excel;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.sondertara.common.util.StringUtils;
-import com.sondertara.excel.annotation.ExcelImportFiled;
+import com.sondertara.excel.annotation.ExcelExport;
 import com.sondertara.excel.annotation.ExcelExportField;
+import com.sondertara.excel.annotation.ExcelImportFiled;
 import com.sondertara.excel.common.Constant;
 import com.sondertara.excel.entity.ExcelEntity;
 import com.sondertara.excel.entity.ExcelHelper;
+import com.sondertara.excel.entity.PageQueryParam;
 import com.sondertara.excel.exception.ExcelTaraException;
 import com.sondertara.excel.factory.ExcelMappingFactory;
 import com.sondertara.excel.function.ExportFunction;
-import com.sondertara.excel.function.ImportFunction;
-import com.sondertara.excel.parser.ExcelReader;
 import com.sondertara.excel.parser.ExcelWriter;
 import com.sondertara.excel.task.ExcelGenerateTask;
 import com.sondertara.excel.task.ExcelRunnable;
@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.util.concurrent.CyclicBarrier;
@@ -38,9 +37,9 @@ import java.util.concurrent.TimeUnit;
  *
  * @author huangxiaohu
  */
-public class ExcelTara {
+public class ExcelExportTara<U> {
 
-    private static final Logger logger = LoggerFactory.getLogger(ExcelTara.class);
+    private static final Logger logger = LoggerFactory.getLogger(ExcelExportTara.class);
 
     /**
      * task pool
@@ -48,13 +47,10 @@ public class ExcelTara {
     private ThreadPoolExecutor taskPool;
 
 
-    private Object param;
+    private PageQueryParam param;
 
     @SuppressWarnings("rawtypes")
     private ExportFunction exportFunction;
-
-    @SuppressWarnings("rawtypes")
-    private ImportFunction importFunction;
 
 
     /**
@@ -64,64 +60,40 @@ public class ExcelTara {
      * <p>
      * {@link ExcelExportField}
      */
-    private Class<?> excelClass;
-
-    /**
-     * row cached in memory, default is 200 {@link Constant#DEFAULT_ROW_ACCESS_WINDOW_SIZE}
-     */
-    private Integer rowAccessWindowSize;
-    /**
-     * pre sheet rows count,when export large data will generate multi sheet.
-     */
-    private Integer recordCountPerSheet;
-
+    private Class<U> excelClass;
     private ExcelHelper excelHelper;
 
-
-    private ExcelTara() {
-    }
-
-
-    protected ExcelTara(Class<?> clazz) {
-        this(clazz, null, null, null);
+    private ExcelExportTara() {
     }
 
     /**
      * the base constructor
      */
-    protected ExcelTara(Class<?> excelClass, Integer rowAccessWindowSize, Integer recordCountPerSheet, Boolean openAutoColumWidth) {
+    protected ExcelExportTara(Class<U> excelClass) {
 
         this.excelClass = excelClass;
 
-        this.rowAccessWindowSize = rowAccessWindowSize;
-        this.recordCountPerSheet = recordCountPerSheet;
 
         ThreadFactory build = new ThreadFactoryBuilder().setDaemon(true).setNameFormat("Excel-worker-%d").build();
         this.taskPool = new ThreadPoolExecutor(8, 16, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<>(10), build, new ThreadPoolExecutor.CallerRunsPolicy());
     }
 
 
-    public static ExcelTara of(Class<?> excelClass) {
-        return new ExcelTara(excelClass);
+    public static <U> ExcelExportTara<U> of(Class<U> excelClass) {
+        return new ExcelExportTara<U>(excelClass);
     }
 
-
-    public ExcelTara pagination(Integer pageStart, Integer pageEnd, Integer pageSize) {
-        this.excelHelper = ExcelHelper.builder().pageSize(pageSize).pageStart(pageStart).pageEnd(pageEnd).build();
+    public ExcelExportTara<U> customizer(ExcelHelper excelHelper) {
+        this.excelHelper = excelHelper;
         return this;
     }
 
-    public <R, EF> ExcelTara handler(R param, ExportFunction<R, EF> exportFunction) {
+
+    public <T extends PageQueryParam, R> ExcelExportTara<U> query(T param, ExportFunction<T, R> exportFunction) {
         this.param = param;
         this.exportFunction = exportFunction;
         return this;
     }
-
-    public <R> ExcelTara handler(ImportFunction<R> importFunction) {
-        this.importFunction = importFunction;
-        return this;
-    }
-
 
     /**
      * export to http response with browser
@@ -172,10 +144,8 @@ public class ExcelTara {
         try {
             verifyAndBuildParams();
             ExcelEntity excelMapping = ExcelMappingFactory.loadExportExcelClass(excelClass);
-            final String workPath = Constant.FILE_PATH + File.separator + fileName + File.separator;
-            excelHelper.setWorkspace(workPath);
             CyclicBarrier cyclicBarrier = new CyclicBarrier(Constant.PRODUCER_COUNT + Constant.CONSUMER_COUNT + 1);
-            ExcelRunnable excelRunnable = new ExcelGenerateTask<>(param, exportFunction, excelMapping, excelHelper);
+            ExcelRunnable excelRunnable = new ExcelGenerateTask(param, exportFunction, excelMapping, fileName);
             for (int i = 0; i < Constant.PRODUCER_COUNT; i++) {
                 taskPool.submit((excelRunnable.newRunnableProducer(cyclicBarrier)));
             }
@@ -185,10 +155,11 @@ public class ExcelTara {
             cyclicBarrier.await();
             logger.info("CSV exporting is merging...");
             //合并文件
-            ExcelWriter excelWriter = new ExcelWriter(excelMapping, workPath);
+            ExcelWriter excelWriter = new ExcelWriter(excelMapping);
             excelWriter.generateCsv(fileName);
             logger.info("CSV exporting has been completed...");
             //返回文件path
+            final String workPath = Constant.FILE_PATH + File.separator + fileName + File.separator;
             return workPath + fileName + ".csv";
         } catch (Exception e) {
             throw new ExcelTaraException(e);
@@ -266,7 +237,7 @@ public class ExcelTara {
             try {
                 verifyAndBuildParams();
                 ExcelEntity excelMapping = ExcelMappingFactory.loadExportExcelClass(excelClass);
-                ExcelWriter excelWriter = new ExcelWriter(excelMapping, excelHelper.getPageSize(), rowAccessWindowSize, recordCountPerSheet);
+                ExcelWriter excelWriter = new ExcelWriter(excelMapping);
                 sxssfWorkbook = excelWriter.generateTemplateWorkbook();
                 download(sxssfWorkbook, response, URLEncoder.encode(fileName + ".xlsx", "UTF-8"));
             } finally {
@@ -283,27 +254,6 @@ public class ExcelTara {
     }
 
     /**
-     * import all Excel sheet
-     */
-    public void readExcel(Boolean enableIndex, InputStream inputStream) {
-        try {
-            if (importFunction == null) {
-                throw new ExcelTaraException("excel read handler importFunction is null!");
-            }
-            if (inputStream == null) {
-                throw new ExcelTaraException("inputStream is null");
-            }
-
-            ExcelEntity excelMapping = ExcelMappingFactory.loadImportExcelClass(excelClass);
-            ExcelReader excelReader = new ExcelReader(excelClass, excelMapping, importFunction, enableIndex);
-            excelReader.process(inputStream);
-        } catch (Exception e) {
-            throw new ExcelTaraException(e);
-        }
-
-    }
-
-    /**
      * generate one sheet.
      *
      * @param <R> query class
@@ -315,7 +265,7 @@ public class ExcelTara {
     private <R, F> SXSSFWorkbook commonSingleSheet() throws Exception {
         verifyAndBuildParams();
         ExcelEntity excelMapping = ExcelMappingFactory.loadExportExcelClass(excelClass);
-        ExcelWriter excelWriter = new ExcelWriter(excelMapping, excelHelper.getPageSize(), rowAccessWindowSize, recordCountPerSheet);
+        ExcelWriter excelWriter = new ExcelWriter(excelMapping, excelHelper);
         return excelWriter.generateWorkbook(param, exportFunction);
     }
 
@@ -323,7 +273,7 @@ public class ExcelTara {
     private <R, F> SXSSFWorkbook commonMultiSheet() throws Exception {
         verifyAndBuildParams();
         ExcelEntity excelMapping = ExcelMappingFactory.loadExportExcelClass(excelClass);
-        ExcelWriter excelWriter = new ExcelWriter(excelMapping, excelHelper.getPageSize(), rowAccessWindowSize, recordCountPerSheet);
+        ExcelWriter excelWriter = new ExcelWriter(excelMapping, excelHelper);
         return excelWriter.generateMultiSheetWorkbook(param, exportFunction);
     }
 
@@ -356,26 +306,6 @@ public class ExcelTara {
     private void verifyAndBuildParams() {
         if (excelClass == null) {
             throw new ExcelTaraException("param excelClass is null");
-        }
-        if (excelHelper == null) {
-            throw new ExcelTaraException("param excelHelper is null");
-        }
-
-
-        if (StringUtils.isEmpty(excelHelper.getWorkspace())) {
-            excelHelper.setWorkspace("default_export");
-        }
-        if (excelHelper.getPageSize() == null) {
-            excelHelper.setPageSize(Constant.DEFAULT_PAGE_SIZE);
-        }
-        if (excelHelper.getPageStart() == null) {
-            excelHelper.setPageStart(1);
-        }
-        if (excelHelper.getPageEnd() == null) {
-            excelHelper.setPageEnd(Integer.MAX_VALUE);
-        }
-        if (this.rowAccessWindowSize == null) {
-            this.rowAccessWindowSize = Constant.DEFAULT_ROW_ACCESS_WINDOW_SIZE;
         }
     }
 }

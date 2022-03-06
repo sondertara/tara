@@ -1,32 +1,33 @@
-
 package com.sondertara.excel.function;
+
+import com.sondertara.excel.entity.PageQueryParam;
 
 import java.util.List;
 
 /**
  * 分页查询
  *
- * @param <P>
  * @param <T>
+ * @param <R>
+ * @param <U>
  * @author huangxiaohu
  */
-public interface ExportFunction<P, T> {
+public interface ExportFunction<T extends PageQueryParam, R> {
     /**
      * 分页查询方法
      *
-     * @param param
-     * @param pageNum
-     * @param pageSize
+     * @param param    query param
+     * @param pageNo   current page no
      * @return 查询结果
      */
-    List<T> pageQuery(P param, int pageNum, int pageSize);
+    List<R> pageQuery(T param, int pageNo);
 
     /**
      * 集合内对象转换
      *
-     * @param queryResult
-     * @return 导出pojo
+     * @param queryResult the query result
+     * @return the export data
      */
-    Object convert(T queryResult);
+    Object convert(R queryResult);
 
 }
