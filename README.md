@@ -238,4 +238,12 @@ public class ExcelmportDemo {
 
 My email :814494432@qq.com / xhhuangchn@outlook.com
 
+## JetBrains support
+
+We graciously acknowledge the support of [JetBrains](https://www.jetbrains.com/community/opensource/#support?from=tara)
+which enables us to use the professional version
+of IntelliJ IDEA for developing **Friendly**.
+
+[![JetBrains](https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png)](https://www.jetbrains.com/community/opensource/#support?from=tara)
+
 
