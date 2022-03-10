@@ -230,9 +230,9 @@ public class ExcelmportDemo {
 ### TODO
 
 - [x] `ExcelExportField` 注解支持样式
-- [x] 模板导出Excel
-- [x] 简易导入导出数据,不使用注解
-- [x] 代码注释和性能优化
+- [ ] 模板导出Excel
+- [ ] 简易导入导出数据,不使用注解
+- [ ] 代码注释和性能优化
 
 ## Contact
 
