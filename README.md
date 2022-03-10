@@ -9,9 +9,7 @@ Tara是一个纯java项目,包括常用util工具类和excel处理两个模块
 
 ## System Requirements
 
-- Language: Java 8
-- Environment: MacOS, Windows,Linux
--
+- Language: Java 8+
 
 ## Quick Start
 
