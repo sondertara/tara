@@ -244,5 +244,4 @@ We graciously acknowledge the support of [JetBrains](https://www.jetbrains.com/c
 which enables us to use the professional version
 of IntelliJ IDEA for developing **Friendly**.
 
-[![JetBrains Logo (Main) logo](docs/assets/jb_beam.png)](https://www.jetbrains.com/community/opensource/#support?from=tara)]
-
+[![JetBrains Logo (Main) logo](docs/assets/jb_beam.png)](https://www.jetbrains.com/community/opensource/#support?from=tara)
