@@ -27,7 +27,9 @@ public class LocalDateTimeUtils {
     private static final Logger log = LoggerFactory.getLogger(LocalDateTimeUtils.class);
 
 
-    private static final String PATTERN = "yyyy-MM-dd HH:mm:ss";
+    public static final String DATE_TIME_FORMATTER = "yyyy-MM-dd HH:mm:ss";
+    public static final String DATE_TIME_MILLS_FORMATTER = "yyyy-MM-dd HH:mm:ss.SSS";
+    public static final String DATE_FORMATTER = "yyyy-MM-dd";
 
 
     private static final LoadingCache<String, DateTimeFormatter> LOAD_CACHE = CacheBuilder.newBuilder().maximumSize(16).build(new CacheLoader<String, DateTimeFormatter>() {
@@ -36,9 +38,6 @@ public class LocalDateTimeUtils {
             return DateTimeFormatter.ofPattern(pattern);
         }
     });
-    private static final String DATE_TIME_FORMATTER = "yyyy-MM-dd HH:mm:ss";
-    private static final String DATE_TIME_MILLS_FORMATTER = "yyyy-MM-dd HH:mm:ss.SSS";
-    private static final String DATE_FORMATTER = "yyyy-MM-dd";
 
     public static String getNow() {
         return now(DATE_TIME_FORMATTER);
