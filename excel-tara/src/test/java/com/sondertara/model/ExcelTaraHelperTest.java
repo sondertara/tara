@@ -1,6 +1,6 @@
 package com.sondertara.model;
 
-import com.sondertara.excel.common.ExcelTaraTool;
+import com.sondertara.excel.common.ExcelTaraHelper;
 import com.sondertara.excel.entity.ErrorEntity;
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +15,7 @@ import java.util.List;
  * @version 1.0
  * @since 1.0
  **/
-public class ExcelTaraToolTest {
+public class ExcelTaraHelperTest {
 
     @Test
     public void test() {
@@ -25,16 +25,16 @@ public class ExcelTaraToolTest {
             public void run() {
                 ErrorEntity errorEntity = ErrorEntity.builder().errorMessage("test")
                         .cellIndex(1).cellValue("66633").columnName("hahah111").rowIndex(1).sheetIndex(1).build();
-                ExcelTaraTool.addErrorEntity(errorEntity);
+                ExcelTaraHelper.addErrorEntity(errorEntity);
 
-                List<List<String>> records = ExcelTaraTool.getErrorEntityRecords();
+                List<List<String>> records = ExcelTaraHelper.getErrorEntityRecords();
 
-                ExcelTaraTool.writeRecords("hahah.csv", records);
+                ExcelTaraHelper.writeRecords("hahah.csv", records);
 
-                ExcelTaraTool.writeRecords("test22.csv", records);
+                ExcelTaraHelper.writeRecords("test22.csv", records);
 
-                ExcelTaraTool.closeAllPrinter();
-                ExcelTaraTool.getWorkFile("test22.csv");
+                ExcelTaraHelper.closeAllPrinter();
+                ExcelTaraHelper.getWorkFile("test22.csv");
 
             }
         }).start();

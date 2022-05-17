@@ -29,9 +29,9 @@ import static com.sondertara.excel.common.Constant.FILE_STORAGE_PREFIX;
  * @version 1.0
  * @since 1.0
  **/
-public class ExcelTaraTool {
+public class ExcelTaraHelper {
 
-    private static final Logger logger = LoggerFactory.getLogger(ExcelTaraTool.class);
+    private static final Logger logger = LoggerFactory.getLogger(ExcelTaraHelper.class);
     public static final String WORKSPACE = System.getProperty("user.dir") + File.separator + FILE_STORAGE_PREFIX;
 
     private static final ThreadLocal<List<List<String>>> errorEntityRecordsLocal = new ThreadLocal<>();

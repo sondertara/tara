@@ -61,7 +61,7 @@ public class ExcelExportTara<U> {
     private Class<U> excelClass;
     private ExcelHelper excelHelper;
 
-    private ExcelExportTara() {
+    protected ExcelExportTara() {
     }
 
     /**
@@ -70,14 +70,12 @@ public class ExcelExportTara<U> {
     protected ExcelExportTara(Class<U> excelClass) {
 
         this.excelClass = excelClass;
-
-
         ThreadFactory build = new ThreadFactoryBuilder().setDaemon(true).setNameFormat("Excel-worker-%d").build();
         this.taskPool = new ThreadPoolExecutor(8, 16, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<>(10), build, new ThreadPoolExecutor.CallerRunsPolicy());
     }
 
 
-    public static <U> ExcelExportTara<U> of(Class<U> excelClass) {
+    public <U> ExcelExportTara<U> of(Class<U> excelClass) {
         return new ExcelExportTara<>(excelClass);
     }
 
@@ -86,8 +84,12 @@ public class ExcelExportTara<U> {
         return this;
     }
 
-    public <R> ExcelExportTara<U> query(PageQueryParam param, ExportFunction<R> exportFunction) {
+    public ExcelExportTara withQuery(PageQueryParam param) {
         this.param = param;
+        return this;
+    }
+
+    public <R> ExcelExportTara<U> doQuery(ExportFunction<R> exportFunction) {
         this.exportFunction = exportFunction;
         return this;
     }

@@ -5,7 +5,7 @@ import com.sondertara.excel.annotation.ExcelExportField;
 import com.sondertara.excel.entity.ExcelEntity;
 import com.sondertara.excel.exception.ExcelTaraException;
 import com.sondertara.excel.factory.ExcelMappingFactory;
-import com.sondertara.excel.function.ImportFunction;
+import com.sondertara.excel.parser.ExcelReadHandler;
 import com.sondertara.excel.parser.ExcelReader;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.slf4j.Logger;
@@ -25,12 +25,6 @@ import java.io.OutputStream;
 public class ExcelImportTara {
 
     private static final Logger logger = LoggerFactory.getLogger(ExcelImportTara.class);
-
-
-    @SuppressWarnings("rawtypes")
-    private ImportFunction importFunction;
-
-
     /**
      * the class to work
      * <p>
@@ -40,8 +34,10 @@ public class ExcelImportTara {
      */
     private Class<?> excelClass;
 
+    private boolean enableIndex = false;
 
-    private ExcelImportTara() {
+
+    protected ExcelImportTara() {
     }
 
 
@@ -50,14 +46,14 @@ public class ExcelImportTara {
     }
 
 
-    public static ExcelImportTara of(Class<?> excelClass) {
-        return new ExcelImportTara(excelClass);
+    public ExcelImportTara of(Class<?> excelClass) {
+        this.excelClass = excelClass;
+        return this;
     }
 
 
-
-    public <R> ExcelImportTara handler(ImportFunction<R> importFunction) {
-        this.importFunction = importFunction;
+    public ExcelImportTara enableIndex(boolean enableIndex) {
+        this.enableIndex = enableIndex;
         return this;
     }
 
@@ -65,18 +61,15 @@ public class ExcelImportTara {
     /**
      * import all Excel sheet
      */
-    public void readExcel(Boolean enableIndex, InputStream inputStream) {
+    public ExcelReadHandler readExcel(InputStream inputStream) {
         try {
-            if (importFunction == null) {
-                throw new ExcelTaraException("excel read handler importFunction is null!");
-            }
             if (inputStream == null) {
                 throw new ExcelTaraException("inputStream is null");
             }
 
             ExcelEntity excelMapping = ExcelMappingFactory.loadImportExcelClass(excelClass);
-            ExcelReader excelReader = new ExcelReader(excelClass, excelMapping, importFunction, enableIndex);
-            excelReader.process(inputStream);
+            ExcelReader excelReader = new ExcelReader(excelClass, excelMapping, 1, enableIndex);
+            return new ExcelReadHandler(excelReader, inputStream);
         } catch (Exception e) {
             throw new ExcelTaraException(e);
         }

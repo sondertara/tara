@@ -13,7 +13,8 @@ import com.sondertara.excel.entity.ExcelPropertyEntity;
 import com.sondertara.excel.enums.FieldRangeType;
 import com.sondertara.excel.exception.AllEmptyRowException;
 import com.sondertara.excel.exception.ExcelTaraException;
-import com.sondertara.excel.function.ImportFunction;
+import com.sondertara.excel.function.ImportErrorResolver;
+import com.sondertara.excel.function.ImportRowParser;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.usermodel.BuiltinFormats;
@@ -97,10 +98,6 @@ public class ExcelReader extends DefaultHandler {
      */
     private ExcelEntity excelMapping;
     /**
-     * import function
-     */
-    private ImportFunction importFunction;
-    /**
      * class which will parse data
      */
     private Class excelClass;
@@ -135,26 +132,28 @@ public class ExcelReader extends DefaultHandler {
     private short formatIndex;
     private String formatString;
 
+    private ImportRowParser importRowParser;
 
-    public ExcelReader(Class entityClass,
-                       ExcelEntity excelMapping,
-                       ImportFunction importFunction, Boolean enableIndex) {
-        this(entityClass, excelMapping, 1, importFunction, enableIndex);
-    }
+    private ImportErrorResolver importErrorResolver;
 
-    public ExcelReader(Class entityClass,
-                       ExcelEntity excelMapping,
-                       Integer beginReadRowIndex,
-                       ImportFunction importFunction, Boolean enableIndex) {
+    public ExcelReader(Class entityClass, ExcelEntity excelMapping, Integer beginReadRowIndex, Boolean enableIndex) {
         this.excelClass = entityClass;
         this.excelMapping = excelMapping;
         this.beginReadRowIndex = beginReadRowIndex;
-        this.importFunction = importFunction;
         this.enableIndex = enableIndex;
     }
 
-    public void process(InputStream in)
-            throws IOException, OpenXML4JException, SAXException {
+    public void setImportRowParser(ImportRowParser importRowParser) {
+        this.importRowParser = importRowParser;
+
+    }
+
+    public void setImportErrorResolver( ImportErrorResolver importErrorResolver) {
+        this.importErrorResolver = importErrorResolver;
+
+    }
+
+    public void process(InputStream in) throws IOException, OpenXML4JException, SAXException {
 
         for (ExcelPropertyEntity entity : excelMapping.getPropertyList()) {
             if (enableIndex && entity.getIndex() < 0) {
@@ -328,8 +327,6 @@ public class ExcelReader extends DefaultHandler {
             excelCellType = ExcelCellType.SSTINDEX;
         } else if ("str".equals(cellType)) {
             excelCellType = ExcelCellType.FORMULA;
-        } else if ("str".equals(cellType)) {
-            excelCellType = ExcelCellType.FORMULA;
         } else if (cellStyleStr != null) {
             // It's a number, but almost certainly one
             // with a special style or format
@@ -365,8 +362,7 @@ public class ExcelReader extends DefaultHandler {
                 return new XSSFRichTextString(value).toString();
             case NUMBER:
                 if (this.formatString != null && !StringUtils.isBlank(value)) {
-                    return FORMATTER.formatRawCellContents(Double
-                            .parseDouble(value), this.formatIndex, this.formatString);
+                    return FORMATTER.formatRawCellContents(Double.parseDouble(value), this.formatIndex, this.formatString);
                 } else {
                     return String.valueOf(value);
                 }
@@ -417,9 +413,9 @@ public class ExcelReader extends DefaultHandler {
                 }
             }
             if (null == errorEntity) {
-                importFunction.onProcess(currentSheetIndex + 1, currentRowIndex + 1, entity);
+                importRowParser.parse(currentSheetIndex + 1, currentRowIndex + 1, entity);
             } else {
-                importFunction.onError(errorEntity);
+                importErrorResolver.error(errorEntity);
             }
         }
     }
@@ -448,8 +444,7 @@ public class ExcelReader extends DefaultHandler {
      * @throws ParseException
      * @throws ExecutionException
      */
-    private Object convertCellValue(ExcelPropertyEntity mappingProperty, Object cellValue) throws
-            ParseException, ExecutionException {
+    private Object convertCellValue(ExcelPropertyEntity mappingProperty, Object cellValue) throws ParseException, ExecutionException {
         Class filedClazz = mappingProperty.getFieldEntity().getType();
         if (filedClazz == Date.class) {
             if (!StringUtils.isBlank(cellValue)) {
@@ -499,15 +494,13 @@ public class ExcelReader extends DefaultHandler {
      * @return error entity if  pass validate  will return null
      * @throws Exception
      */
-    private ErrorEntity checkCellValue(Integer cellIndex, ExcelPropertyEntity mappingProperty, Object cellValue) throws
-            Exception {
+    private ErrorEntity checkCellValue(Integer cellIndex, ExcelPropertyEntity mappingProperty, Object cellValue) throws Exception {
         // is required
         Boolean required = mappingProperty.getRequired();
         if (null != required && required) {
             if (null == cellValue || StringUtils.isBlank(cellValue)) {
 
-                String validErrorMessage = String.format("The sheet[{}],row[{}],column[{}] is required,but now is empty!"
-                        , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1);
+                String validErrorMessage = String.format("The sheet[{}],row[{}],column[{}] is required,but now is empty!", currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1);
                 return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
             }
         }
@@ -517,8 +510,7 @@ public class ExcelReader extends DefaultHandler {
             boolean matches = RegexUtils.isMatch(regex, cellValue.toString());
             if (!matches) {
                 String regularExpMessage = mappingProperty.getRegexMessage();
-                String validErrorMessage = String.format("The sheet[{}],row[{}],column[{}],cell value[%s] not pass the regex validation!"
-                        , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, regularExpMessage);
+                String validErrorMessage = String.format("The sheet[{}],row[{}],column[{}],cell value[%s] not pass the regex validation!", currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, regularExpMessage);
                 return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
             }
         }
@@ -536,13 +528,7 @@ public class ExcelReader extends DefaultHandler {
 
         if ("Date".equals(simpleName)) {
             return checkRangeDate(cellIndex, filedClazz, range, cellValue, mappingProperty.getRangeType());
-        } else if ("Integer".equals(simpleName)
-                || "double".equals(simpleName.toLowerCase())
-                || "BigDecimal".equals(simpleName)
-                || "float".equals(simpleName.toLowerCase())
-                || "int".equals(simpleName)
-                || "short".equals(simpleName.toLowerCase())
-                || "long".equals(simpleName.toLowerCase())) {
+        } else if ("Integer".equals(simpleName) || "double".equals(simpleName.toLowerCase()) || "BigDecimal".equals(simpleName) || "float".equals(simpleName.toLowerCase()) || "int".equals(simpleName) || "short".equals(simpleName.toLowerCase()) || "long".equals(simpleName.toLowerCase())) {
             return checkRangeNumber(cellIndex, filedClazz, range, cellValue, mappingProperty.getRangeType());
         }
         return null;
@@ -556,16 +542,8 @@ public class ExcelReader extends DefaultHandler {
      * @param validErrorMessage error msg
      * @return error entity
      */
-    private ErrorEntity buildErrorMsg(Integer cellIndex, Object cellValue,
-                                      String validErrorMessage) {
-        return ErrorEntity.builder()
-                .sheetIndex(currentSheetIndex + 1)
-                .rowIndex(currentRowIndex + 1)
-                .cellIndex(cellIndex + 1)
-                .cellValue(StringUtils.convertNullToEmpty(cellValue))
-                .columnName(titleRow.get(cellIndex))
-                .errorMessage(validErrorMessage)
-                .build();
+    private ErrorEntity buildErrorMsg(Integer cellIndex, Object cellValue, String validErrorMessage) {
+        return ErrorEntity.builder().sheetIndex(currentSheetIndex + 1).rowIndex(currentRowIndex + 1).cellIndex(cellIndex + 1).cellValue(StringUtils.convertNullToEmpty(cellValue)).columnName(titleRow.get(cellIndex)).errorMessage(validErrorMessage).build();
     }
 
     /**
@@ -632,68 +610,55 @@ public class ExcelReader extends DefaultHandler {
         Date v = null;
         v = LocalDateTimeUtils.parseToDate(String.valueOf(cellValue));
         if (null == v) {
-            String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s]  is empty after converted!"
-                    , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1);
+            String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s]  is empty after converted!", currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1);
             return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
         }
         switch (rangeType) {
             case RANGE_CLOSE:
                 if (null == max && v.getTime() < min.getTime()) {
-                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the date range '[%s,]' validation!"
-                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0]);
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the date range '[%s,]' validation!", currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0]);
                     return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
                 } else if (null == min && v.getTime() > max.getTime()) {
-                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the date range '[,%s]' validation!"
-                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[1]);
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the date range '[,%s]' validation!", currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[1]);
                     return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
                 } else if (v.getTime() > max.getTime() || v.getTime() < min.getTime()) {
-                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the date range '[%s,%s]' validation!"
-                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0], range[1]);
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the date range '[%s,%s]' validation!", currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0], range[1]);
                     return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
                 }
                 break;
             case RANGE_OPEN:
                 if (null == max && v.getTime() <= min.getTime()) {
-                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '(%s,)' validation!"
-                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0]);
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '(%s,)' validation!", currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0]);
                     return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
                 } else if (null == min && v.getTime() >= max.getTime()) {
-                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '(,%s)' validation!"
-                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[1]);
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '(,%s)' validation!", currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[1]);
                     return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
                 } else if (v.getTime() >= max.getTime() || v.getTime() <= min.getTime()) {
-                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '(%s,%s)' validation!"
-                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0], range[1]);
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '(%s,%s)' validation!", currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0], range[1]);
                     return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
                 }
                 break;
             case RANGE_LEFT_OPEN:
                 if (null == max && v.getTime() <= min.getTime()) {
-                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '(%s,]' validation!"
-                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0]);
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '(%s,]' validation!", currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0]);
                     return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
                 } else if (null == min && v.getTime() > max.getTime()) {
-                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '(,%s]' validation!"
-                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[1]);
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '(,%s]' validation!", currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[1]);
                     return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
                 } else if (v.getTime() > max.getTime() || v.getTime() <= min.getTime()) {
-                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '(%s,%s]' validation!"
-                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0], range[1]);
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '(%s,%s]' validation!", currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0], range[1]);
                     return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
                 }
                 break;
             case RANGE_RIGHT_OPEN:
                 if (null == max && v.getTime() < min.getTime()) {
-                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '[%s,)' validation!"
-                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0]);
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '[%s,)' validation!", currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0]);
                     return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
                 } else if (null == min && v.getTime() >= max.getTime()) {
-                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '[,%s)' validation!"
-                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[1]);
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '[,%s)' validation!", currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[1]);
                     return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
                 } else if (v.getTime() >= max.getTime() || v.getTime() < min.getTime()) {
-                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '[%s,%s)' validation!"
-                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0], range[1]);
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '[%s,%s)' validation!", currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0], range[1]);
                     return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
                 }
                 break;
@@ -735,73 +700,60 @@ public class ExcelReader extends DefaultHandler {
             throw new Exception(String.format("The ImportFiled annotation attribute[range] value %s is illegal!", Arrays.toString(range)));
         }
         if (null == v) {
-            String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s]  is empty after converted!"
-                    , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1);
+            String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s]  is empty after converted!", currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1);
             return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
         }
         switch (rangeType) {
             case RANGE_CLOSE:
                 if (null == max && v < min) {
-                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '[%s,]' validation!"
-                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0]);
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '[%s,]' validation!", currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0]);
                     return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
 
                 } else if (null == min && v > max) {
-                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '[,%s]' validation!"
-                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[1]);
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '[,%s]' validation!", currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[1]);
                     return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
                 } else if (v > max || v < min) {
-                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '[%s,%s]' validation!"
-                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0], range[1]);
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '[%s,%s]' validation!", currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0], range[1]);
                     return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
                 }
                 break;
             case RANGE_OPEN:
                 if (null == max && v <= min) {
-                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '(%s,]' validation!"
-                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0]);
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '(%s,]' validation!", currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0]);
                     return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
 
                 } else if (null == min && v >= max) {
-                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '[,%s)' validation!"
-                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[1]);
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '[,%s)' validation!", currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[1]);
                     return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
                 } else if (v >= max || v <= min) {
-                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '(%s,%s)' validation!"
-                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0], range[1]);
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '(%s,%s)' validation!", currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0], range[1]);
                     return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
                 }
                 break;
             case RANGE_LEFT_OPEN:
                 if (null == max && v <= min) {
-                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '(%s,]' validation!"
-                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0]);
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '(%s,]' validation!", currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0]);
                     return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
 
                 } else if (null == min && v > min) {
-                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '(,%s]' validation!"
-                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[1]);
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '(,%s]' validation!", currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[1]);
                     return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
 
                 } else if (v > max || v <= min) {
-                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '(%s,%s]' validation!"
-                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0], range[1]);
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '(%s,%s]' validation!", currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0], range[1]);
                     return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
 
                 }
                 break;
             case RANGE_RIGHT_OPEN:
                 if (null == max && v < min) {
-                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '[%s,)' validation!"
-                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0]);
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '[%s,)' validation!", currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0]);
                     return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
                 } else if (null == min && v >= max) {
-                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '[,%s)' validation!"
-                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[1]);
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '[,%s)' validation!", currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[1]);
                     return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
                 } else if (v >= max || v < min) {
-                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '[%s,%s)' validation!"
-                            , currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0], range[1]);
+                    String validErrorMessage = String.format("The sheet[%s],row[%s],column[%s],cell value[%s] not pass the number range '[%s,%s)' validation!", currentSheetIndex + 1, currentRowIndex + 1, cellIndex + 1, cellValue, range[0], range[1]);
                     return buildErrorMsg(cellIndex, cellValue, validErrorMessage);
                 }
                 break;
