@@ -1,4 +1,3 @@
-
 package com.sondertara.common.exception;
 
 import org.slf4j.helpers.MessageFormatter;
@@ -14,14 +13,16 @@ public class TaraException extends RuntimeException {
     }
 
     public TaraException(String format, Object... arguments) {
-        super(MessageFormatter.arrayFormat(format, arguments).getMessage());
+
+        super(MessageFormatter.arrayFormat(format, arguments).getMessage(), MessageFormatter.getThrowableCandidate(arguments));
     }
 
-    public TaraException(Throwable cause, String format, Object... arguments) {
-        super(MessageFormatter.arrayFormat(format, arguments).getMessage(), cause);
+    public TaraException(String msg, Throwable e) {
+        super(msg, e);
     }
 
     public TaraException(Throwable cause) {
         super(cause);
     }
+
 }

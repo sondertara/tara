@@ -5,7 +5,11 @@ import com.google.common.collect.Maps;
 
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Objects;
 
 
 /**
@@ -156,7 +160,7 @@ public class ArrayUtils {
      * @return 是否为非空
      */
     public static boolean isNotEmpty(final Object array) {
-        return false == isEmpty((Object) array);
+        return false == isEmpty(array);
     }
 
     /**
@@ -2394,7 +2398,7 @@ public class ArrayUtils {
                         throw new RuntimeException("Unknown primitive type:" + componentTypeName);
                 }
             } else {
-                return join((Object[]) array, conjunction);
+                return join(array, conjunction);
             }
         }
         throw new RuntimeException(StringUtils.format("[{}] is not a Array!", array.getClass()));

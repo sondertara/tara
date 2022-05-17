@@ -370,7 +370,7 @@ public class Assert {
      * @since 5.4.5
      */
     public static <T extends CharSequence, X extends Throwable> T notContain(CharSequence textToSearch, T substring, Supplier<X> errorSupplier) throws X {
-        if (StringUtils.contains(textToSearch,  substring)) {
+        if (StringUtils.contains(textToSearch, substring)) {
             throw errorSupplier.get();
         }
         return substring;
@@ -529,9 +529,6 @@ public class Assert {
     public static <T> T[] noNullElements(T[] array) throws IllegalArgumentException {
         return noNullElements(array, "[Assertion failed] - this array must not contain any null elements");
     }
-
-
-
 
 
     /**

@@ -22,8 +22,8 @@ import java.util.Properties;
  */
 public class PropertiesUtils {
     private static final Logger logger = LoggerFactory.getLogger(PropertiesUtils.class);
-    private static Map<String, PropertiesUtils> instanceMap = new HashMap<>();
-    private String propertyFileName;
+    private static final Map<String, PropertiesUtils> instanceMap = new HashMap<>();
+    private final String propertyFileName;
     private Properties properties = null;
     private URI uri = null;
 
@@ -125,7 +125,7 @@ public class PropertiesUtils {
      */
     public static PropertiesUtils getInstance(String propertyFileName) {
         if (instanceMap.get(propertyFileName) != null) {
-            return (PropertiesUtils) instanceMap.get(propertyFileName);
+            return instanceMap.get(propertyFileName);
         }
         //实例化
         PropertiesUtils instance = new PropertiesUtils(propertyFileName);

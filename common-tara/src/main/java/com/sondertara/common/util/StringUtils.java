@@ -1,6 +1,7 @@
 package com.sondertara.common.util;
 
 
+import com.sondertara.common.io.CharacterReader;
 import com.sondertara.common.lang.Assert;
 
 import java.io.IOException;
@@ -31,48 +32,14 @@ public class StringUtils {
 
     public static final int INDEX_NOT_FOUND = -1;
 
-    public static final char C_SPACE = CharUtils.SPACE;
-    public static final char C_TAB = CharUtils.TAB;
-    public static final char C_DOT = CharUtils.DOT;
     public static final char C_SLASH = CharUtils.SLASH;
-    public static final char C_BACKSLASH = CharUtils.BACKSLASH;
     public static final char C_CR = CharUtils.CR;
     public static final char C_LF = CharUtils.LF;
-    public static final char C_UNDERLINE = CharUtils.UNDERLINE;
-    public static final char C_COMMA = CharUtils.COMMA;
-    public static final char C_DELIM_START = CharUtils.DELIM_START;
-    public static final char C_DELIM_END = CharUtils.DELIM_END;
-    public static final char C_BRACKET_START = CharUtils.BRACKET_START;
-    public static final char C_BRACKET_END = CharUtils.BRACKET_END;
-    public static final char C_COLON = CharUtils.COLON;
+
 
     public static final String SPACE = " ";
-    public static final String TAB = "	";
-    public static final String DOT = ".";
-    public static final String DOUBLE_DOT = "..";
-    public static final String SLASH = "/";
-    public static final String BACKSLASH = "\\";
+
     public static final String EMPTY = "";
-    public static final String CR = "\r";
-    public static final String LF = "\n";
-    public static final String CRLF = "\r\n";
-    public static final String UNDERLINE = "_";
-    public static final String DASHED = "-";
-    public static final String COMMA = ",";
-    public static final String DELIM_START = "{";
-    public static final String DELIM_END = "}";
-    public static final String BRACKET_START = "[";
-    public static final String BRACKET_END = "]";
-    public static final String COLON = ":";
-
-    public static final String HTML_NBSP = "&nbsp;";
-    public static final String HTML_AMP = "&amp;";
-    public static final String HTML_QUOTE = "&quot;";
-    public static final String HTML_APOS = "&apos;";
-    public static final String HTML_LT = "&lt;";
-    public static final String HTML_GT = "&gt;";
-
-    public static final String EMPTY_JSON = "{}";
 
 
     /**
@@ -2490,14 +2457,13 @@ public class StringUtils {
                 delimiterHashSet.add(Character.codePointAt(delimiters, index));
             }
 
-            return delimiterHashSet;
         } else {
             if (delimiters == null) {
                 delimiterHashSet.add(Character.codePointAt(new char[]{' '}, 0));
             }
 
-            return delimiterHashSet;
         }
+        return delimiterHashSet;
     }
 
     public static String toSoftCamelCase(String s) {
@@ -2526,22 +2492,22 @@ public class StringUtils {
             if (firstWord && startsWithLetter(word)) {
                 words[i] = word.toLowerCase();
                 firstWord = false;
-                if (i > 1 && isBlank(words[i - 1]) && isAllLetterOrDigit(words[i - 2])) {
+                if (i > 1 && StringUtils.isBlank(words[i - 1]) && isAllLetterOrDigit(words[i - 2])) {
                     words[i - 1] = "";
                 }
             } else if (specialWord(word)) { // multiple camelCases
                 firstWord = true;
             } else {
-                words[i] = upperFirst(word);
-                if (i > 1 && isBlank(words[i - 1]) && isAllLetterOrDigit(words[i - 2])) {
+                words[i] = org.apache.commons.lang3.StringUtils.capitalize(word.toLowerCase());
+                if (i > 1 && StringUtils.isBlank(words[i - 1]) && isAllLetterOrDigit(words[i - 2])) {
                     words[i - 1] = "";
                 }
             }
         }
         String join = org.apache.commons.lang3.StringUtils.join(words);
-        join = replaceSeparatorBetweenLetters(join, '_', EMPTY_CHAR);
-        join = replaceSeparatorBetweenLetters(join, '-', EMPTY_CHAR);
-        join = replaceSeparatorBetweenLetters(join, '.', EMPTY_CHAR);
+        join = StringUtils.replaceSeparatorBetweenLetters(join, '_', EMPTY_CHAR);
+        join = StringUtils.replaceSeparatorBetweenLetters(join, '-', EMPTY_CHAR);
+        join = StringUtils.replaceSeparatorBetweenLetters(join, '.', EMPTY_CHAR);
         return join;
     }
 
@@ -2552,6 +2518,53 @@ public class StringUtils {
             }
         }
         return true;
+    }
+
+    /**
+     * CameCase is converted to underline form
+     *
+     * @param val       CameCase String
+     * @param separator the separator
+     * @return the target String
+     */
+    public static String unCameCase(String val, char separator) {
+        try {
+            if (StringUtils.isNotEmpty(val)) {
+                CharacterReader charReader = new CharacterReader(val);
+                StringBuilder result = new StringBuilder();
+                while (charReader.hasMore()) {
+                    char ch = charReader.next();
+                    if (ch >= 'A' && ch <= 'Z') {
+                        result.append(separator).append((char) (ch + 32));
+                    } else if (ch != separator) {
+                        result.append(ch);
+                    }
+                }
+                return result.toString();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+
+    /**
+     * 下划线形式组合的字符串转大驼峰
+     */
+
+    public static String toCapitalizeCamelCase(String str) {
+
+        if (null == str) {
+
+            return null;
+
+        }
+
+        str = toCamelCase(str);
+
+        return str.substring(0, 1).toUpperCase() + str.substring(1);
+
     }
 
     private static boolean specialWord(String word) {
@@ -2571,7 +2584,7 @@ public class StringUtils {
     }
 
     private static boolean isNotQuote(String word) {
-        return !"\"".equals(word) && !"\'".equals(word);
+        return !"\"".equals(word) && !"'".equals(word);
     }
 
     public static String wordsToConstantCase(String s) {
@@ -2656,9 +2669,7 @@ public class StringUtils {
     private static boolean isNotBorderQuote(char actualChar, int i, char[] chars) {
         if (chars.length - 1 == i) {
             char firstChar = chars[0];
-            if (isQuote(actualChar) && isQuote(firstChar)) {
-                return true;
-            }
+            return isQuote(actualChar) && isQuote(firstChar);
         }
         return false;
     }
@@ -2790,7 +2801,6 @@ public class StringUtils {
         Matcher m = p.matcher(input);
 
         // Add segments before each match found
-        int lastBeforeIdx = 0;
         while (m.find()) {
             if (isNotEmpty(m.group())) {
                 String match = input.subSequence(index, m.start()).toString();
@@ -2820,7 +2830,7 @@ public class StringUtils {
 
 
     public static String nonAsciiToUnicode(String s) {
-        StringBuffer sb = new StringBuffer(s.length());
+        StringBuilder sb = new StringBuilder(s.length());
         for (Character c : s.toCharArray()) {
             if (!CharUtils.isAscii(c)) {
                 sb.append(org.apache.commons.lang3.CharUtils.unicodeEscaped(c));
@@ -2941,7 +2951,7 @@ public class StringUtils {
     }
 
     public static boolean isQuoted(String selectedText) {
-        return selectedText != null && selectedText.length() > 2 && (isBorderChar(selectedText, "\"") || isBorderChar(selectedText, "\'"));
+        return selectedText != null && selectedText.length() > 2 && (isBorderChar(selectedText, "\"") || isBorderChar(selectedText, "'"));
     }
 
     public static boolean isBorderChar(String s, String borderChar) {
@@ -3097,11 +3107,6 @@ public class StringUtils {
 
     public static String toSpringEnvVariable(String s) {
         return Arrays.stream(split(s, ".")).map(StringUtils::trim).map(str -> StringUtils.replaceChars(str, "-", "")).map(str -> StringUtils.replaceChars(str, "_", "")).collect(Collectors.joining("_")).toUpperCase();
-    }
-
-
-    public static class Constants {
-        public static final char[] DELIMITERS = new char[]{'\'', '\"', ' '};
     }
 
 
@@ -5384,6 +5389,41 @@ public class StringUtils {
         }
 
         return str;
+
+    }
+
+    /**
+     * 统计行数
+     *
+     * @param str str
+     * @return line
+     */
+    public static int countLines(String str) {
+        if (null == str || str.length() == 0) {
+            return 0;
+        }
+        int line = 1;
+        int len = str.length();
+        for (int pos = 0; pos < len; pos++) {
+            char c = str.charAt(pos);
+            if ('\r' == c) {
+                line++;
+                if (pos + 1 < len && str.charAt(pos + 1) == '\n') {
+                    pos++;
+                }
+            } else if ('\n' == c) {
+                line++;
+            }
+        }
+        return line;
+    }
+
+    public static String removeWhiteLines(String str) {
+        if (null == str || str.length() == 0) {
+            return str;
+        }
+        String all = str.replaceAll("(?m)^\\s*$(\\n|\\r\\n)", "");
+        return trim(all);
 
     }
 

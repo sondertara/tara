@@ -86,7 +86,7 @@ public class HttpUtils {
         BufferedReader in = null;
         try {
 
-            logger.info("data:{}", buffer.toString());
+            logger.info("data:{}", buffer);
             URL realUrl = new URL(buffer.toString());
             // 打开和URL之间的连接
             HttpURLConnection connection = (HttpURLConnection) realUrl.openConnection();
@@ -219,7 +219,7 @@ public class HttpUtils {
             while ((line = reader.readLine()) != null) {
                 result.append(line);
             }
-            System.out.println(result.toString());
+            System.out.println(result);
             return result.toString();
 
         } catch (Exception e) {
@@ -304,7 +304,6 @@ public class HttpUtils {
                 paramsList.add(new BasicNameValuePair(key, String.valueOf(params.get(key))));
             }
             httpPost.setEntity(new UrlEncodedFormEntity(paramsList, "utf-8"));
-            ;
             httpPost.setConfig(REQUEST_CONFIG_TIME_OUT);
             response = httpClient.execute(httpPost);
             int statusCode = response.getStatusLine().getStatusCode();
@@ -338,9 +337,9 @@ public class HttpUtils {
         try {
             if (params != null) {
                 if (url.contains("?")) {
-                    url += "&" + getParams(params).toString();
+                    url += "&" + getParams(params);
                 } else {
-                    url += "?" + getParams(params).toString();
+                    url += "?" + getParams(params);
                 }
             }
             HttpGet httpGet = new HttpGet(url);
@@ -459,7 +458,7 @@ public class HttpUtils {
             // 获取URLConnection对象对应的输出流
             out = conn.getOutputStream();
             // 发送请求参数
-            out.write(buffer.toString().getBytes("utf-8"));
+            out.write(buffer.toString().getBytes(StandardCharsets.UTF_8));
             // flush输出流的缓冲
             out.flush();
             // 定义BufferedReader输入流来读取URL的响应
@@ -469,12 +468,12 @@ public class HttpUtils {
             } else {
                 in = conn.getErrorStream();
             }
-            BufferedReader reader = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
             String line;
             while ((line = reader.readLine()) != null) {
                 result.append(line);
             }
-            System.out.println(result.toString());
+            System.out.println(result);
             return result.toString();
 
         } catch (Exception e) {
@@ -540,10 +539,7 @@ public class HttpUtils {
                 HttpClientContext clientContext = HttpClientContext.adapt(context);
                 HttpRequest request = clientContext.getRequest();
                 // 如果请求被认为是幂等的，那么就重试。即重复执行不影响程序其他效果的
-                if (!(request instanceof HttpEntityEnclosingRequest)) {
-                    return true;
-                }
-                return false;
+                return !(request instanceof HttpEntityEnclosingRequest);
             }
         };
     }
@@ -567,11 +563,8 @@ public class HttpUtils {
             HttpClientContext clientContext = HttpClientContext.adapt(httpContext);
             HttpRequest request = clientContext.getRequest();
             boolean idempotent = !(request instanceof HttpEntityEnclosingRequest);
-            if (idempotent) {
-                // 如果请求被认为是幂等的，那么就重试。即重复执行不影响程序其他效果的
-                return true;
-            }
-            return false;
+            // 如果请求被认为是幂等的，那么就重试。即重复执行不影响程序其他效果的
+            return idempotent;
         };
     }
 
@@ -594,8 +587,8 @@ public class HttpUtils {
 
     static class CustomServiceUnavailableRetryStrategy implements ServiceUnavailableRetryStrategy {
 
-        private int executionCount;
-        private long retryInterval;
+        private final int executionCount;
+        private final long retryInterval;
 
         CustomServiceUnavailableRetryStrategy(Builder builder) {
             this.executionCount = builder.executionCount;

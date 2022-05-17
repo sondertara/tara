@@ -9,11 +9,11 @@
     <parent>
         <groupId>com.sondertara</groupId>
         <artifactId>tara</artifactId>
-        <version>0.0.4.0</version>
+        <version>0.0.1.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>common-tara</artifactId>
-    <version>0.0.4.0</version>
+    <version>0.0.1.0</version>
 
     <name>common-tara</name>
     <description>common utils.</description>
@@ -26,6 +26,11 @@
 
     </properties>
     <dependencies>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>1.70</version>
+        </dependency>
         <dependency>
             <groupId>net.sf.dozer</groupId>
             <artifactId>dozer</artifactId>
