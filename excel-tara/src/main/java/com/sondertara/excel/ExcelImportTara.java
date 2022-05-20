@@ -46,9 +46,8 @@ public class ExcelImportTara {
     }
 
 
-    public ExcelImportTara of(Class<?> excelClass) {
-        this.excelClass = excelClass;
-        return this;
+    public static ExcelImportTara mapper(Class<?> excelClass) {
+        return new ExcelImportTara(excelClass);
     }
 
 
@@ -61,12 +60,11 @@ public class ExcelImportTara {
     /**
      * import all Excel sheet
      */
-    public ExcelReadHandler readExcel(InputStream inputStream) {
+    public ExcelReadHandler from(InputStream inputStream) {
         try {
             if (inputStream == null) {
                 throw new ExcelTaraException("inputStream is null");
             }
-
             ExcelEntity excelMapping = ExcelMappingFactory.loadImportExcelClass(excelClass);
             ExcelReader excelReader = new ExcelReader(excelClass, excelMapping, 1, enableIndex);
             return new ExcelReadHandler(excelReader, inputStream);

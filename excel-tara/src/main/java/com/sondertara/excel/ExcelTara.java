@@ -9,8 +9,4 @@ package com.sondertara.excel;
 public class ExcelTara {
 
 
-    public static ExcelImportTara READER = new ExcelImportTara();
-
-    public static ExcelExportTara  WRITER = new ExcelExportTara();
-
 }

@@ -19,7 +19,7 @@ public class ExcelReadHandler {
         this.inputStream = inputStream;
     }
 
-    public void run() {
+    public void read() {
         if (null != excelReader) {
             try {
                 excelReader.process(this.inputStream);

@@ -1,12 +1,15 @@
 package com.sondertara;
 
-import com.sondertara.excel.ExcelExportTara;
 import com.sondertara.excel.entity.PageQueryParam;
+import com.sondertara.excel.parser.ExcelBeanWriter;
+import com.sondertara.model.ImportParam;
 import com.sondertara.model.UserDTO;
 import com.sondertara.model.UserInfoVo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -26,11 +29,10 @@ public class ExcelExportDemo {
 
     private final AtomicInteger atomicInteger = new AtomicInteger(0);
 
-    public void exportCsvDemo() {
-
+    public void exportToStream() throws Exception {
+        OutputStream out = new FileOutputStream("filename");
         PageQueryParam query = PageQueryParam.builder().build();
-        String path = ExcelExportTara.of(UserInfoVo.class).query(query, pageNo -> {
-
+        ExcelBeanWriter.mapper(ImportParam.class).fromQuery().pagination(1, 10, 100).query((pageNo, pageSize) -> {
             // query list data from db
             List<UserDTO> list = new ArrayList<>(200);
             for (int i = 0; i < 200; i++) {
@@ -55,14 +57,6 @@ public class ExcelExportDemo {
                 userInfoVo.setName(u.getN());
                 return userInfoVo;
             }).collect(Collectors.toList());
-
-        }).exportCsv("Excel-Test");
-        logger.info("path:{}", path);
-        logger.info("data list size:{}", atomicInteger.get());
-        //FileUtils.remove(path);
-    }
-
-    public static void main(String[] args) {
-        new ExcelExportDemo().exportCsvDemo();
+        }).to(out);
     }
 }

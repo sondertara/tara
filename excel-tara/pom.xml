@@ -11,7 +11,7 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>excel-tara</artifactId>
-    <version>0.0.1.0</version>
+    <version>0.1.0</version>
     <name>excel-tara</name>
     <description>High performance Excel kit.</description>
     <properties>
@@ -98,7 +98,7 @@
         <dependency>
             <groupId>com.sondertara</groupId>
             <artifactId>common-tara</artifactId>
-            <version>0.0.1.0</version>
+            <version>0.1.0</version>
         </dependency>
     </dependencies>
 </project>

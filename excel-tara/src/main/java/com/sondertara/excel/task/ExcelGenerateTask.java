@@ -97,7 +97,7 @@ public class ExcelGenerateTask<R> implements ExcelRunnable {
                 return;
             }
             logger.info("start query page[{}]...", queryPage);
-            List<R> data = exportFunction.apply(queryPage);
+            List<R> data = exportFunction.queryPage(queryPage,param.getPageSize());
             logger.info("end query page[{}]...", queryPage);
             if (data == null || data.isEmpty()) {
                 logger.warn("query data is empty,query exit !");

@@ -1,7 +1,7 @@
 package com.sondertara;
 
 import com.alibaba.fastjson.JSON;
-import com.sondertara.excel.ExcelTara;
+import com.sondertara.excel.ExcelImportTara;
 import com.sondertara.excel.common.ExcelTaraHelper;
 import com.sondertara.model.ImportParam;
 import org.slf4j.Logger;
@@ -28,7 +28,7 @@ public class ExcelImportDemo {
         File file = new File(filePath);
         final FileInputStream inputStream = new FileInputStream(file);
 
-        ExcelTara.reader.of(ImportParam.class).readExcel(inputStream).onRow((sheetIndex, rowIndex, entity) -> {
+        ExcelImportTara.mapper(ImportParam.class).from(inputStream).onRow((sheetIndex, rowIndex, entity) -> {
             logger.info("sheet[{}],第{}行，解析数据为:{}", sheetIndex, rowIndex, JSON.toJSONString(entity));
             try {
                 //  handleImportData(param);
@@ -40,7 +40,7 @@ public class ExcelImportDemo {
 
             logger.info(errorEntity.toString());
             ExcelTaraHelper.addErrorEntity(errorEntity);
-        }).run();
+        }).read();
 
         //获取导入错误数据
         List<List<String>> records = ExcelTaraHelper.getErrorEntityRecords();
