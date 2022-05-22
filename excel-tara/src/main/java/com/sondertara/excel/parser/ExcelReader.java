@@ -5,11 +5,11 @@ import com.sondertara.common.util.LocalDateTimeUtils;
 import com.sondertara.common.util.NumberUtils;
 import com.sondertara.common.util.RegexUtils;
 import com.sondertara.common.util.StringUtils;
-import com.sondertara.excel.annotation.ExcelExportField;
+import com.sondertara.excel.annotation.ExcelImportField;
 import com.sondertara.excel.common.Constant;
 import com.sondertara.excel.entity.ErrorEntity;
-import com.sondertara.excel.entity.ExcelEntity;
-import com.sondertara.excel.entity.ExcelPropertyEntity;
+import com.sondertara.excel.entity.ExcelCellEntity;
+import com.sondertara.excel.entity.ExcelReadSheetEntity;
 import com.sondertara.excel.enums.FieldRangeType;
 import com.sondertara.excel.exception.AllEmptyRowException;
 import com.sondertara.excel.exception.ExcelTaraException;
@@ -38,7 +38,12 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.TimeZone;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -96,7 +101,7 @@ public class ExcelReader extends DefaultHandler {
     /**
      * excel entity via annotation
      */
-    private ExcelEntity excelMapping;
+    private ExcelReadSheetEntity excelMapping;
     /**
      * class which will parse data
      */
@@ -118,7 +123,7 @@ public class ExcelReader extends DefaultHandler {
      * <p>
      * if true the index value  is the column in excel,else the field and column one-to-one
      *
-     * @see ExcelExportField#index()
+     * @see ExcelImportField#index()
      * </p>
      */
     private Boolean enableIndex = false;
@@ -136,7 +141,7 @@ public class ExcelReader extends DefaultHandler {
 
     private ImportErrorResolver importErrorResolver;
 
-    public ExcelReader(Class entityClass, ExcelEntity excelMapping, Integer beginReadRowIndex, Boolean enableIndex) {
+    public ExcelReader(Class entityClass, ExcelReadSheetEntity excelMapping, Integer beginReadRowIndex, Boolean enableIndex) {
         this.excelClass = entityClass;
         this.excelMapping = excelMapping;
         this.beginReadRowIndex = beginReadRowIndex;
@@ -155,7 +160,7 @@ public class ExcelReader extends DefaultHandler {
 
     public void process(InputStream in) throws IOException, OpenXML4JException, SAXException {
 
-        for (ExcelPropertyEntity entity : excelMapping.getPropertyList()) {
+        for (ExcelCellEntity entity : excelMapping.getPropertyList()) {
             if (enableIndex && entity.getIndex() < 0) {
                 throw new ExcelTaraException("Excel enable the index mapping relation .please set [index] filed via @ImportField", entity.getFieldEntity().getName());
             }
@@ -380,7 +385,7 @@ public class ExcelReader extends DefaultHandler {
     private void assembleData() throws Exception {
 
         if (currentRowIndex >= beginReadRowIndex) {
-            List<ExcelPropertyEntity> propertyList = excelMapping.getPropertyList();
+            List<ExcelCellEntity> propertyList = excelMapping.getPropertyList();
             for (int i = 0; i < propertyList.size() - cellsOnRow.size(); i++) {
                 cellsOnRow.add(i, "");
             }
@@ -390,7 +395,7 @@ public class ExcelReader extends DefaultHandler {
             Object entity = excelClass.newInstance();
             ErrorEntity errorEntity = null;
             for (int i = 0; i < propertyList.size(); i++) {
-                ExcelPropertyEntity property = propertyList.get(i);
+                ExcelCellEntity property = propertyList.get(i);
                 //  dataCurrentCellIndex = i;
                 currentCellIndex = enableIndex ? property.getIndex() : i;
                 Object cellValue = cellsOnRow.get(currentCellIndex);
@@ -436,15 +441,15 @@ public class ExcelReader extends DefaultHandler {
     }
 
     /**
-     * parse cell value to pojo via {@link ExcelExportField}
+     * parse cell value to pojo via {@link ExcelImportField}
      *
-     * @param mappingProperty pojo filed attribute in {@link ExcelExportField}
+     * @param mappingProperty pojo filed attribute in {@link ExcelImportField}
      * @param cellValue       cell value
      * @return the qualified value
      * @throws ParseException
      * @throws ExecutionException
      */
-    private Object convertCellValue(ExcelPropertyEntity mappingProperty, Object cellValue) throws ParseException, ExecutionException {
+    private Object convertCellValue(ExcelCellEntity mappingProperty, Object cellValue) throws ParseException, ExecutionException {
         Class filedClazz = mappingProperty.getFieldEntity().getType();
         if (filedClazz == Date.class) {
             if (!StringUtils.isBlank(cellValue)) {
@@ -486,7 +491,7 @@ public class ExcelReader extends DefaultHandler {
     }
 
     /**
-     * check the cell value via {@link ExcelExportField}
+     * check the cell value via {@link ExcelImportField}
      *
      * @param cellIndex       cell index
      * @param mappingProperty pojo field attribute
@@ -494,7 +499,7 @@ public class ExcelReader extends DefaultHandler {
      * @return error entity if  pass validate  will return null
      * @throws Exception
      */
-    private ErrorEntity checkCellValue(Integer cellIndex, ExcelPropertyEntity mappingProperty, Object cellValue) throws Exception {
+    private ErrorEntity checkCellValue(Integer cellIndex, ExcelCellEntity mappingProperty, Object cellValue) throws Exception {
         // is required
         Boolean required = mappingProperty.getRequired();
         if (null != required && required) {

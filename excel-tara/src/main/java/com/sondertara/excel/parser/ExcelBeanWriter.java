@@ -1,7 +1,7 @@
 package com.sondertara.excel.parser;
 
 import com.sondertara.common.exception.TaraException;
-import com.sondertara.excel.entity.ExcelEntity;
+import com.sondertara.excel.entity.ExcelWriteSheetEntity;
 import com.sondertara.excel.entity.ExcelHelper;
 import com.sondertara.excel.entity.PageQueryParam;
 import com.sondertara.excel.exception.ExcelTaraException;
@@ -19,10 +19,6 @@ import java.nio.charset.StandardCharsets;
 
 public class ExcelBeanWriter extends AbstractExcelWriter<Workbook> {
 
-
-    private ExportFunction<?> exportFunction;
-
-    private PageQueryParam pageQueryParam;
     private boolean multiSheet;
     private int sheetRowMaxCount;
 
@@ -122,7 +118,7 @@ public class ExcelBeanWriter extends AbstractExcelWriter<Workbook> {
     @Override
     public Workbook generate() {
         verifyAndBuildParams();
-        ExcelEntity excelMapping = ExcelMappingFactory.loadExportExcelClass(excelClass);
+        ExcelWriteSheetEntity excelMapping = ExcelMappingFactory.loadExportExcelClass(excelClass);
         ExcelWriterResolver resolver = new ExcelWriterResolver(excelMapping, excelHelperBuilder.build());
         if (this.multiSheet) {
             return resolver.generateMultiSheetWorkbook(pageQueryParam, exportFunction);

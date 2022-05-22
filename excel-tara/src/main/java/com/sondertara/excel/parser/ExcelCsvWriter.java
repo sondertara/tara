@@ -1,7 +1,7 @@
 package com.sondertara.excel.parser;
 
 
-import com.sondertara.excel.entity.ExcelEntity;
+import com.sondertara.excel.entity.ExcelWriteSheetEntity;
 import com.sondertara.excel.exception.ExcelTaraException;
 import com.sondertara.excel.factory.ExcelMappingFactory;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -66,7 +66,7 @@ public class ExcelCsvWriter extends AbstractExcelWriter<String> {
         logger.info("CSV exporting is starting...");
         try {
             verifyAndBuildParams();
-            ExcelEntity excelMapping = ExcelMappingFactory.loadExportExcelClass(excelClass);
+            ExcelWriteSheetEntity excelMapping = ExcelMappingFactory.loadExportExcelClass(excelClass);
             ExcelCsvWriterResolver resolver = new ExcelCsvWriterResolver(excelMapping, fileName);
             return resolver.createFile(pageQueryParam, exportFunction);
         } catch (Exception e) {

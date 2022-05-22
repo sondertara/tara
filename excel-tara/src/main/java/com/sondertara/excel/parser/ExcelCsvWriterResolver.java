@@ -2,12 +2,10 @@ package com.sondertara.excel.parser;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.sondertara.excel.common.Constant;
-import com.sondertara.excel.entity.ExcelEntity;
-import com.sondertara.excel.entity.ExcelHelper;
-import com.sondertara.excel.entity.ExcelPropertyEntity;
+import com.sondertara.excel.entity.ExcelWriteSheetEntity;
+import com.sondertara.excel.entity.ExcelCellEntity;
 import com.sondertara.excel.entity.PageQueryParam;
 import com.sondertara.excel.exception.ExcelTaraException;
-import com.sondertara.excel.factory.ExcelMappingFactory;
 import com.sondertara.excel.function.ExportFunction;
 import com.sondertara.excel.task.ExcelGenerateTask;
 import com.sondertara.excel.task.ExcelRunnable;
@@ -33,6 +31,9 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+/**
+ * @author huangxiaohu
+ */
 public class ExcelCsvWriterResolver {
 
     private static final Logger logger = LoggerFactory.getLogger(ExcelReader.class);
@@ -40,7 +41,7 @@ public class ExcelCsvWriterResolver {
     private static final ThreadPoolExecutor TASK_POOL = new ThreadPoolExecutor(8, 16, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<>(100), new ThreadFactoryBuilder().setDaemon(true).setNameFormat("Excel-worker-%d").build(), new ThreadPoolExecutor.CallerRunsPolicy());
 
 
-    private final ExcelEntity excelEntity;
+    private final ExcelWriteSheetEntity excelEntity;
     private final String fileName;
 
     private Integer nullCellCount = 0;
@@ -49,15 +50,16 @@ public class ExcelCsvWriterResolver {
     private final Map<Integer, Integer> columnWidthMap = new HashMap<>();
 
 
-    public ExcelCsvWriterResolver(ExcelEntity excelEntity,String fileName) {
+    public ExcelCsvWriterResolver(ExcelWriteSheetEntity excelEntity, String fileName) {
         this.excelEntity = excelEntity;
         this.fileName=fileName;
     }
 
-    public String  createFile(PageQueryParam pageQueryParam, ExportFunction exportFunction){
+    @SuppressWarnings("unchecked")
+    public String  createFile(PageQueryParam pageQueryParam, ExportFunction<?> exportFunction){
         try {
             CyclicBarrier cyclicBarrier = new CyclicBarrier(Constant.PRODUCER_COUNT + Constant.CONSUMER_COUNT + 1);
-            ExcelRunnable excelRunnable = new ExcelGenerateTask(pageQueryParam, exportFunction, excelEntity, fileName);
+            ExcelRunnable excelRunnable = new ExcelGenerateTask<>(pageQueryParam, exportFunction, excelEntity, fileName);
             for (int i = 0; i < Constant.PRODUCER_COUNT; i++) {
                 TASK_POOL.submit((excelRunnable.newRunnableProducer(cyclicBarrier)));
             }
@@ -104,7 +106,7 @@ public class ExcelCsvWriterResolver {
                     }
                 }
                 Appendable printWriter = new PrintWriter(csvFile, Constant.CHARSET);
-                CSVPrinter csvPrinter = CSVFormat.EXCEL.builder().setHeader(excelEntity.getPropertyList().stream().map(ExcelPropertyEntity::getColumnName).toArray(String[]::new)).build().print(printWriter);
+                CSVPrinter csvPrinter = CSVFormat.EXCEL.builder().setHeader(excelEntity.getPropertyList().stream().map(ExcelCellEntity::getColumnName).toArray(String[]::new)).build().print(printWriter);
 
                 csvPrinter.flush();
                 csvPrinter.close();

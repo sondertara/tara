@@ -2,12 +2,13 @@ package com.sondertara;
 
 import com.sondertara.excel.entity.PageQueryParam;
 import com.sondertara.excel.parser.ExcelBeanWriter;
-import com.sondertara.model.ImportParam;
-import com.sondertara.model.UserDTO;
-import com.sondertara.model.UserInfoVo;
+import com.sondertara.domain.UserDTO;
+import com.sondertara.domain.UserInfoVo;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -29,20 +30,26 @@ public class ExcelExportDemo {
 
     private final AtomicInteger atomicInteger = new AtomicInteger(0);
 
-    public void exportToStream() throws Exception {
-        OutputStream out = new FileOutputStream("filename");
+
+    @Test
+    public void export() throws Exception {
+
+        File file = new File("test.xlsx");
+        if (!file.exists()) {
+            file.createNewFile();
+        }
+        OutputStream out = new FileOutputStream(file, false);
         PageQueryParam query = PageQueryParam.builder().build();
-        ExcelBeanWriter.mapper(ImportParam.class).fromQuery().pagination(1, 10, 100).query((pageNo, pageSize) -> {
+        ExcelBeanWriter.mapper(UserInfoVo.class).fromQuery().pagination(1, 10, 200).query((pageNo, pageSize) -> {
             // query list data from db
             List<UserDTO> list = new ArrayList<>(200);
-            for (int i = 0; i < 200; i++) {
+            for (int i = 0; i < pageSize; i++) {
                 UserDTO userDTO = new UserDTO();
 
                 userDTO.setA(i);
                 userDTO.setN(pageNo + "测试姓名" + i);
                 userDTO.setD("测试地址" + i);
                 list.add(userDTO);
-
                 if (pageNo == 5 && i == 150) {
                     break;
                 }

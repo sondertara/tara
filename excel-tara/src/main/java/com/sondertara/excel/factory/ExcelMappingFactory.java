@@ -1,13 +1,15 @@
 package com.sondertara.excel.factory;
 
-import com.sondertara.excel.annotation.ExcelExport;
-import com.sondertara.excel.annotation.ExcelImportFiled;
-import com.sondertara.excel.annotation.ExcelExportField;
-import com.sondertara.excel.entity.ExcelEntity;
-import com.sondertara.excel.entity.ExcelPropertyEntity;
+import com.sondertara.excel.annotation.ExcelImportField;
+import com.sondertara.excel.entity.ExcelReadSheetEntity;
+import com.sondertara.excel.entity.ExcelWriteSheetEntity;
+import com.sondertara.excel.entity.ExcelCellEntity;
 import com.sondertara.excel.exception.ExcelTaraException;
+import com.sondertara.excel.executor.CellStyleCache;
+import com.sondertara.excel.meta.annotation.ExcelExport;
+import com.sondertara.excel.meta.annotation.ExcelExportField;
+import com.sondertara.excel.meta.style.CellStyleBuilder;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,24 +25,16 @@ public class ExcelMappingFactory {
      * @param clazz
      * @return excel 属性
      */
-    public static ExcelEntity loadImportExcelClass(Class<?> clazz) {
-        List<ExcelPropertyEntity> propertyList = new ArrayList<>();
-        ExcelEntity excelMapping = new ExcelEntity();
-        ExcelExport annotation = clazz.getAnnotation(ExcelExport.class);
-        if (annotation != null) {
-            String s = annotation.sheetName();
-            excelMapping.setSheetName(s);
-        } else {
-            excelMapping.setSheetName("Sheet");
-
-        }
+    public static ExcelReadSheetEntity loadImportExcelClass(Class<?> clazz) {
+        List<ExcelCellEntity> propertyList = new ArrayList<>();
+        ExcelReadSheetEntity excelMapping = new ExcelReadSheetEntity();
 
         Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
-            ExcelExportField excelExportField = field.getAnnotation(ExcelExportField.class);
-            if (null != excelExportField) {
+            ExcelImportField excelImportField = field.getAnnotation(ExcelImportField.class);
+            if (null != excelImportField) {
                 field.setAccessible(true);
-                ExcelPropertyEntity excelPropertyEntity = ExcelPropertyEntity.builder().fieldEntity(field).index(excelExportField.index() - 1).required(excelExportField.required()).dateFormat(excelExportField.dateFormat().trim()).regex(excelExportField.regex().trim()).regexMessage(excelExportField.regexMessage().trim()).scale(excelExportField.scale()).roundingMode(excelExportField.roundingMode()).range(excelExportField.range()).rangeType(excelExportField.rangeType()).build();
+                ExcelCellEntity excelPropertyEntity = ExcelCellEntity.builder().fieldEntity(field).index(excelImportField.index() - 1).required(excelImportField.required()).regex(excelImportField.regex().trim()).regexMessage(excelImportField.regexMessage().trim()).scale(excelImportField.scale()).roundingMode(excelImportField.roundingMode()).range(excelImportField.range()).rangeType(excelImportField.rangeType()).build();
                 propertyList.add(excelPropertyEntity);
             }
         }
@@ -59,22 +53,37 @@ public class ExcelMappingFactory {
      * @param clazz class
      * @return excel属性
      */
-    public static ExcelEntity loadExportExcelClass(Class<?> clazz) {
-        List<ExcelPropertyEntity> propertyList = new ArrayList<ExcelPropertyEntity>();
+    public static ExcelWriteSheetEntity loadExportExcelClass(Class<?> clazz) {
+
+        ExcelWriteSheetEntity excelMapping = new ExcelWriteSheetEntity();
+        ExcelExport annotation = clazz.getAnnotation(ExcelExport.class);
+        if (annotation != null) {
+            String s = annotation.sheetName();
+            excelMapping.setSheetName(s);
+        } else {
+            excelMapping.setSheetName("Sheet");
+
+        }
+        List<ExcelCellEntity> propertyList = new ArrayList<>();
 
         Field[] fields = clazz.getDeclaredFields();
         for (Field field : fields) {
-            ExcelImportFiled excelImportFiled = field.getAnnotation(ExcelImportFiled.class);
-            if (null != excelImportFiled) {
+            ExcelExportField excelExportField = field.getAnnotation(ExcelExportField.class);
+            if (null != excelExportField) {
                 field.setAccessible(true);
-                ExcelPropertyEntity excelPropertyEntity = ExcelPropertyEntity.builder().fieldEntity(field).columnName(excelImportFiled.columnName().trim()).scale(excelImportFiled.scale()).roundingMode(excelImportFiled.roundingMode()).dateFormat(excelImportFiled.dateFormat().trim()).templateCellValue(excelImportFiled.defaultCellValue().trim()).build();
+                Class<?> styleBuilder = excelExportField.dataCellStyleBuilder();
+                Class<?> headerStyleClass = excelExportField.titleCellStyleBuilder();
+
+                CellStyleBuilder dataStyle = CellStyleCache.getInstance().getCellStyleInstance(styleBuilder);
+                CellStyleBuilder headerStyle = CellStyleCache.getInstance().getCellStyleInstance(headerStyleClass);
+                ExcelCellEntity excelPropertyEntity = ExcelCellEntity.builder().fieldEntity(field).index(excelExportField.colIndex()).cellType(excelExportField.cellType()).dateFormat(excelExportField.dataFormat()).dataStyle(dataStyle).headStyle(headerStyle).authWith(excelExportField.autoWidth()).colWidth(excelExportField.colWidth()).columnName(excelExportField.colName().trim()).defaultValue(excelExportField.defaultCellValue().trim()).build();
                 propertyList.add(excelPropertyEntity);
             }
         }
         if (propertyList.isEmpty()) {
-            throw new ExcelTaraException("[{}]类未找到标注@ExportField注解的属性!", clazz.getName());
+            throw new ExcelTaraException("[{}]类未找到标注@ExcelExportField注解的属性!", clazz.getName());
         }
-        ExcelEntity excelMapping = new ExcelEntity();
+
         excelMapping.setPropertyList(propertyList);
         return excelMapping;
     }

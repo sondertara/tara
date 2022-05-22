@@ -3,7 +3,7 @@ package com.sondertara;
 import com.alibaba.fastjson.JSON;
 import com.sondertara.excel.ExcelImportTara;
 import com.sondertara.excel.common.ExcelTaraHelper;
-import com.sondertara.model.ImportParam;
+import com.sondertara.domain.ImportParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

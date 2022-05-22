@@ -5,9 +5,9 @@ import com.sondertara.common.exception.TaraException;
 import com.sondertara.common.util.LocalDateTimeUtils;
 import com.sondertara.common.util.StringUtils;
 import com.sondertara.excel.common.Constant;
-import com.sondertara.excel.entity.ExcelEntity;
+import com.sondertara.excel.entity.ExcelCellEntity;
 import com.sondertara.excel.entity.ExcelHelper;
-import com.sondertara.excel.entity.ExcelPropertyEntity;
+import com.sondertara.excel.entity.ExcelWriteSheetEntity;
 import com.sondertara.excel.entity.PageQueryParam;
 import com.sondertara.excel.function.ExportFunction;
 import org.apache.commons.csv.CSVFormat;
@@ -48,12 +48,12 @@ public class ExcelWriterResolver extends ExcelTemplateWriterResolver {
 
 
 
-    public ExcelWriterResolver(ExcelEntity excelEntity) {
+    public ExcelWriterResolver(ExcelWriteSheetEntity excelEntity) {
         super(excelEntity);
 
     }
 
-    public ExcelWriterResolver(ExcelEntity excelEntity, ExcelHelper excelHelper) {
+    public ExcelWriterResolver(ExcelWriteSheetEntity excelEntity, ExcelHelper excelHelper) {
         super(excelEntity,excelHelper);
 
     }
@@ -87,7 +87,7 @@ public class ExcelWriterResolver extends ExcelTemplateWriterResolver {
                     }
                 }
                 Appendable printWriter = new PrintWriter(csvFile, Constant.CHARSET);
-                CSVPrinter csvPrinter = CSVFormat.EXCEL.builder().setHeader(excelEntity.getPropertyList().stream().map(ExcelPropertyEntity::getColumnName).toArray(String[]::new)).build().print(printWriter);
+                CSVPrinter csvPrinter = CSVFormat.EXCEL.builder().setHeader(excelEntity.getPropertyList().stream().map(ExcelCellEntity::getColumnName).toArray(String[]::new)).build().print(printWriter);
 
                 csvPrinter.flush();
                 csvPrinter.close();
@@ -122,7 +122,7 @@ public class ExcelWriterResolver extends ExcelTemplateWriterResolver {
         SXSSFWorkbook workbook = new SXSSFWorkbook(excelHelper.getRowAccessWindowSize());
         int sheetNo = 1;
         int rowNum = 1;
-        List<ExcelPropertyEntity> propertyList = excelEntity.getPropertyList();
+        List<ExcelCellEntity> propertyList = excelEntity.getPropertyList();
         //generate first row head.
         SXSSFSheet sheet = generateHeader(workbook, propertyList, excelEntity.getSheetName());
 
@@ -195,7 +195,7 @@ public class ExcelWriterResolver extends ExcelTemplateWriterResolver {
         int sheetNo = 1;
         int rowNum = 1;
         SXSSFWorkbook workbook = new SXSSFWorkbook(excelHelper.getRowAccessWindowSize());
-        List<ExcelPropertyEntity> propertyList = excelEntity.getPropertyList();
+        List<ExcelCellEntity> propertyList = excelEntity.getPropertyList();
         SXSSFSheet sheet = generateHeader(workbook, propertyList, excelEntity.getSheetName());
 
         while (true) {
@@ -253,7 +253,7 @@ public class ExcelWriterResolver extends ExcelTemplateWriterResolver {
      * @param entity   data
      * @param property Excel properties
      */
-    private void buildCellValue(SXSSFCell cell, Object entity, ExcelPropertyEntity property) {
+    private void buildCellValue(SXSSFCell cell, Object entity, ExcelCellEntity property) {
         Field field = property.getFieldEntity();
         Object cellValue = null;
         try {
@@ -270,7 +270,7 @@ public class ExcelWriterResolver extends ExcelTemplateWriterResolver {
             cell.setCellValue((((BigDecimal) cellValue).setScale(property.getScale(), property.getRoundingMode())).toString());
 
         } else if (cellValue instanceof Date) {
-            cell.setCellValue(LocalDateTimeUtils.format((Date) cellValue, property.getDateFormat()));
+            cell.setCellValue(LocalDateTimeUtils.format((Date) cellValue, property.getDateFormat().value()));
         } else {
             cell.setCellValue(cellValue.toString());
         }

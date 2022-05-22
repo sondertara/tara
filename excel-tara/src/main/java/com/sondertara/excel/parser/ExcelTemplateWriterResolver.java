@@ -2,23 +2,15 @@ package com.sondertara.excel.parser;
 
 
 import com.sondertara.excel.common.Constant;
-import com.sondertara.excel.entity.ExcelEntity;
+import com.sondertara.excel.entity.ExcelWriteSheetEntity;
 import com.sondertara.excel.entity.ExcelHelper;
-import com.sondertara.excel.entity.ExcelPropertyEntity;
-import org.apache.poi.ss.usermodel.BorderStyle;
+import com.sondertara.excel.entity.ExcelCellEntity;
 import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.FillPatternType;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.HorizontalAlignment;
-import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.xssf.streaming.SXSSFCell;
 import org.apache.poi.xssf.streaming.SXSSFRow;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-import org.apache.poi.xssf.usermodel.DefaultIndexedColorMap;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFColor;
 
 import java.util.HashMap;
 import java.util.List;
@@ -33,17 +25,17 @@ public class ExcelTemplateWriterResolver extends ExcelDefaultWriterResolver {
 
     final ExcelHelper excelHelper;
 
-    final ExcelEntity excelEntity;
+    final ExcelWriteSheetEntity excelEntity;
 
     private XSSFCellStyle headCellStyle;
 
 
-    public ExcelTemplateWriterResolver(ExcelEntity excelEntity) {
+    public ExcelTemplateWriterResolver(ExcelWriteSheetEntity excelEntity) {
         this.excelEntity = excelEntity;
         this.excelHelper = ExcelHelper.builder().build();
     }
 
-    public ExcelTemplateWriterResolver(ExcelEntity excelEntity, ExcelHelper excelHelper) {
+    public ExcelTemplateWriterResolver(ExcelWriteSheetEntity excelEntity, ExcelHelper excelHelper) {
         this.excelEntity = excelEntity;
         this.excelHelper = excelHelper;
     }
@@ -56,12 +48,12 @@ public class ExcelTemplateWriterResolver extends ExcelDefaultWriterResolver {
      */
     public SXSSFWorkbook generateTemplate() {
         SXSSFWorkbook workbook = new SXSSFWorkbook();
-        List<ExcelPropertyEntity> propertyList = excelEntity.getPropertyList();
+        List<ExcelCellEntity> propertyList = excelEntity.getPropertyList();
         SXSSFSheet sheet = generateHeader(workbook, propertyList, excelEntity.getSheetName());
         SXSSFRow row = sheet.createRow(1);
         for (int j = 0; j < propertyList.size(); j++) {
             SXSSFCell cell = row.createCell(j);
-            cell.setCellValue(propertyList.get(j).getTemplateCellValue());
+            cell.setCellValue(propertyList.get(j).getDefaultValue());
             calculateColumnWidth(cell, j);
         }
         sizeColumnWidth(sheet, propertyList.size());
@@ -76,7 +68,7 @@ public class ExcelTemplateWriterResolver extends ExcelDefaultWriterResolver {
      * @param sheetName    sheet name
      * @return SXSSFSheet
      */
-    protected SXSSFSheet generateHeader(SXSSFWorkbook workbook, List<ExcelPropertyEntity> propertyList, String sheetName) {
+    protected SXSSFSheet generateHeader(SXSSFWorkbook workbook, List<ExcelCellEntity> propertyList, String sheetName) {
         SXSSFSheet sheet = workbook.createSheet(sheetName);
         SXSSFRow headerRow = sheet.createRow(0);
         if (Constant.OPEN_CELL_STYLE) {

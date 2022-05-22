@@ -1,8 +1,9 @@
 package com.sondertara.excel;
 
 
-import com.sondertara.excel.annotation.ExcelExportField;
-import com.sondertara.excel.entity.ExcelEntity;
+import com.sondertara.excel.annotation.ExcelImportField;
+import com.sondertara.excel.entity.ExcelReadSheetEntity;
+import com.sondertara.excel.entity.ExcelWriteSheetEntity;
 import com.sondertara.excel.exception.ExcelTaraException;
 import com.sondertara.excel.factory.ExcelMappingFactory;
 import com.sondertara.excel.parser.ExcelReadHandler;
@@ -28,9 +29,9 @@ public class ExcelImportTara {
     /**
      * the class to work
      * <p>
-     * {@link ExcelExportField}
+     * {@link ExcelImportField}
      * <p>
-     * {@link ExcelExportField}
+     * {@link ExcelImportField}
      */
     private Class<?> excelClass;
 
@@ -65,7 +66,7 @@ public class ExcelImportTara {
             if (inputStream == null) {
                 throw new ExcelTaraException("inputStream is null");
             }
-            ExcelEntity excelMapping = ExcelMappingFactory.loadImportExcelClass(excelClass);
+            ExcelReadSheetEntity excelMapping = ExcelMappingFactory.loadImportExcelClass(excelClass);
             ExcelReader excelReader = new ExcelReader(excelClass, excelMapping, 1, enableIndex);
             return new ExcelReadHandler(excelReader, inputStream);
         } catch (Exception e) {
