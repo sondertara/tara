@@ -1,7 +1,9 @@
 package com.sondertara.excel.parser;
 
 import com.sondertara.common.exception.TaraException;
+import com.sondertara.excel.context.AnnotationExcelWriterContext;
 import com.sondertara.excel.entity.PageQueryParam;
+import com.sondertara.excel.enums.ExcelDataType;
 import com.sondertara.excel.function.ExportFunction;
 import org.apache.commons.io.FileUtils;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -10,20 +12,31 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
+/**
+ * @author huangxiaohu
+ */
 public abstract class AbstractExcelWriter<T> implements TaraExcelWriter {
 
     protected PageQueryParam pageQueryParam;
+
+    protected ExcelDataType excelDataType;
     protected ExportFunction<?> exportFunction;
+    protected Map<Class<?>, ExportFunction<?>> excelMapping = new HashMap<>();
 
     protected Class<?> excelClass;
+    private AnnotationExcelWriterContext writerContext;
 
-    public AbstractExcelWriter(Class<?> excelClass) {
-        this.excelClass = excelClass;
+    public AbstractExcelWriter() {
+        writerContext = new AnnotationExcelWriterContext();
     }
-    public AbstractExcelWriter(){
 
-    };
+    protected AbstractExcelWriter(Class<?> clazz) {
+        this.excelClass = clazz;
+
+    }
 
     public void pagination(Integer start, Integer end, Integer pageSize) {
         this.pageQueryParam = PageQueryParam.builder().pageEnd(end).pageStart(start).pageSize(pageSize).build();
@@ -37,10 +50,6 @@ public abstract class AbstractExcelWriter<T> implements TaraExcelWriter {
      * @return the target file
      */
     public abstract T generate();
-
-    public void exportFunction() {
-
-    }
 
 
     @Override
@@ -74,7 +83,23 @@ public abstract class AbstractExcelWriter<T> implements TaraExcelWriter {
         }
     }
 
-    public <R> void exportFunction(ExportFunction<R> exportFunction) {
+    protected <R> void exportFunction(ExportFunction<R> exportFunction) {
         this.exportFunction = exportFunction;
+    }
+
+    public <R> void excelMapping(Class<?> excelClass, ExportFunction<R> exportFunction) {
+        this.excelMapping.put(excelClass, exportFunction);
+    }
+
+    public AnnotationExcelWriterContext getWriterContext() {
+        return writerContext;
+    }
+
+    public ExcelDataType getExcelDataType() {
+        return excelDataType;
+    }
+
+    public void setExcelDataType(ExcelDataType excelDataType) {
+        this.excelDataType = excelDataType;
     }
 }

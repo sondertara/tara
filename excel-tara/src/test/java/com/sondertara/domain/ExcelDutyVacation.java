@@ -29,7 +29,6 @@ public class ExcelDutyVacation {
 
 
     /**
-     *
      * 休假开始时间
      **/
     @ExcelExportField(colIndex = 3, colName = "休假起始时间", dataFormat = @ExcelDataFormat("yyyy/MM/dd"))
@@ -143,8 +142,6 @@ public class ExcelDutyVacation {
 
     @Override
     public String toString() {
-        return "ExcelDutyVacation{" + "userName='" + userName + '\'' + ", vacationType=" + vacationType + ", startDate="
-                + startDate + ", endDate=" + endDate + ", remark='" + remark + '\'' + ", recordType=" + recordType
-                + ", creator=" + creator + ", vacationDays=" + vacationDays + ", state=" + state + '}';
+        return "ExcelDutyVacation{" + "userName='" + userName + '\'' + ", vacationType=" + vacationType + ", startDate=" + startDate + ", endDate=" + endDate + ", remark='" + remark + '\'' + ", recordType=" + recordType + ", creator=" + creator + ", vacationDays=" + vacationDays + ", state=" + state + '}';
     }
 }

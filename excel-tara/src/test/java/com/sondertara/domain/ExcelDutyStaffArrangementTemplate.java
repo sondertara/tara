@@ -105,9 +105,6 @@ public class ExcelDutyStaffArrangementTemplate {
 
     @Override
     public String toString() {
-        return "ExcelDutyStaffArrangementTemplate{" + "dutyName='" + dutyName + '\'' + ", orderName='" + orderName
-                + '\'' + ", dutyDate=" + dutyDate + ", dutyStaffNames='" + dutyStaffNames + '\'' + ", dutyUserNames='"
-                + dutyUserNames + '\'' + ", dutyStaffIds='" + dutyStaffIds + '\'' + ", dutyId=" + dutyId + ", orderId="
-                + orderId + '}';
+        return "ExcelDutyStaffArrangementTemplate{" + "dutyName='" + dutyName + '\'' + ", orderName='" + orderName + '\'' + ", dutyDate=" + dutyDate + ", dutyStaffNames='" + dutyStaffNames + '\'' + ", dutyUserNames='" + dutyUserNames + '\'' + ", dutyStaffIds='" + dutyStaffIds + '\'' + ", dutyId=" + dutyId + ", orderId=" + orderId + '}';
     }
 }

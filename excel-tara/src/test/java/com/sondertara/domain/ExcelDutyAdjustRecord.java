@@ -157,9 +157,6 @@ public class ExcelDutyAdjustRecord {
 
     @Override
     public String toString() {
-        return "ExcelDutyAdjustRecord{" + "dutyName='" + dutyName + '\'' + ", adjustOrder='" + adjustOrder + '\''
-                + ", adjustStaff='" + adjustStaff + '\'' + ", adjustDate=" + adjustDate + ", beAdjustOrder='"
-                + beAdjustOrder + '\'' + ", beAdjustStaff=" + beAdjustStaff + ", beAdjustDate=" + beAdjustDate
-                + ", remark='" + remark + '\'' + ", state=" + state + ", creator=" + creator + '}';
+        return "ExcelDutyAdjustRecord{" + "dutyName='" + dutyName + '\'' + ", adjustOrder='" + adjustOrder + '\'' + ", adjustStaff='" + adjustStaff + '\'' + ", adjustDate=" + adjustDate + ", beAdjustOrder='" + beAdjustOrder + '\'' + ", beAdjustStaff=" + beAdjustStaff + ", beAdjustDate=" + beAdjustDate + ", remark='" + remark + '\'' + ", state=" + state + ", creator=" + creator + '}';
     }
 }

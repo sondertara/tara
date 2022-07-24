@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * @author chenzw
  */
-public class ExcelReaderExecutor<T> extends AbstractExcelReaderExecutor implements ExcelPerRowProcessor {
+public class ExcelReaderExecutor<T> extends AbstractExcelReaderExecutor<T> implements ExcelPerRowProcessor {
 
     private static final Logger logger = LoggerFactory.getLogger(ExcelReaderExecutor.class);
 
@@ -71,8 +71,7 @@ public class ExcelReaderExecutor<T> extends AbstractExcelReaderExecutor implemen
                 return false;
             }
         } catch (Throwable e) {
-            throw new ExcelReaderException(this.curSheetIndex, this.curRowIndex, this.curColIndex,
-                    ExcelFieldUtils.getCellValue(row, this.curColIndex), e.getMessage(), e);
+            throw new ExcelReaderException(this.curSheetIndex, this.curRowIndex, this.curColIndex, ExcelFieldUtils.getCellValue(row, this.curColIndex), e.getMessage(), e);
         } finally {
             logger.debug("finish validate emtpy row! [cost:{}ms] ", (System.currentTimeMillis() - startTimeMillis));
         }
@@ -91,8 +90,7 @@ public class ExcelReaderExecutor<T> extends AbstractExcelReaderExecutor implemen
         try {
             return super.validate(row);
         } catch (Throwable e) {
-            throw new ExcelReaderException(this.curSheetIndex, this.curRowIndex, this.curColIndex,
-                    ExcelFieldUtils.getCellValue(row, this.curColIndex), e.getMessage(), e);
+            throw new ExcelReaderException(this.curSheetIndex, this.curRowIndex, this.curColIndex, ExcelFieldUtils.getCellValue(row, this.curColIndex), e.getMessage(), e);
         } finally {
             logger.debug("finish validate empty row! [cost:{}ms]", (System.currentTimeMillis() - startTimeMillis));
         }
@@ -105,8 +103,7 @@ public class ExcelReaderExecutor<T> extends AbstractExcelReaderExecutor implemen
         try {
             super.format(row);
         } catch (Throwable e) {
-            throw new ExcelReaderException(this.curSheetIndex, this.curRowIndex, this.curColIndex,
-                    ExcelFieldUtils.getCellValue(row, this.curColIndex), e.getMessage(), e);
+            throw new ExcelReaderException(this.curSheetIndex, this.curRowIndex, this.curColIndex, ExcelFieldUtils.getCellValue(row, this.curColIndex), e.getMessage(), e);
         } finally {
             logger.debug("finish format and assign value! [cost:{}ms]", (System.currentTimeMillis() - startTimeMillis));
         }
@@ -118,11 +115,11 @@ public class ExcelReaderExecutor<T> extends AbstractExcelReaderExecutor implemen
     }
 
     @Override
-    public List executeRead() {
+    public List<T> execute() {
         logger.debug("start read!");
         long startTimeMillis = System.currentTimeMillis();
         try {
-            return super.executeRead();
+            return super.execute();
         } finally {
             logger.debug("finish read![total cost:{}ms]", (System.currentTimeMillis() - startTimeMillis));
         }

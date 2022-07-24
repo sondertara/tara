@@ -30,7 +30,7 @@ public class ExcelDefaultWriterResolver {
      * @param cell        cell
      * @param columnIndex index
      */
-    protected void calculateColumnWidth(SXSSFCell cell, Integer columnIndex) {
+    public void calculateColumnWidth(SXSSFCell cell, Integer columnIndex) {
         if (Constant.OPEN_AUTO_COLUMN_WIDTH) {
             String cellValue = cell.getStringCellValue();
             int length = cellValue.getBytes().length;
@@ -50,7 +50,7 @@ public class ExcelDefaultWriterResolver {
      * @param sheet      sheet
      * @param columnSize size
      */
-    protected void sizeColumnWidth(SXSSFSheet sheet, Integer columnSize) {
+    public void sizeColumnWidth(SXSSFSheet sheet, Integer columnSize) {
         if (Constant.OPEN_AUTO_COLUMN_WIDTH) {
             for (int j = 0; j < columnSize; j++) {
                 if (columnWidthMap.get(j) != null) {

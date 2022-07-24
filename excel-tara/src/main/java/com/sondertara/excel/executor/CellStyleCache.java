@@ -9,10 +9,11 @@ import java.util.Map;
 
 /**
  * 单元格样式缓存
+ * @author huangxiaohu
  */
 public class CellStyleCache {
 
-    private static volatile CellStyleCache instance = null;
+    private volatile static CellStyleCache instance = null;
     private final Map<String, CellStyleBuilder> cellStyleCacheMap;
 
 
@@ -37,7 +38,7 @@ public class CellStyleCache {
 
     public CellStyleBuilder getCellStyleInstance(final Class<?> clazz) {
 
-       return this.cellStyleCacheMap.computeIfAbsent(clazz.getName(),key->{
+        return this.cellStyleCacheMap.computeIfAbsent(clazz.getName(), key -> {
             try {
                 if (CellStyleBuilder.class.isAssignableFrom(clazz)) {
                     return (CellStyleBuilder) clazz.newInstance();
@@ -45,7 +46,7 @@ public class CellStyleCache {
                     throw new ExcelWriterException("CellStyle [" + clazz + "] not assignable from CellStyleBuilder.class");
                 }
             } catch (final Exception e) {
-             throw new TaraException("Get CellBuilder error",e);
+                throw new TaraException("Get CellBuilder error", e);
             }
         });
     }

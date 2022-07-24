@@ -1,6 +1,5 @@
 package com.sondertara.domain;
 
-
 import com.sondertara.excel.meta.annotation.ExcelDataFormat;
 import com.sondertara.excel.meta.annotation.ExcelExport;
 import com.sondertara.excel.meta.annotation.ExcelExportField;
@@ -68,7 +67,6 @@ public class HolidayCfg {
 
     @Override
     public String toString() {
-        return "HolidayCfg{" + "holidayDate='" + holidayDate + '\'' + ", holidayName='" + holidayName + '\''
-                + ", isWork='" + isWork + '\'' + ", remark='" + remark + '\'' + '}';
+        return "HolidayCfg{" + "holidayDate='" + holidayDate + '\'' + ", holidayName='" + holidayName + '\'' + ", isWork='" + isWork + '\'' + ", remark='" + remark + '\'' + '}';
     }
 }

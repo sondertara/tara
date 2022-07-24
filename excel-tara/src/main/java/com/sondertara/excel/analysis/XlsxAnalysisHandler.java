@@ -20,7 +20,6 @@ import java.util.List;
  * @author chenzw
  */
 public class XlsxAnalysisHandler extends DefaultHandler {
-
     private StylesTable stylesTable;
     private SharedStrings sst;
     private ExcelPerRowProcessor perRowProcessor;
@@ -90,7 +89,7 @@ public class XlsxAnalysisHandler extends DefaultHandler {
     }
 
     @Override
-    public void endElement(final String uri, final String localName, final String name) throws SAXException {
+    public void endElement(final String uri, final String localName, final String name) {
 
         if (ExcelConstants.DIMENSION_TAG.equals(name)) {
             this.perRowProcessor.processTotalRow(this.totalRow);

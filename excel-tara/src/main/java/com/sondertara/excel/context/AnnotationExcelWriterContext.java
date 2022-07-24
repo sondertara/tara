@@ -4,12 +4,16 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.sondertara.excel.ListUtils;
-import com.sondertara.excel.executor.ExcelExecutor;
+import com.sondertara.excel.entity.PageQueryParam;
 import com.sondertara.excel.executor.ExcelWriterExecutor;
+import com.sondertara.excel.executor.TaraExcelExecutor;
+import com.sondertara.excel.function.ExportFunction;
+import com.sondertara.excel.meta.AnnotationSheet;
 import com.sondertara.excel.meta.annotation.ExcelExport;
 import com.sondertara.excel.meta.model.AnnotationExcelWriterSheetDefinition;
 import com.sondertara.excel.meta.model.ExcelSheetDefinition;
-import com.sondertara.excel.meta.model.ExcelWriterSheetDefinition;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.Workbook;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,12 +26,13 @@ import java.util.concurrent.ExecutionException;
 /**
  * @author chenzw
  */
+@Slf4j
 public class AnnotationExcelWriterContext implements ExcelWriterContext {
 
-    private List<ExcelWriterSheetDefinition> sheetDefinitions;
-    private Map<Integer, ExcelSheetDefinition> sheetDefinitionMap;
-    private ExcelExecutor excelExecutor;
-    private LoadingCache<String, Integer> sheetNameCache;
+    private final List<AnnotationSheet> sheetDefinitions;
+    private final Map<Integer, AnnotationSheet> sheetDefinitionMap;
+    private final TaraExcelExecutor<Workbook> excelExecutor;
+    private final LoadingCache<String, Integer> sheetNameCache;
 
     public AnnotationExcelWriterContext() {
         this.sheetDefinitions = new ArrayList<>();
@@ -35,7 +40,7 @@ public class AnnotationExcelWriterContext implements ExcelWriterContext {
 
         this.sheetNameCache = CacheBuilder.newBuilder().maximumSize(10).build(new CacheLoader<String, Integer>() {
             @Override
-            public Integer load(String key) throws Exception {
+            public Integer load(String key) {
                 return 1;
             }
         });
@@ -44,24 +49,29 @@ public class AnnotationExcelWriterContext implements ExcelWriterContext {
 
 
     @Override
-    public Map<Integer, ExcelSheetDefinition> getSheetDefinitions() {
+    public Map<Integer, AnnotationSheet> getSheetDefinitions() {
         return this.sheetDefinitionMap;
     }
 
     @Override
-    public ExcelExecutor getExecutor() {
+    public TaraExcelExecutor<Workbook> getExecutor() {
         return this.excelExecutor;
     }
 
 
     @Override
-    public void addData(List<?>... datas) {
-        this.addData(Arrays.asList(datas));
+    public void addMapper(Class<?> excelClass, ExportFunction<?> function, PageQueryParam queryParam) {
+        sheetDefinitions.add(new AnnotationExcelWriterSheetDefinition<>(excelClass, function, queryParam));
     }
 
     @Override
-    public void addData(List<List<?>> datas) {
-        for (List<?> data : datas) {
+    public void addData(List<?>... dataList) {
+        this.addData(Arrays.asList(dataList));
+    }
+
+    @Override
+    public void addData(List<List<?>> dataList) {
+        for (List<?> data : dataList) {
             sheetDefinitions.add(new AnnotationExcelWriterSheetDefinition<>(ListUtils.getGenericClass(data), data));
         }
         Collections.sort(sheetDefinitions);
@@ -86,19 +96,20 @@ public class AnnotationExcelWriterContext implements ExcelWriterContext {
 
     /**
      * 获取定义的SheetName
-     * @param sheetDefinition
-     * @return
+     *
+     * @param sheetDefinition the sheet definition
+     * @return the sheet name
      */
-    private String getOriginalSheetName(ExcelSheetDefinition sheetDefinition) {
+    private String getOriginalSheetName(AnnotationSheet sheetDefinition) {
         ExcelExport excelExport = sheetDefinition.getAnnotation(ExcelExport.class);
         return excelExport.sheetName();
     }
 
     /**
      * 生成唯一性的sheetName
-     * @param sheetName
-     * @return
-     * @throws ExecutionException
+     *
+     * @param sheetName the sheet name
+     * @return the unique sheet name
      */
     private String buildUniqueSheetName(String sheetName) {
         try {
@@ -110,9 +121,9 @@ public class AnnotationExcelWriterContext implements ExcelWriterContext {
                 return sheetName;
             }
         } catch (ExecutionException ex) {
-            ex.printStackTrace();
+            log.error("", ex);
+            return "数据";
         }
-        return "数据";
     }
 
     private void buildSheetDefinitionMap() {
@@ -120,9 +131,9 @@ public class AnnotationExcelWriterContext implements ExcelWriterContext {
         sheetNameCache.invalidateAll();
 
         for (int i = 0; i < sheetDefinitions.size(); i++) {
-            ExcelWriterSheetDefinition tSheetDefinition = sheetDefinitions.get(i);
+            AnnotationSheet tSheetDefinition = sheetDefinitions.get(i);
             String originalSheetName = getOriginalSheetName(tSheetDefinition);
-            tSheetDefinition.setSheetName(buildUniqueSheetName(originalSheetName));
+            tSheetDefinition.setName(buildUniqueSheetName(originalSheetName));
             this.sheetDefinitionMap.put(i, tSheetDefinition);
         }
     }

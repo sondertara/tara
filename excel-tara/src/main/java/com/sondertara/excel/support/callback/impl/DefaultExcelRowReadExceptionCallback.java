@@ -5,6 +5,9 @@ import com.sondertara.excel.exception.ExcelReaderException;
 import com.sondertara.excel.meta.model.ExcelRowDefinition;
 import com.sondertara.excel.support.callback.ExcelRowReadExceptionCallback;
 
+/**
+ * @author huangxiaohu
+ */
 public class DefaultExcelRowReadExceptionCallback implements ExcelRowReadExceptionCallback {
 
     @Override

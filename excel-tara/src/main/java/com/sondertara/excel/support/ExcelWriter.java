@@ -1,7 +1,6 @@
 package com.sondertara.excel.support;
 
 import com.sondertara.excel.context.AnnotationExcelWriterContext;
-import com.sondertara.excel.context.ExcelWriterContext;
 import org.apache.poi.ss.usermodel.Workbook;
 
 import javax.servlet.http.HttpServletResponse;
@@ -14,7 +13,7 @@ import java.util.List;
  */
 public class ExcelWriter {
 
-    private ExcelWriterContext writerContext;
+    private AnnotationExcelWriterContext writerContext;
 
     public ExcelWriter() {
         this.writerContext = new AnnotationExcelWriterContext();
@@ -26,6 +25,7 @@ public class ExcelWriter {
 
     /**
      * 实例化模版类
+     *
      * @param clazzs
      * @return
      */
@@ -42,6 +42,7 @@ public class ExcelWriter {
 
     /**
      * 添加数据
+     *
      * @param data
      * @return
      */
@@ -65,7 +66,7 @@ public class ExcelWriter {
 
 
     private Workbook execute() {
-        return this.writerContext.getExecutor().executeWrite();
+        return this.writerContext.getExecutor().execute();
     }
 
 }

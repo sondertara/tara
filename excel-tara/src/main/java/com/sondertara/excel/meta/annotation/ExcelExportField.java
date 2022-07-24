@@ -28,7 +28,7 @@ public @interface ExcelExportField {
      * 列索引（从1开始）
      * @return
      */
-    int colIndex();
+    int colIndex() default -1;
 
 
     /**

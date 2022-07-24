@@ -15,7 +15,7 @@ public class PageQueryParam implements Serializable {
     private final Integer pageStart;
     private final Integer pageEnd;
 
-    public static PageQueryParam.Builder builder() {
+    public static Builder builder() {
         return new Builder();
     }
 

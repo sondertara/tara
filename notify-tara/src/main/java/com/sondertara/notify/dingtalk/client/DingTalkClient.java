@@ -1,6 +1,6 @@
 package com.sondertara.notify.dingtalk.client;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONObject;
 import com.sondertara.common.model.ResultDTO;
 import com.sondertara.common.util.HttpUtils;
 import com.sondertara.common.util.StringUtils;

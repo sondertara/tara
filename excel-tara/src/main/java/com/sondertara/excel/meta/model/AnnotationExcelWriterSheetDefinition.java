@@ -1,9 +1,14 @@
 package com.sondertara.excel.meta.model;
 
 
+import com.sondertara.common.util.CollectionUtils;
 import com.sondertara.excel.ColorUtils;
+import com.sondertara.excel.entity.PageQueryParam;
+import com.sondertara.excel.enums.ExcelDataType;
 import com.sondertara.excel.exception.ExcelException;
 import com.sondertara.excel.exception.ExcelWriterException;
+import com.sondertara.excel.function.ExportFunction;
+import com.sondertara.excel.meta.AnnotationSheet;
 import com.sondertara.excel.meta.annotation.CellRange;
 import com.sondertara.excel.meta.annotation.ExcelComplexHeader;
 import com.sondertara.excel.meta.annotation.ExcelExport;
@@ -21,30 +26,47 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author
  */
-public class AnnotationExcelWriterSheetDefinition<T> implements ExcelWriterSheetDefinition {
-    private Class<T> cls;
+public class AnnotationExcelWriterSheetDefinition<T> extends AnnotationSheet {
+    private PageQueryParam pagination;
+    private ExportFunction<?> queryFunction;
     private Map<Integer, Field> columnFields;
-    private int firstDataRow = 1;
-    private List<?> rowDatas;
-    private int order;
-    private String sheeName;
+
     private int maxRowsPerSheet;
     private boolean isRowStriped;
     private Color rowStripeColor;
     private int titleRowHeight;
     private int dataRowHeight;
     private Map<Integer, ExcelCellStyleDefinition> columnCellStyles;
+    private boolean colIndexEnabled = false;
+
+    private ExcelDataType dataType;
 
 
     public AnnotationExcelWriterSheetDefinition(Class<T> clazz, List<?> rowDatas) {
-        this.cls = clazz;
+        super(clazz);
         this.columnFields = new HashMap<>();
-        this.rowDatas = rowDatas;
+        if (CollectionUtils.isNotEmpty(rowDatas)) {
+            this.rows = rowDatas.stream().map(o -> {
+                TaraRow row = new TaraRow();
+                row.setRowData(o);
+                return row;
+            }).collect(Collectors.toList());
+        }
+        this.dataType = ExcelDataType.DIRECT;
+        init();
+    }
 
+    public AnnotationExcelWriterSheetDefinition(Class<T> clazz, ExportFunction<?> exportFunction, PageQueryParam param) {
+        super(clazz);
+        this.columnFields = new HashMap<>();
+        this.queryFunction = exportFunction;
+        this.pagination = param;
+        this.dataType = ExcelDataType.QUERY;
         init();
     }
 
@@ -57,75 +79,59 @@ public class AnnotationExcelWriterSheetDefinition<T> implements ExcelWriterSheet
 
     @Override
     public <A extends Annotation> A getAnnotation(Class<A> clazz) {
-        return (A)this.cls.getAnnotation(clazz);
+        return (A) this.mappingClass.getAnnotation(clazz);
     }
 
-    @Override
-    public Class<T> getBindingModel() {
-        return this.cls;
-    }
-
-    @Override
-    public Map<Integer, Field> getColumnFields() {
-        return this.columnFields;
-    }
-
-    @Override
-    public Map<Integer, String> getColumnTitles() {
-        return null;
-    }
 
     @Override
     public int getFirstDataRow() {
         return this.firstDataRow;
     }
 
-    @Override
-    public List<?> getRowDatas() {
-        return this.rowDatas;
+    public ExcelDataType dataType() {
+        return this.dataType;
     }
+
 
     @Override
     public int getOrder() {
         return this.order;
     }
 
-    @Override
-    public String getSheetName() {
-        return this.sheeName;
-    }
 
-    @Override
-    public void setSheetName(String sheetName) {
-        this.sheeName = sheetName;
-    }
-
-    @Override
     public int getMaxRowsPerSheet() {
         return this.maxRowsPerSheet;
     }
 
-    @Override
     public boolean isRowStriped() {
         return this.isRowStriped;
     }
 
-    @Override
+
     public Color getRowStripeColor() {
         return this.rowStripeColor;
     }
 
-    @Override
     public int getTitleRowHeight() {
         return this.titleRowHeight;
     }
 
-    @Override
+
     public int getDataRowHeight() {
         return this.dataRowHeight;
     }
 
-    @Override
+
+    public PageQueryParam getPagination() {
+        return this.pagination;
+    }
+
+
+    public ExportFunction<?> getQueryFunction() {
+        return this.queryFunction;
+    }
+
+
     public Map<Integer, ExcelCellStyleDefinition> getColumnCellStyles(Workbook workbook) {
         if (columnCellStyles == null) {
             columnCellStyles = new HashMap<>();
@@ -151,32 +157,39 @@ public class AnnotationExcelWriterSheetDefinition<T> implements ExcelWriterSheet
     }
 
     private void initColumnFields() {
-        Field[] fields = this.cls.getDeclaredFields();
+        Field[] fields = this.mappingClass.getDeclaredFields();
+        int colIndex = 1;
         for (Field field : fields) {
             ExcelExportField exportColumn = field.getAnnotation(ExcelExportField.class);
             if (exportColumn != null) {
-                if (exportColumn.colIndex() < 1) {
-                    throw new ExcelException("The @ExcelExportColumn on Field [" + field.getName() + "] of Class[" + this.cls.getCanonicalName() + "] miss \"colIndex\" attribute or less than 1 !");
-                }
+                if (colIndexEnabled) {
+                    if (exportColumn.colIndex() < 1) {
+                        throw new ExcelException("The @ExcelExportColumn on Field [" + field.getName() + "] of Class[" + this.mappingClass.getCanonicalName() + "] miss \"colIndex\" attribute or less than 1 !");
+                    }
 
-                // exists colIndex
-                if (this.columnFields.containsKey(exportColumn.colIndex())) {
-                    throw new ExcelException("The @ExcelExportColumn on Field [" + field.getName() + "] of Class[" + this.cls.getCanonicalName() + "] has conflicting \"colIndex\" value => [" + exportColumn.colIndex() + "] !");
-                }
+                    // exists colIndex
+                    if (this.columnFields.containsKey(exportColumn.colIndex())) {
+                        throw new ExcelException("The @ExcelExportColumn on Field [" + field.getName() + "] of Class[" + this.mappingClass.getCanonicalName() + "] has conflicting \"colIndex\" value => [" + exportColumn.colIndex() + "] !");
+                    }
 
-                field.setAccessible(true);
-                this.columnFields.put(exportColumn.colIndex(), field);
+                    field.setAccessible(true);
+                    this.columnFields.put(exportColumn.colIndex(), field);
+                } else {
+                    field.setAccessible(true);
+                    this.columnFields.put(colIndex++, field);
+                }
             }
         }
     }
 
     private void initSheetMeta() {
-        ExcelExport excelExport = this.cls.getAnnotation(ExcelExport.class);
+        ExcelExport excelExport = this.mappingClass.getAnnotation(ExcelExport.class);
         if (excelExport == null) {
-            throw new ExcelWriterException("Class[" + this.cls.getCanonicalName() + "] miss @ExcelExport!");
+            throw new ExcelWriterException("Class[" + this.mappingClass.getCanonicalName() + "] miss @ExcelExport!");
         }
         this.order = excelExport.order();
-        this.sheeName = excelExport.sheetName();
+        this.name = excelExport.sheetName();
+        this.colIndexEnabled = excelExport.colIndexEnabled();
         this.maxRowsPerSheet = excelExport.maxRowsPerSheet();
         this.isRowStriped = excelExport.rowStriped();
         if (this.isRowStriped && !StringUtils.isBlank(excelExport.rowStripeColor())) {
@@ -193,7 +206,7 @@ public class AnnotationExcelWriterSheetDefinition<T> implements ExcelWriterSheet
      * @return
      */
     private int calFirstDataRow() {
-        ExcelComplexHeader complexHeader = this.cls.getAnnotation(ExcelComplexHeader.class);
+        ExcelComplexHeader complexHeader = this.mappingClass.getAnnotation(ExcelComplexHeader.class);
         if (complexHeader != null) {
             CellRange[] cellRanges = complexHeader.value();
             int startRow = 1;
@@ -208,16 +221,4 @@ public class AnnotationExcelWriterSheetDefinition<T> implements ExcelWriterSheet
     }
 
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public int compareTo(ExcelSheetDefinition o) {
-        AnnotationExcelWriterSheetDefinition<T> sheetDefinition = (AnnotationExcelWriterSheetDefinition<T>) o;
-        if (this.order == sheetDefinition.getOrder()) {
-            return 0;
-        }
-        if (this.order > sheetDefinition.getOrder()) {
-            return 1;
-        }
-        return -1;
-    }
 }

@@ -1,7 +1,12 @@
 package com.sondertara.excel.lifecycle;
 
+/**
+ * @author huangxiaohu
+ */
 public interface ExcelWriterLifecycle {
-
+    /**
+     * before callback
+     */
     void beforeCallback();
 
     /**
@@ -26,10 +31,14 @@ public interface ExcelWriterLifecycle {
 
     /**
      * 初始化数据
-     * @throws IllegalAccessException
+     *
+     * @throws IllegalAccessException e
      */
     void initData() throws IllegalAccessException;
 
+    /**
+     * after callback
+     */
     void afterCallback();
 
 }

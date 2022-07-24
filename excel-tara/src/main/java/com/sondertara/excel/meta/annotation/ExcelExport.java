@@ -61,4 +61,11 @@ public @interface ExcelExport {
      */
     int dataRowHeight() default 20;
 
+    /**
+     * 是否使用colIndex 指定顺序，默认禁用，使用字段定义顺序
+     *
+     * @return whether enable colIndex
+     */
+    boolean colIndexEnabled() default false;
+
 }

@@ -46,15 +46,13 @@ public class ExcelWriterResolver extends ExcelTemplateWriterResolver {
     private Integer nullCellCount = 0;
 
 
-
-
     public ExcelWriterResolver(ExcelWriteSheetEntity excelEntity) {
         super(excelEntity);
 
     }
 
     public ExcelWriterResolver(ExcelWriteSheetEntity excelEntity, ExcelHelper excelHelper) {
-        super(excelEntity,excelHelper);
+        super(excelEntity, excelHelper);
 
     }
 
@@ -123,13 +121,13 @@ public class ExcelWriterResolver extends ExcelTemplateWriterResolver {
         int sheetNo = 1;
         int rowNum = 1;
         List<ExcelCellEntity> propertyList = excelEntity.getPropertyList();
-        //generate first row head.
+        // generate first row head.
         SXSSFSheet sheet = generateHeader(workbook, propertyList, excelEntity.getSheetName());
 
         // generate data rows
         int firstPageNo = 1;
         while (true) {
-            List<R> data = exportFunction.queryPage(firstPageNo, param.getPageSize());
+            List<R> data = exportFunction.queryPage(firstPageNo, param.getPageSize()).getData();
             if (data == null || data.isEmpty()) {
                 if (rowNum != 1) {
                     if (Constant.OPEN_CELL_STYLE) {
@@ -177,7 +175,6 @@ public class ExcelWriterResolver extends ExcelTemplateWriterResolver {
     }
 
 
-
     /**
      * 构建多Sheet Excel
      *
@@ -199,7 +196,7 @@ public class ExcelWriterResolver extends ExcelTemplateWriterResolver {
         SXSSFSheet sheet = generateHeader(workbook, propertyList, excelEntity.getSheetName());
 
         while (true) {
-            List<R> data = exportFunction.queryPage(pageNo, param.getPageSize());
+            List<R> data = exportFunction.queryPage(pageNo, param.getPageSize()).getData();
             if (data == null || data.isEmpty()) {
                 if (rowNum != 1) {
                     sizeColumnWidth(sheet, propertyList.size());
@@ -238,11 +235,6 @@ public class ExcelWriterResolver extends ExcelTemplateWriterResolver {
         }
         return workbook;
     }
-
-
-
-
-
 
 
     /**

@@ -59,8 +59,7 @@ public class ExcelWriterExecutor extends AbstractExcelWriterExecutor {
         try {
             super.addDataValidation();
         } catch (final Throwable e) {
-            throw new ExcelWriterException(this.curSheetIndex, this.curRowIndex, this.curColIndex, "", "添加单元格校验器失败",
-                    e);
+            throw new ExcelWriterException(this.curSheetIndex, this.curRowIndex, this.curColIndex, "", "添加单元格校验器失败", e);
         } finally {
             logger.debug("finish add data validation! [cost:{}ms]", (System.currentTimeMillis() - startTimeMillis));
         }

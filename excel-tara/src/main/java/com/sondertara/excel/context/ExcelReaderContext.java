@@ -10,18 +10,24 @@ import java.io.InputStream;
  * @author chenzw
  */
 public interface ExcelReaderContext extends ExcelContext {
-
+    /**
+     * get the InputStream
+     *
+     * @return InputStream
+     */
     InputStream getInputStream();
 
     /**
-     * @return
-     * @since 1.0.5
+     * read row error callback
+     *
+     * @return callback
      */
     ExcelRowReadExceptionCallback getExcelRowReadExceptionCallback();
 
     /**
-     * @return
-     * @since 1.0.5
+     * read cell error callback
+     *
+     * @return callback
      */
     ExcelCellReadExceptionCallback getExcelCellReadExceptionCallback();
 

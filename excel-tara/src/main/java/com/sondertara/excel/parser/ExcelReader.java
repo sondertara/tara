@@ -153,7 +153,7 @@ public class ExcelReader extends DefaultHandler {
 
     }
 
-    public void setImportErrorResolver( ImportErrorResolver importErrorResolver) {
+    public void setImportErrorResolver(ImportErrorResolver importErrorResolver) {
         this.importErrorResolver = importErrorResolver;
 
     }
@@ -211,6 +211,7 @@ public class ExcelReader extends DefaultHandler {
      */
     private XMLReader fetchSheetParser(SharedStrings sst) throws SAXException {
         XMLReader parser = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser");
+        parser.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
         this.mSharedStringsTable = sst;
         parser.setContentHandler(this);
         return parser;

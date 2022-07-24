@@ -1,5 +1,7 @@
 package com.sondertara.excel.function;
 
+import com.sondertara.excel.entity.PageResult;
+
 import java.util.List;
 
 /**
@@ -11,5 +13,5 @@ import java.util.List;
 @FunctionalInterface
 public interface ExportFunction<T> {
 
-    List<T> queryPage(Integer pageNo, Integer pageSize);
+    PageResult<T> queryPage(Integer pageNo, Integer pageSize);
 }

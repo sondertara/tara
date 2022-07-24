@@ -22,7 +22,7 @@ public class ExcelXmlCodecUtils {
 
     public static int getTotalRow(String ref) {
         String sTotal = ref.substring(ref.indexOf(":") + 1).toUpperCase().replaceAll("[A-Z]", "");
-        return Integer.valueOf(sTotal);
+        return Integer.parseInt(sTotal);
     }
 
     public static String getDataFormat(int styleIndex, StylesTable stylesTable) {
@@ -34,5 +34,4 @@ public class ExcelXmlCodecUtils {
         }
         return dataFormatString;
     }
-
 }

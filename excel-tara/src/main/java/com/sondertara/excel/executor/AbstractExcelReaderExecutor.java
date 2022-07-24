@@ -7,12 +7,12 @@ import com.sondertara.excel.analysis.XlsxAnalysisHandler;
 import com.sondertara.excel.context.ExcelReaderContext;
 import com.sondertara.excel.exception.ExcelException;
 import com.sondertara.excel.lifecycle.ExcelReaderLifecycle;
+import com.sondertara.excel.meta.AnnotationSheet;
 import com.sondertara.excel.meta.annotation.ExcelImportColumn;
 import com.sondertara.excel.meta.annotation.converter.ExcelConverter;
 import com.sondertara.excel.meta.annotation.validation.ConstraintValidator;
 import com.sondertara.excel.meta.model.ExcelCellDefinition;
 import com.sondertara.excel.meta.model.ExcelRowDefinition;
-import com.sondertara.excel.meta.model.ExcelSheetDefinition;
 import com.sondertara.excel.processor.ExcelPerRowProcessor;
 import com.sondertara.excel.support.converter.AbstractExcelColumnConverter;
 import com.sondertara.excel.support.converter.ExcelDefaultConverter;
@@ -22,7 +22,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.util.ZipSecureFile;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
@@ -43,7 +42,9 @@ import java.util.Map;
 /**
  * @author chenzw
  */
-public abstract class AbstractExcelReaderExecutor<T> implements ExcelReaderLifecycle, ExcelExecutor {
+
+@SuppressWarnings("rawtypes")
+public abstract class AbstractExcelReaderExecutor<T> implements ExcelReaderLifecycle, TaraExcelExecutor<List<T>> {
 
     protected int curSheetIndex = 0;
     protected int curRowIndex;
@@ -51,11 +52,11 @@ public abstract class AbstractExcelReaderExecutor<T> implements ExcelReaderLifec
     protected int totalRows;
 
     protected ExcelReaderContext readerContext;
-    protected ExcelSheetDefinition curSheet;
+    protected AnnotationSheet curSheet;
 
-    private List<T> datas = new ArrayList<>();
-    private Cache<String, List<AbstractExcelColumnValidator>> columnValidatorCache;
-    private Cache<String, List<AbstractExcelColumnConverter>> columnConverterCache;
+    private final List<T> dataList = new ArrayList<>();
+    private final Cache<String, List<AbstractExcelColumnValidator>> columnValidatorCache;
+    private final Cache<String, List<AbstractExcelColumnConverter>> columnConverterCache;
 
 
     public AbstractExcelReaderExecutor(final ExcelReaderContext readerContext) {
@@ -68,23 +69,21 @@ public abstract class AbstractExcelReaderExecutor<T> implements ExcelReaderLifec
 
 
     @Override
-    public List<T> executeRead() {
-        final Map<Integer, ExcelSheetDefinition> sheetDefinitions = readerContext.getSheetDefinitions();
+    public List<T> execute() {
+        final Map<Integer, AnnotationSheet> sheetDefinitions = readerContext.getSheetDefinitions();
         // 延迟解析比率
         ZipSecureFile.setMinInflateRatio(-1.0d);
         try (final OPCPackage pkg = OPCPackage.open(readerContext.getInputStream())) {
             final XSSFReader xssfReader = new XSSFReader(pkg);
             final XMLReader parser = XMLReaderFactory.createXMLReader("com.sun.org.apache.xerces.internal.parsers.SAXParser");
-            final ContentHandler xlsxAnalysisHandler = new XlsxAnalysisHandler(xssfReader.getStylesTable(),
-                    xssfReader.getSharedStringsTable(), getExcelRowProcess(), readerContext.getExcelRowReadExceptionCallback());
+            parser.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            final ContentHandler xlsxAnalysisHandler = new XlsxAnalysisHandler(xssfReader.getStylesTable(), xssfReader.getSharedStringsTable(), getExcelRowProcess(), readerContext.getExcelRowReadExceptionCallback());
             parser.setContentHandler(xlsxAnalysisHandler);
 
             final Iterator<InputStream> sheets = xssfReader.getSheetsData();
             while (sheets.hasNext()) {
                 final InputStream sheet = sheets.next();
 
-              /*  InputStream copy = cn.chenzw.toolkit.io.IOExtUtils.copy(sheet);
-                System.out.println(org.apache.commons.io.IOUtils.toString(copy));*/
 
                 if (sheetDefinitions.containsKey(this.curSheetIndex + 1)) {
                     this.curSheetIndex++;
@@ -93,16 +92,11 @@ public abstract class AbstractExcelReaderExecutor<T> implements ExcelReaderLifec
                 }
                 sheet.close();
             }
-            return datas;
+            return dataList;
         } catch (final IOException | SAXException | OpenXML4JException e) {
             e.printStackTrace();
         }
         return null;
-    }
-
-    @Override
-    public Workbook executeWrite() {
-        throw new UnsupportedOperationException("不支持调用此方法！");
     }
 
     @Override
@@ -118,7 +112,7 @@ public abstract class AbstractExcelReaderExecutor<T> implements ExcelReaderLifec
 
     @Override
     public void preSet(final ExcelRowDefinition row) {
-        final Map<Integer, String> columnTitles = this.curSheet.getColumnTitles();
+        final Map<Integer, String> columnTitles = this.curSheet.getTitles();
         final List<ExcelCellDefinition> excelCells = row.getExcelCells();
 
         for (final ExcelCellDefinition excelCell : excelCells) {
@@ -131,7 +125,7 @@ public abstract class AbstractExcelReaderExecutor<T> implements ExcelReaderLifec
     @Override
     public boolean validate(final ExcelRowDefinition row) {
         final List<ExcelCellDefinition> excelCells = row.getExcelCells();
-        final Map<Integer, Field> columnFields = this.curSheet.getColumnFields();
+        final Map<Integer, Field> columnFields = this.curSheet.getColFields();
         boolean allPassed = true;
         for (final Map.Entry<Integer, Field> columnFieldEntity : columnFields.entrySet()) {
             this.curColIndex = columnFieldEntity.getKey();
@@ -172,17 +166,16 @@ public abstract class AbstractExcelReaderExecutor<T> implements ExcelReaderLifec
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void format(final ExcelRowDefinition row) {
-        final Map<Integer, Field> columnFields = this.curSheet.getColumnFields();
+        final Map<Integer, Field> columnFields = this.curSheet.getColFields();
         final List<ExcelCellDefinition> excelCells = row.getExcelCells();
         boolean allPassed = true;
-        Object instance = null;
+        T instance;
         try {
-            instance = this.curSheet.getBindingModel().newInstance();
-        } catch (final InstantiationException e) {
-            throw new ExcelException("实例化对象" + this.curSheet.getBindingModel() + "失败!");
-        } catch (final IllegalAccessException e) {
-            throw new ExcelException("实例化对象" + this.curSheet.getBindingModel() + "失败!");
+            instance = (T) this.curSheet.getMappingClass().newInstance();
+        } catch (final InstantiationException | IllegalAccessException e) {
+            throw new ExcelException("实例化对象" + this.curSheet.getMappingClass() + "失败!");
         }
 
         for (int i = 0; i < excelCells.size(); i++) {
@@ -211,8 +204,7 @@ public abstract class AbstractExcelReaderExecutor<T> implements ExcelReaderLifec
                 }
 
                 try {
-                    ExcelFieldUtils.setFieldValue(field, instance, cellValue,
-                            field.getAnnotation(ExcelImportColumn.class).dateFormat());
+                    ExcelFieldUtils.setFieldValue(field, instance, cellValue, field.getAnnotation(ExcelImportColumn.class).dateFormat());
                 } catch (final Exception ex) {
                     allPassed = false;
                     readerContext.getExcelCellReadExceptionCallback().call(row, cell, new ExcelException("字段赋值失败!", ex));
@@ -223,7 +215,7 @@ public abstract class AbstractExcelReaderExecutor<T> implements ExcelReaderLifec
 
         // 只有全部字段都解析成功，才将数据添加到返回的列表中
         if (allPassed) {
-            datas.add((T) instance);
+            dataList.add(instance);
         }
     }
 
@@ -256,6 +248,8 @@ public abstract class AbstractExcelReaderExecutor<T> implements ExcelReaderLifec
         return _cellDefinition;
     }
 
+
+    @SuppressWarnings("unchecked")
     private List<AbstractExcelColumnValidator> findColumnValidators(final Field field) {
         List<AbstractExcelColumnValidator> columnValidators = new ArrayList<>();
         final Annotation[] annotations = field.getAnnotations();
@@ -274,11 +268,12 @@ public abstract class AbstractExcelReaderExecutor<T> implements ExcelReaderLifec
         }
 
         if (columnValidators.size() == 0) {
-            columnValidators = Collections.singletonList((AbstractExcelColumnValidator) new ExcelDefaultValidator());
+            columnValidators = Collections.singletonList(new ExcelDefaultValidator());
         }
         return columnValidators;
     }
 
+    @SuppressWarnings("unchecked")
     private List<AbstractExcelColumnConverter> findColumnConverter(final Field field) {
         List<AbstractExcelColumnConverter> columnConverters = new ArrayList<>();
         final Annotation[] annotations = field.getAnnotations();
@@ -297,7 +292,7 @@ public abstract class AbstractExcelReaderExecutor<T> implements ExcelReaderLifec
         }
 
         if (columnConverters.size() == 0) {
-            columnConverters = Collections.singletonList((AbstractExcelColumnConverter) new ExcelDefaultConverter());
+            columnConverters = Collections.singletonList(new ExcelDefaultConverter());
         }
 
         return columnConverters;

@@ -48,8 +48,7 @@ public class ExcelReader {
     }
 
     public <T> List<T> read(Class<T> clazz) {
-        return new AnnotationExcelReaderContext(new ByteArrayInputStream(baos.toByteArray()), clazz, rowReadExceptionCallback, cellReadExceptionCallback).getExecutor()
-                .executeRead();
+        return new AnnotationExcelReaderContext<>(new ByteArrayInputStream(baos.toByteArray()), clazz, rowReadExceptionCallback, cellReadExceptionCallback).getExecutor().execute();
     }
 
 }
