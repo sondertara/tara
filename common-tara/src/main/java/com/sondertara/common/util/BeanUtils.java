@@ -1,53 +1,149 @@
 package com.sondertara.common.util;
 
-import org.dozer.DozerBeanMapper;
+import com.sondertara.common.bean.BeanCopy;
+import com.sondertara.common.lang.Assert;
+import com.sondertara.common.lang.refelect.ReflectUtils;
+import org.apache.commons.beanutils.BeanMap;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
- * @author SonderTara
+ * Bean copy Utils
+ *
+ * @author huangxiaohu
  */
-public class BeanUtils extends org.apache.commons.beanutils.BeanUtils {
+public class BeanUtils {
 
     /**
-     * 简单封装Dozer, 实现Bean<-->Bean深度转换
-     * 依赖包 compile "net.sf.dozer:dozer:5.5.1"
-     * <p>
-     * 1. 持有Mapper的单例.
-     * 2. 返回值类型转换.
-     * 3. 批量转换Collection中的所有对象.
-     * 4. 区分创建新的B对象与将对象A值复制到已存在的B对象两种函数.
-     * <p>
-     * 持有Dozer单例, 避免重复创建DozerMapper消耗资源
+     * 修改spring的BeanUtils,不用null覆盖已有的值
      */
-    private static final DozerBeanMapper dozer = new DozerBeanMapper();
+    public static void copyNonNullProperties(Object source, Object target) {
 
+        Assert.notNull(source, "Source must not be null");
+        Assert.notNull(target, "Target must not be null");
+        BeanCopy.copyToIgnoreNull(source, target);
 
-    /**
-     * 基于Dozer将对象A的值拷贝到对象B中
-     */
-    public static void copyObject(Object source, Object targetObject) {
-        dozer.map(source, targetObject);
     }
 
-    /**
-     * 基于Dozer转换对象的类型
-     */
-    public static <T> T beanToBean(Object source, Class<T> targetClass) {
-        return dozer.map(source, targetClass);
+    public static void copyProperties(Object source, Object target) {
+
+        Assert.notNull(source, "Source must not be null");
+        Assert.notNull(target, "Target must not be null");
+        BeanCopy.copyTo(source, target);
+
     }
 
-    /**
-     * 基于Dozer转换Collection中对象的类型
-     */
-    public static <T> List<T> beansToBeans(Iterable<?> sourceList, Class<T> targetClass) {
-        List<T> targetList = new ArrayList<>();
-        for (Object sourceObject : sourceList) {
-            T targetObject = dozer.map(sourceObject, targetClass);
-            targetList.add(targetObject);
+    public static <T> T beanToBean(Object source, Class<T> target) {
+        return BeanCopy.copy(source, target);
+    }
+
+    public static <T> List<T> beansToBeans(Collection<?> sourceList, Class<T> targetClass) {
+        if (sourceList == null || sourceList.isEmpty()) {
+            return Collections.emptyList();
         }
-        return targetList;
+        List<T> result = new ArrayList<>();
+        BeanCopy.copy(sourceList, result, targetClass);
+        return result;
+    }
+
+    /**
+     * Java bean to map
+     *
+     * @param bean the bean
+     * @param <T>  the type of the bean
+     * @return map
+     */
+    public static <T> Map<String, Object> beanToMap(T bean) {
+        Map<String, Object> map = new HashMap<>(16);
+        if (bean == null) {
+            return map;
+        }
+        BeanMap beanMap = new BeanMap(bean);
+        for (Object key : beanMap.keySet()) {
+            if (beanMap.get(key) != null) {
+                map.put(key.toString(), beanMap.get(key));
+            }
+        }
+        return map;
+    }
+
+    /**
+     * Map to bean
+     *
+     * @param map the original map
+     * @param t   the bean instance
+     * @param <T> the type of the bean
+     * @return the bean instance
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T mapToBean(Map<?, ?> map, T t) {
+        BeanMap beanMap = new BeanMap(t);
+        beanMap.putAll(map);
+        return (T) beanMap.getBean();
+    }
+
+    /**
+     * Map to java bean
+     *
+     * @param map   The original map
+     * @param clazz the class of target bean
+     * @param <T>   the type of the bean
+     * @return the target bean
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T mapToBean(Map<?, ?> map, Class<T> clazz) {
+        T instance = ReflectUtils.newInstance(clazz);
+        BeanMap beanMap = new BeanMap(instance);
+        beanMap.putAll(map);
+        return (T) beanMap.getBean();
+    }
+
+    /**
+     * Convert list of bean to List map
+     *
+     * @param list the list of bean
+     * @param <T>  the type of the bean
+     * @return the list map
+     */
+    public static <T> List<Map<String, Object>> beansToMaps(List<T> list) {
+        List<Map<String, Object>> maps = new ArrayList<>();
+        if (list == null || list.size() == 0) {
+            return null;
+        }
+        for (T bean : list) {
+            if (bean != null) {
+                Map<String, Object> beanToMaps = beanToMap(bean);
+                maps.add(beanToMaps);
+            }
+        }
+        return maps;
+    }
+
+    /**
+     * Convert list of map to list of bean
+     *
+     * @param list the map list
+     * @param t    the class of the bean
+     * @param <T>  the type of the bean
+     * @return the list of bean
+     */
+    public static <T> List<T> mapsToBeans(List<Map<?, Object>> list, Class<T> t) {
+        List<T> beans = new ArrayList<>();
+        if (list == null || list.size() == 0) {
+            return null;
+        }
+        for (Map<?, Object> map : list) {
+            T t1;
+            t1 = ReflectUtils.newInstance(t);
+            T t2 = mapToBean(map, t1);
+            beans.add(t2);
+        }
+        return beans;
     }
 
 }

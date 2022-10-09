@@ -1,7 +1,7 @@
 package com.sondertara.common.util;
 
-
 import com.google.common.collect.Maps;
+import com.sondertara.common.function.Filter;
 
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
@@ -10,21 +10,24 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
-
+import java.util.function.Function;
 
 /**
  * 数组工具类
  *
- * @author Looly
+ * @author huangxiaohu
  */
-public class ArrayUtils {
+public class
+
+ArrayUtils {
 
     /**
      * 数组中元素未找到的下标，值为-1
      */
     public static final int INDEX_NOT_FOUND = -1;
 
-    // ---------------------------------------------------------------------- isEmpty
+    // ----------------------------------------------------------------------
+    // isEmpty
 
     /**
      * 数组是否为空
@@ -136,7 +139,8 @@ public class ArrayUtils {
         return array == null || array.length == 0;
     }
 
-    // ---------------------------------------------------------------------- isNotEmpty
+    // ----------------------------------------------------------------------
+    // isNotEmpty
 
     /**
      * 数组是否为非空
@@ -717,7 +721,6 @@ public class ArrayUtils {
         return arrays;
     }
 
-
     /**
      * 映射键值（参考Python的zip()函数）<br>
      * 例如：<br>
@@ -766,7 +769,8 @@ public class ArrayUtils {
         return zip(keys, values, false);
     }
 
-    // ------------------------------------------------------------------- indexOf and lastIndexOf and contains
+    // ------------------------------------------------------------------- indexOf
+    // and lastIndexOf and contains
 
     /**
      * 返回数组中指定元素所在位置，未找到返回{@link #INDEX_NOT_FOUND}
@@ -1270,7 +1274,8 @@ public class ArrayUtils {
         return indexOf(array, value) > INDEX_NOT_FOUND;
     }
 
-    // ------------------------------------------------------------------- Wrap and unwrap
+    // ------------------------------------------------------------------- Wrap and
+    // unwrap
 
     /**
      * 将原始类型数组包装为包装类型
@@ -2164,7 +2169,6 @@ public class ArrayUtils {
         return Array.getLength(array);
     }
 
-
     /**
      * 以 conjunction 为分隔符将数组转换为字符串
      *
@@ -2424,7 +2428,6 @@ public class ArrayUtils {
             return Arrays.copyOfRange(bytebuffer.array(), bytebuffer.position(), bytebuffer.limit());
         }
     }
-
 
     /**
      * 将集合转为数组
@@ -2728,7 +2731,8 @@ public class ArrayUtils {
         return remove(array, indexOf(array, element));
     }
 
-    // ------------------------------------------------------------------------------------------------------------ Reverse array
+    // ------------------------------------------------------------------------------------------------------------
+    // Reverse array
 
     /**
      * 反转数组，会变更原数组
@@ -3205,7 +3209,6 @@ public class ArrayUtils {
         return min;
     }
 
-
     /**
      * 取最大值
      *
@@ -3535,5 +3538,61 @@ public class ArrayUtils {
         Array.set(array, index1, Array.get(array, index2));
         Array.set(array, index2, tmp);
         return array;
+    }
+
+    /**
+     * 过滤<br>
+     * 过滤过程通过传入的Filter实现来过滤返回需要的元素内容，这个Filter实现可以实现以下功能：
+     *
+     * <pre>
+     * 1、过滤出需要的对象，{@link Filter#accept(Object)}方法返回true的对象将被加入结果集合中
+     * </pre>
+     *
+     * @param <T>    数组元素类型
+     * @param array  数组
+     * @param filter 过滤器接口，用于定义过滤规则，{@code null}返回原集合
+     * @return 过滤后的数组
+     * @since 3.2.1
+     */
+    public static <T> T[] filter(T[] array, Filter<T> filter) {
+        if (null == array || null == filter) {
+            return array;
+        }
+        return edit(array, t -> filter.accept(t) ? t : null);
+    }
+
+    /**
+     * 编辑数组<br>
+     * 编辑过程通过传入的Editor实现来返回需要的元素内容，这个Editor实现可以实现以下功能：
+     *
+     * <pre>
+     * 1、过滤出需要的对象，如果返回{@code
+     * null
+     * }表示这个元素对象抛弃
+     * 2、修改元素对象，返回集合中为修改后的对象
+     * </pre>
+     * <p>
+     *
+     * @param <T>    数组元素类型
+     * @param array  数组
+     * @param editor 编辑器接口，{@code null}返回原集合
+     * @return 编辑后的数组
+     * @since 5.3.3
+     */
+    public static <T> T[] edit(T[] array, Function<T, T> editor) {
+        if (null == editor) {
+            return array;
+        }
+
+        final ArrayList<T> list = new ArrayList<>(array.length);
+        T modified;
+        for (T t : array) {
+            modified = editor.apply(t);
+            if (null != modified) {
+                list.add(modified);
+            }
+        }
+        final T[] result = newArray(array.getClass().getComponentType(), list.size());
+        return list.toArray(result);
     }
 }

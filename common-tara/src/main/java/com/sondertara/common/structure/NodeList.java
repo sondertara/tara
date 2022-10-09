@@ -26,14 +26,12 @@ public class NodeList<E> {
         }
     }
 
-
     private int size;
-
 
     private final Node head;
 
     public NodeList() {
-        //empty head
+        // empty head
         head = new Node(null, null);
     }
 
@@ -52,7 +50,7 @@ public class NodeList<E> {
         if (index < 0 || index > size) {
             throw new IllegalArgumentException("index out bounds");
         }
-        //临时节点指向头节点
+        // 临时节点指向头节点
         Node tempNode = head;
         for (int i = 0; i < index; i++) {
             tempNode = tempNode.next;
@@ -150,7 +148,7 @@ public class NodeList<E> {
      * not contains
      *
      * @param data element
-     * @return is the element is not in the  list
+     * @return is the element is not in the list
      */
     public boolean notContains(E data) {
         return !contains(data);
@@ -159,7 +157,7 @@ public class NodeList<E> {
     /**
      * is empty
      *
-     * @return if  the list size is zero
+     * @return if the list size is zero
      */
     public boolean isEmpty() {
         return size == 0;
@@ -199,7 +197,6 @@ public class NodeList<E> {
     public void setLast(E data) {
         set(size - 1, data);
     }
-
 
     /**
      * remove by index

@@ -2,12 +2,13 @@ package com.sondertara.common.crypto;
 
 import com.sondertara.common.exception.TaraException;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 
 /**
  * @author huangxiaohu
@@ -18,7 +19,6 @@ public class DESedeUtils {
 
     static final String DES_EDE = "DESede";
 
-
     /**
      * 生成秘钥
      */
@@ -26,11 +26,11 @@ public class DESedeUtils {
 
         KeyGenerator keyGen;
         try {
-            //秘钥生成器
+            // 秘钥生成器
             keyGen = KeyGenerator.getInstance(DES_EDE);
-            //初始秘钥生成器
+            // 初始秘钥生成器
             keyGen.init(168, new SecureRandom());
-            //生成秘钥
+            // 生成秘钥
             SecretKey secretKey = keyGen.generateKey();
             return secretKey.getEncoded();
         } catch (NoSuchAlgorithmException e) {

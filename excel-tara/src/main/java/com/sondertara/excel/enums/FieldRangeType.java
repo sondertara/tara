@@ -1,5 +1,9 @@
 package com.sondertara.excel.enums;
 
+/**
+ * @author huangxiaohu
+ */
+
 public enum FieldRangeType {
     /**
      * range[]

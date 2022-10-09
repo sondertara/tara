@@ -1,15 +1,15 @@
 package com.sondertara.common.util;
 
-
 import org.apache.commons.codec.binary.Base64;
+
+import java.security.MessageDigest;
+import java.security.SecureRandom;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import java.security.MessageDigest;
-import java.security.SecureRandom;
 
 /**
  * encrypt util.
@@ -40,10 +40,10 @@ public class EncryptUtils {
     public static volatile EncryptUtils me;
 
     private EncryptUtils() {
-        //单例
+        // 单例
     }
 
-    //双重锁
+    // 双重锁
     public static EncryptUtils getInstance() {
         if (me == null) {
             synchronized (EncryptUtils.class) {

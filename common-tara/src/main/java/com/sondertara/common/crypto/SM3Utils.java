@@ -119,7 +119,8 @@ public class SM3Utils {
         System.out.println("        带密钥加密后的密文：" + hexStrByKey);
 
         System.out.println("明文(带密钥)与密文校验结果：" + SM3Utils.verify(srcStr, key, hexStrByKey));
-        System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+        System.out.println(
+                "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
         // ******************************无密钥的加密及校验******************************************
         String hexStrNoKey = SM3Utils.encrypt(srcStr);
         System.out.println("        不带密钥加密后的密文：" + hexStrNoKey);

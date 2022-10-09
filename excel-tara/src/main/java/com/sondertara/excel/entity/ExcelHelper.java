@@ -4,7 +4,6 @@ import com.sondertara.excel.common.Constant;
 
 import java.io.Serializable;
 
-
 /**
  * @author SonderTara
  */
@@ -13,8 +12,8 @@ public class ExcelHelper implements Serializable {
     private Boolean openAutoColumWidth;
     private Integer rowAccessWindowSize;
 
-    public static ExcelHelper.ExcelHelperBuilder builder() {
-        return new ExcelHelper.ExcelHelperBuilder();
+    public static ExcelHelperBuilder builder() {
+        return new ExcelHelperBuilder();
     }
 
     public Integer getRecordCountPerSheet() {
@@ -43,17 +42,17 @@ public class ExcelHelper implements Serializable {
         ExcelHelperBuilder() {
         }
 
-        public ExcelHelper.ExcelHelperBuilder recordCountPerSheet(Integer recordCountPerSheet) {
+        public ExcelHelperBuilder recordCountPerSheet(Integer recordCountPerSheet) {
             this.recordCountPerSheet = recordCountPerSheet;
             return this;
         }
 
-        public ExcelHelper.ExcelHelperBuilder openAutoColumWidth(Boolean openAutoColumWidth) {
+        public ExcelHelperBuilder openAutoColumWidth(Boolean openAutoColumWidth) {
             this.openAutoColumWidth = openAutoColumWidth;
             return this;
         }
 
-        public ExcelHelper.ExcelHelperBuilder rowAccessWindowSize(Integer rowAccessWindowSize) {
+        public ExcelHelperBuilder rowAccessWindowSize(Integer rowAccessWindowSize) {
             this.rowAccessWindowSize = rowAccessWindowSize;
             return this;
         }
@@ -74,7 +73,9 @@ public class ExcelHelper implements Serializable {
 
         @Override
         public String toString() {
-            return "ExcelHelper.ExcelHelperBuilder(recordCountPerSheet=" + this.recordCountPerSheet + ", openAutoColumWidth=" + this.openAutoColumWidth + ", rowAccessWindowSize=" + this.rowAccessWindowSize + ")";
+            return "ExcelHelper.ExcelHelperBuilder(recordCountPerSheet=" + this.recordCountPerSheet
+                    + ", openAutoColumWidth=" + this.openAutoColumWidth + ", rowAccessWindowSize="
+                    + this.rowAccessWindowSize + ")";
         }
     }
 }

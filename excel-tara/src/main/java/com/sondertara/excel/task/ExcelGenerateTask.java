@@ -1,11 +1,10 @@
 package com.sondertara.excel.task;
 
 import com.sondertara.common.util.LocalDateTimeUtils;
-import com.sondertara.excel.annotation.ExcelImportFiled;
 import com.sondertara.excel.common.Constant;
-import com.sondertara.excel.entity.ExcelEntity;
-import com.sondertara.excel.entity.ExcelPropertyEntity;
+import com.sondertara.excel.entity.ExcelCellEntity;
 import com.sondertara.excel.entity.ExcelQueryEntity;
+import com.sondertara.excel.entity.ExcelWriteSheetEntity;
 import com.sondertara.excel.entity.PageQueryParam;
 import com.sondertara.excel.function.ExportFunction;
 import org.apache.commons.csv.CSVFormat;
@@ -41,18 +40,17 @@ public class ExcelGenerateTask<R> implements ExcelRunnable {
     private final AtomicBoolean flag = new AtomicBoolean(true);
     private final AtomicInteger page = new AtomicInteger(1);
 
-
     private final PageQueryParam param;
 
     private final ExportFunction<R> exportFunction;
 
     private final BlockingQueue<ExcelQueryEntity<R>> queue;
-    private final ExcelEntity excelEntity;
+    private final ExcelWriteSheetEntity excelEntity;
 
     private final String fileName;
 
-
-    public ExcelGenerateTask(PageQueryParam param, ExportFunction<R> exportFunction, ExcelEntity e, String fileName) {
+    public ExcelGenerateTask(PageQueryParam param, ExportFunction<R> exportFunction, ExcelWriteSheetEntity e,
+            String fileName) {
         this.param = param;
         this.exportFunction = exportFunction;
         this.excelEntity = e;
@@ -97,7 +95,7 @@ public class ExcelGenerateTask<R> implements ExcelRunnable {
                 return;
             }
             logger.info("start query page[{}]...", queryPage);
-            List<R> data = exportFunction.apply(queryPage);
+            List<R> data = exportFunction.queryPage(queryPage, param.getPageSize()).getData();
             logger.info("end query page[{}]...", queryPage);
             if (data == null || data.isEmpty()) {
                 logger.warn("query data is empty,query exit !");
@@ -111,7 +109,8 @@ public class ExcelGenerateTask<R> implements ExcelRunnable {
             entity.setPage(queryPage);
             queue.put(entity);
             if (data.size() < param.getPageSize()) {
-                logger.warn("current data  size is [{}],less than pageSize[{}],is the last page,query exit!", data.size(), param.getPageSize());
+                logger.warn("current data  size is [{}],less than pageSize[{}],is the last page,query exit!",
+                        data.size(), param.getPageSize());
                 super.isDone = true;
                 flag.set(false);
                 await();
@@ -160,7 +159,8 @@ public class ExcelGenerateTask<R> implements ExcelRunnable {
                         throw new IOException("Create directory:" + file.getAbsolutePath() + " error");
                     }
                 }
-                Appendable printWriter = new PrintWriter(workPath + excelQueryEntity.getPage() + ".csv", Constant.CHARSET);
+                Appendable printWriter = new PrintWriter(workPath + excelQueryEntity.getPage() + ".csv",
+                        Constant.CHARSET);
                 CSVPrinter csvPrinter = CSVFormat.EXCEL.print(printWriter);
 
                 final List<R> list = excelQueryEntity.getData();
@@ -192,14 +192,14 @@ public class ExcelGenerateTask<R> implements ExcelRunnable {
      * build data row except first row in Excel.
      *
      * @param entity      data
-     * @param excelEntity excel entity via {@link ExcelImportFiled}
+     * @param excelEntity excel entity via
+     *                    {@link com.sondertara.excel.meta.annotation.ExcelExportField}
      */
-    private List<String> buildRow(Object entity, ExcelEntity excelEntity) throws IllegalAccessException {
+    private List<String> buildRow(Object entity, ExcelWriteSheetEntity excelEntity) throws IllegalAccessException {
 
-
-        List<ExcelPropertyEntity> propertyList = excelEntity.getPropertyList();
+        List<ExcelCellEntity> propertyList = excelEntity.getPropertyList();
         List<String> list = new ArrayList<>(propertyList.size());
-        for (ExcelPropertyEntity property : propertyList) {
+        for (ExcelCellEntity property : propertyList) {
             String cell;
             Field field = property.getFieldEntity();
             Object cellValue = field.get(entity);
@@ -209,7 +209,7 @@ public class ExcelGenerateTask<R> implements ExcelRunnable {
             } else if (cellValue instanceof BigDecimal) {
                 cell = (((BigDecimal) cellValue).setScale(property.getScale(), property.getRoundingMode())).toString();
             } else if (cellValue instanceof Date) {
-                cell = LocalDateTimeUtils.format((Date) cellValue, property.getDateFormat());
+                cell = LocalDateTimeUtils.format((Date) cellValue, property.getDateFormat().value());
             } else {
                 cell = cellValue.toString();
             }

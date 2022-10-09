@@ -16,10 +16,9 @@ import java.util.Objects;
  * @author huangxiaohu
  * @version 1.0
  * @since 1.0
- * date 2019/11/8 1:00 下午
+ *        date 2019/11/8 1:00 下午
  **/
 public class FileUtils {
-
 
     /**
      * 递归删除文件（夹）
@@ -93,7 +92,6 @@ public class FileUtils {
 
         return Files.readAttributes(new File(filePath).toPath(), BasicFileAttributes.class);
 
-
     }
 
     /**
@@ -104,7 +102,6 @@ public class FileUtils {
     public static LocalDateTime getTimeCreate(String filePath) throws IOException {
 
         return LocalDateTime.ofInstant(getAttributes(filePath).creationTime().toInstant(), ZoneId.systemDefault());
-
 
     }
 
@@ -117,8 +114,6 @@ public class FileUtils {
 
         return LocalDateTime.ofInstant(getAttributes(filePath).lastModifiedTime().toInstant(), ZoneId.systemDefault());
 
-
     }
-
 
 }

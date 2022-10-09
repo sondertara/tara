@@ -3,12 +3,13 @@ package com.sondertara.common.crypto;
 import com.sondertara.common.exception.TaraException;
 import org.apache.commons.codec.binary.Base64;
 
+import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
+
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.DESKeySpec;
-import java.nio.charset.StandardCharsets;
-import java.security.SecureRandom;
 
 /**
  * DES加密说明
@@ -22,7 +23,6 @@ import java.security.SecureRandom;
 public class DESUtils {
 
     static final String DES = "DES";
-
 
     /**
      * 加密过程
@@ -135,7 +135,6 @@ public class DESUtils {
         }
         return password;
     }
-
 
     public static void main(String[] args) {
 

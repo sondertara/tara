@@ -1,7 +1,6 @@
 package com.sondertara.excel.function;
 
-import java.util.List;
-import java.util.function.Function;
+import com.sondertara.excel.entity.PageResult;
 
 /**
  * 分页查询
@@ -9,5 +8,13 @@ import java.util.function.Function;
  * @param <T>
  * @author huangxiaohu
  */
-public interface ExportFunction<T>  extends Function<Integer, List<T>> {
+@FunctionalInterface
+public interface ExportFunction<T> {
+    /**
+     * Query Page Data
+     * @param pageNo page
+     * @param pageSize page size
+     * @return  page
+     */
+    PageResult<T> queryPage(Integer pageNo, Integer pageSize);
 }

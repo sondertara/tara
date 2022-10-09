@@ -16,7 +16,6 @@ import java.util.UUID;
  */
 public class ExecOsCommand {
 
-
     public static ResultDTO<String> getCommandResult(ProcessWrapper command) {
 
         OSType osType = OSType.getOsType();
@@ -54,7 +53,6 @@ public class ExecOsCommand {
             File file = new File(sb.append("_").append(UUID.randomUUID()).append(suffix).toString());
             FileUtils.writeStringToFile(file, command, StandardCharsets.UTF_8);
 
-
             FileUtils.writeStringToFile(file, cleanupScript(command), StandardCharsets.UTF_8);
             String path = file.getAbsolutePath();
             if (!isWindows) {
@@ -70,7 +68,8 @@ public class ExecOsCommand {
         return Paths.get(workingDirectory, scriptFileName);
     }
 
-    private void createScript(String workingDirectory, String scriptFileName, Boolean isWindows, String scriptValue) throws IOException, InterruptedException {
+    private void createScript(String workingDirectory, String scriptFileName, Boolean isWindows, String scriptValue)
+            throws IOException, InterruptedException {
         Path scriptPath = getScriptPath(workingDirectory, scriptFileName);
         FileUtils.writeStringToFile(scriptPath.toFile(), cleanupScript(scriptValue), StandardCharsets.UTF_8);
 
@@ -84,12 +83,10 @@ public class ExecOsCommand {
         return scriptValue.replaceAll("(\\r\\n|\\n|\\r)", System.getProperty("line.separator"));
     }
 
-
     private static void executeCommand(String... command) throws IOException, InterruptedException {
         ProcessBuilder processBuilder = new ProcessBuilder(command);
         Process process = processBuilder.start();
         process.waitFor();
     }
-
 
 }

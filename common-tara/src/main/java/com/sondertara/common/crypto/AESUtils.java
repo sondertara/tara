@@ -1,16 +1,16 @@
 package com.sondertara.common.crypto;
 
-
 import com.sondertara.common.exception.TaraException;
 import com.sondertara.common.util.HexUtils;
+
+import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 
 /**
  * AES加密与解密工具类
@@ -88,7 +88,6 @@ public class AESUtils {
         }
         byte[] bytesResult = HexUtils.decodeHex(cipherText);
 
-
         try {
 
             byte[] bytes = initKey(key, keySize);
@@ -101,7 +100,6 @@ public class AESUtils {
             throw new TaraException("AES decrypt error", e);
         }
     }
-
 
     public static void main(String[] args) {
         try {

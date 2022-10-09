@@ -1,6 +1,6 @@
 package com.sondertara.common.util;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson2.JSON;
 import com.sondertara.common.exception.TaraException;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
@@ -33,9 +33,6 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLException;
-import javax.net.ssl.SSLHandshakeException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -56,6 +53,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLException;
+import javax.net.ssl.SSLHandshakeException;
 
 /**
  * @author huangxiaohu
@@ -192,7 +193,8 @@ public class HttpUtils {
             // set property
             conn.setRequestProperty("accept", "*/*");
             conn.setRequestProperty("connection", "Keep-Alive");
-            conn.setRequestProperty("user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36");
+            conn.setRequestProperty("user-agent",
+                    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36");
             conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
 
             // set timeout
@@ -249,7 +251,8 @@ public class HttpUtils {
         try {
             if (param != null && !param.isEmpty()) {
                 for (Entry<String, Object> entry : param.entrySet()) {
-                    buffer.append(entry.getKey()).append("=").append(URLEncoder.encode(String.valueOf(entry.getValue()), "UTF-8"))
+                    buffer.append(entry.getKey()).append("=")
+                            .append(URLEncoder.encode(String.valueOf(entry.getValue()), "UTF-8"))
                             .append("&");
                 }
                 buffer.deleteCharAt(buffer.length() - 1);
@@ -345,7 +348,7 @@ public class HttpUtils {
             HttpGet httpGet = new HttpGet(url);
             CloseableHttpResponse httpResponse = httpClient.execute(httpGet);
 
-            //判断网络连接状态码是否正常(0--200都数正常)
+            // 判断网络连接状态码是否正常(0--200都数正常)
             if (httpResponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
                 System.out.println("GET Response Status: " + httpResponse.getStatusLine().getStatusCode());
                 System.out.println("httpClient request result:" + result);
@@ -431,7 +434,6 @@ public class HttpUtils {
     }
 
     public static String postForm(String url, Map<String, Object> param) throws TaraException {
-
 
         OutputStream out = null;
         InputStream in = null;
@@ -599,7 +601,8 @@ public class HttpUtils {
          * retry逻辑
          */
         @Override
-        public boolean retryRequest(HttpResponse response, int executionCount, org.apache.http.protocol.HttpContext context) {
+        public boolean retryRequest(HttpResponse response, int executionCount,
+                org.apache.http.protocol.HttpContext context) {
             if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK && executionCount <= this.executionCount) {
                 System.out.println(String.format("响应码为:%s,需要重新请求", response.getStatusLine().getStatusCode()));
 

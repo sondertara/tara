@@ -1,12 +1,17 @@
 package com.sondertara;
 
-import com.sondertara.excel.ExcelExportTara;
+import com.sondertara.domain.UserDTO;
+import com.sondertara.domain.UserInfoVo;
+import com.sondertara.excel.boot.ExcelBeanWriter;
 import com.sondertara.excel.entity.PageQueryParam;
-import com.sondertara.model.UserDTO;
-import com.sondertara.model.UserInfoVo;
+import com.sondertara.excel.entity.PageResult;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -26,21 +31,26 @@ public class ExcelExportDemo {
 
     private final AtomicInteger atomicInteger = new AtomicInteger(0);
 
-    public void exportCsvDemo() {
 
+    @Test
+    public void export() throws Exception {
+
+        File file = new File("test.xlsx");
+        if (!file.exists()) {
+            file.createNewFile();
+        }
+        OutputStream out = new FileOutputStream(file, false);
         PageQueryParam query = PageQueryParam.builder().build();
-        String path = ExcelExportTara.of(UserInfoVo.class).query(query, pageNo -> {
-
+        ExcelBeanWriter.fromQuery().mapper(UserInfoVo.class).query((pageNo, pageSize) -> {
             // query list data from db
             List<UserDTO> list = new ArrayList<>(200);
-            for (int i = 0; i < 200; i++) {
+            for (int i = 0; i < pageSize; i++) {
                 UserDTO userDTO = new UserDTO();
 
                 userDTO.setA(i);
                 userDTO.setN(pageNo + "测试姓名" + i);
                 userDTO.setD("测试地址" + i);
                 list.add(userDTO);
-
                 if (pageNo == 5 && i == 150) {
                     break;
                 }
@@ -48,21 +58,14 @@ public class ExcelExportDemo {
             atomicInteger.getAndAdd(list.size());
 
             // convert to target data list
-            return list.stream().map(u -> {
+            return new PageResult<>(pageNo, pageSize, 1000L, list.stream().map(u -> {
                 UserInfoVo userInfoVo = new UserInfoVo();
                 userInfoVo.setAddress(u.getD());
                 userInfoVo.setAge(u.getA());
                 userInfoVo.setName(u.getN());
                 return userInfoVo;
-            }).collect(Collectors.toList());
+            }).collect(Collectors.toList()));
+        }).pagination(1, 10, 200).to(out);
 
-        }).exportCsv("Excel-Test");
-        logger.info("path:{}", path);
-        logger.info("data list size:{}", atomicInteger.get());
-        //FileUtils.remove(path);
-    }
-
-    public static void main(String[] args) {
-        new ExcelExportDemo().exportCsvDemo();
     }
 }

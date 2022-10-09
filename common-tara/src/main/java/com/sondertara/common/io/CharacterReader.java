@@ -55,7 +55,8 @@ public class CharacterReader {
     }
 
     /**
-     * Returns the character at the pos subscript, and pos + 1, and finally returns the character
+     * Returns the character at the pos subscript, and pos + 1, and finally returns
+     * the character
      *
      * @throws IOException IOException
      * @return Char

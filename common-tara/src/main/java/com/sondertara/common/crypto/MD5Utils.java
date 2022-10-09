@@ -77,7 +77,6 @@ public class MD5Utils {
         }
     }
 
-
     /**
      * 对字符串 MD5 加盐值加密
      *
@@ -123,7 +122,6 @@ public class MD5Utils {
         }
         return encrypt(result);
     }
-
 
     public static void main(String[] args) {
         String srcStr = "春宵一刻值千金，花有清香月有阴；歌管楼台声细细，秋千院落夜沉沉！";

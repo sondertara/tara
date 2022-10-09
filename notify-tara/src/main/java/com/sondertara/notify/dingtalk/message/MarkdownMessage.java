@@ -1,6 +1,6 @@
 package com.sondertara.notify.dingtalk.message;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson2.JSON;
 import com.sondertara.common.exception.TaraException;
 
 import java.util.ArrayList;
@@ -11,9 +11,19 @@ import java.util.Map;
 /**
  * @author huangxiaohu
  */
-public class MarkdownMessage implements DingTalkMessage {
+public class MarkdownMessage implements NotifyMessage {
 
     private String title;
+
+    private AtNode at;
+
+    public AtNode getAt() {
+        return at;
+    }
+
+    public void setAt(AtNode at) {
+        this.at = at;
+    }
 
     private List<String> items = new ArrayList<String>();
 
@@ -103,8 +113,10 @@ public class MarkdownMessage implements DingTalkMessage {
         for (String item : items) {
             markdownText.append(item + "  \n ");
         }
+
         markdown.put("text", markdownText.toString());
         result.put("markdown", markdown);
+        result.put("at", JSON.toJSON(at));
 
         return JSON.toJSONString(result);
     }

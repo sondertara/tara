@@ -10,7 +10,6 @@ public class BigDecimalUtils {
 
     private static final String TWO_DECIMAL = "0.00";
 
-
     private static final DecimalFormat df = new DecimalFormat("0.00");
 
     /**

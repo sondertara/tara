@@ -30,7 +30,7 @@ public class TreeUtils {
      */
     public static <T extends TreeNode<?, T>> List<T> generateTrees(List<T> nodes) {
         List<T> roots = new ArrayList<>();
-        for (Iterator<T> ite = nodes.iterator(); ite.hasNext(); ) {
+        for (Iterator<T> ite = nodes.iterator(); ite.hasNext();) {
             T node = ite.next();
             if (node.root()) {
                 roots.add(node);
@@ -52,7 +52,7 @@ public class TreeUtils {
     public static <T extends TreeNode<?, T>> void setChildren(T parent, List<T> nodes) {
         List<T> children = new ArrayList<>();
         Object parentId = parent.id();
-        for (Iterator<T> ite = nodes.iterator(); ite.hasNext(); ) {
+        for (Iterator<T> ite = nodes.iterator(); ite.hasNext();) {
             T node = ite.next();
             if (Objects.equals(node.pid(), parentId)) {
                 children.add(node);
@@ -134,7 +134,8 @@ public class TreeUtils {
         return result;
     }
 
-    private static <T extends TreeNode<?, T>> void iteratorNode(T root, Stack<String> row, List<List<String>> result, List<String> keys) {
+    private static <T extends TreeNode<?, T>> void iteratorNode(T root, Stack<String> row, List<List<String>> result,
+            List<String> keys) {
 
         try {
             Class<?> rootClass = root.getClass();

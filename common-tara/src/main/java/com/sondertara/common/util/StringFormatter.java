@@ -1,10 +1,9 @@
 package com.sondertara.common.util;
 
-
 /**
  * 字符串格式化工具
  *
- * @author Looly
+ * @author huangxiaohu
  */
 public class StringFormatter {
 
