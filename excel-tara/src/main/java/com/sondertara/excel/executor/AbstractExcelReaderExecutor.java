@@ -3,6 +3,7 @@ package com.sondertara.excel.executor;
 import com.sondertara.excel.analysis.XlsxAnalysisHandler;
 import com.sondertara.excel.context.ExcelReaderContext;
 import com.sondertara.excel.exception.ExcelException;
+import com.sondertara.excel.exception.ExcelReaderException;
 import com.sondertara.excel.lifecycle.ExcelReaderLifecycle;
 import com.sondertara.excel.meta.annotation.ExcelImportColumn;
 import com.sondertara.excel.meta.annotation.converter.ExcelConverter;
@@ -27,8 +28,9 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.XMLReaderFactory;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParserFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
@@ -68,12 +70,9 @@ public abstract class AbstractExcelReaderExecutor<T> implements ExcelReaderLifec
         ZipSecureFile.setMinInflateRatio(-1.0d);
         try (final OPCPackage pkg = OPCPackage.open(readerContext.getInputStream())) {
             final XSSFReader xssfReader = new XSSFReader(pkg);
-            final XMLReader parser = XMLReaderFactory
-                    .createXMLReader("com.sun.org.apache.xerces.internal.parsers.SAXParser");
+            final XMLReader parser = SAXParserFactory.newInstance().newSAXParser().getXMLReader();
             parser.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-            final ContentHandler xlsxAnalysisHandler = new XlsxAnalysisHandler(xssfReader.getStylesTable(),
-                    xssfReader.getSharedStringsTable(), getExcelRowProcess(),
-                    readerContext.getExcelRowReadExceptionCallback());
+            final ContentHandler xlsxAnalysisHandler = new XlsxAnalysisHandler(xssfReader.getStylesTable(), xssfReader.getSharedStringsTable(), getExcelRowProcess(), readerContext.getExcelRowReadExceptionCallback());
             parser.setContentHandler(xlsxAnalysisHandler);
             // InputStream data = xssfReader.getWorkbookData();
             // parser.parse(new InputSource(data));
@@ -88,10 +87,9 @@ public abstract class AbstractExcelReaderExecutor<T> implements ExcelReaderLifec
                 sheet.close();
             }
             return dataList;
-        } catch (final IOException | SAXException | OpenXML4JException e) {
-            e.printStackTrace();
+        } catch (final IOException | SAXException | OpenXML4JException | ParserConfigurationException e) {
+            throw new ExcelReaderException(e);
         }
-        return null;
     }
 
     @Override
@@ -146,8 +144,7 @@ public abstract class AbstractExcelReaderExecutor<T> implements ExcelReaderLifec
             }
         }
 
-        List<AbstractExcelColumnValidator<Annotation>> columnValidators = CacheUtils.getColValidatorCache()
-                .getIfPresent(field.getName());
+        List<AbstractExcelColumnValidator<Annotation>> columnValidators = CacheUtils.getColValidatorCache().getIfPresent(field.getName());
         if (columnValidators == null) {
             columnValidators = findColumnValidators(field);
             CacheUtils.getColValidatorCache().put(field.getName(), columnValidators);
@@ -183,8 +180,7 @@ public abstract class AbstractExcelReaderExecutor<T> implements ExcelReaderLifec
 
                 Object cellValue = cell.getCellValue();
                 // 值转换
-                List<AbstractExcelColumnConverter<Annotation, ?>> columnConverters = CacheUtils.getColConverterCache()
-                        .getIfPresent(field.getName());
+                List<AbstractExcelColumnConverter<Annotation, ?>> columnConverters = CacheUtils.getColConverterCache().getIfPresent(field.getName());
                 if (columnConverters == null) {
                     columnConverters = findColumnConverter(field);
                     CacheUtils.getColConverterCache().put(field.getName(), columnConverters);
@@ -201,12 +197,10 @@ public abstract class AbstractExcelReaderExecutor<T> implements ExcelReaderLifec
                 }
 
                 try {
-                    ExcelFieldUtils.setFieldValue(field, instance, cellValue,
-                            field.getAnnotation(ExcelImportColumn.class).dateFormat());
+                    ExcelFieldUtils.setFieldValue(field, instance, cellValue, field.getAnnotation(ExcelImportColumn.class).dateFormat());
                 } catch (final Exception ex) {
                     allPassed = false;
-                    readerContext.getExcelCellReadExceptionCallback().call(row, cell,
-                            new ExcelException("字段赋值失败!", ex));
+                    readerContext.getExcelCellReadExceptionCallback().call(row, cell, new ExcelException("字段赋值失败!", ex));
                     break;
                 }
             }
@@ -256,8 +250,7 @@ public abstract class AbstractExcelReaderExecutor<T> implements ExcelReaderLifec
             if (aClass.isAnnotationPresent(ConstraintValidator.class)) {
                 final ConstraintValidator constraintValidator = aClass.getAnnotation(ConstraintValidator.class);
                 try {
-                    final AbstractExcelColumnValidator<Annotation> columnValidator = constraintValidator.validator()
-                            .newInstance();
+                    final AbstractExcelColumnValidator<Annotation> columnValidator = constraintValidator.validator().newInstance();
                     columnValidator.initialize(annotation);
                     columnValidators.add(columnValidator);
                 } catch (final InstantiationException | IllegalAccessException e) {
@@ -281,8 +274,7 @@ public abstract class AbstractExcelReaderExecutor<T> implements ExcelReaderLifec
             if (aClass.isAnnotationPresent(ExcelConverter.class)) {
                 final ExcelConverter excelConverter = aClass.getAnnotation(ExcelConverter.class);
                 try {
-                    AbstractExcelColumnConverter<Annotation, ?> columnConverter = excelConverter.convertBy()
-                            .newInstance();
+                    AbstractExcelColumnConverter<Annotation, ?> columnConverter = excelConverter.convertBy().newInstance();
                     columnConverter.initialize(annotation);
                     columnConverters.add(columnConverter);
                 } catch (final InstantiationException | IllegalAccessException e) {

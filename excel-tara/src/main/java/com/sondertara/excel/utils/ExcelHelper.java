@@ -434,7 +434,7 @@ public class ExcelHelper {
 
         try {
             // Don`t remove the String case, fix jdk 11
-            PropertyDescriptor pd = new PropertyDescriptor((String) declaredField.getName(), obj.getClass());
+            PropertyDescriptor pd = new PropertyDescriptor((String)declaredField.getName(), obj.getClass());
             Method method = pd.getReadMethod();
             return method.invoke(obj);
         } catch (Exception e) {

@@ -8,9 +8,9 @@ import java.io.Serializable;
  * @author SonderTara
  */
 public class ExcelHelper implements Serializable {
-    private Integer recordCountPerSheet;
-    private Boolean openAutoColumWidth;
-    private Integer rowAccessWindowSize;
+    private final Integer recordCountPerSheet;
+    private final Boolean openAutoColumWidth;
+    private final Integer rowAccessWindowSize;
 
     public static ExcelHelperBuilder builder() {
         return new ExcelHelperBuilder();

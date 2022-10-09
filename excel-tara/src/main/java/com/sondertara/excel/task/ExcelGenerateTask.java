@@ -50,7 +50,7 @@ public class ExcelGenerateTask<R> implements ExcelRunnable {
     private final String fileName;
 
     public ExcelGenerateTask(PageQueryParam param, ExportFunction<R> exportFunction, ExcelWriteSheetEntity e,
-            String fileName) {
+                             String fileName) {
         this.param = param;
         this.exportFunction = exportFunction;
         this.excelEntity = e;

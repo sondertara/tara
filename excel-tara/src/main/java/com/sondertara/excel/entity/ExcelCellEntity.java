@@ -1,4 +1,3 @@
-
 package com.sondertara.excel.entity;
 
 import com.sondertara.excel.enums.FieldRangeType;

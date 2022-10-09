@@ -8,7 +8,7 @@ public abstract class ListUtils {
 
     /**
      * 将列表切割成指定大小
-     * 
+     *
      * @param data
      * @param rowsPerSegment
      * @param <T>
@@ -38,7 +38,7 @@ public abstract class ListUtils {
 
     /**
      * 获取泛型类型
-     * 
+     *
      * @param list
      * @return
      */

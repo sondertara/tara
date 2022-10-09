@@ -46,7 +46,7 @@ public class ExcelCsvWriterResolver {
     private final ExcelWriteSheetEntity excelEntity;
     private final String fileName;
 
-    private Integer nullCellCount = 0;
+    private final Integer nullCellCount = 0;
 
     private XSSFCellStyle headCellStyle;
     private final Map<Integer, Integer> columnWidthMap = new HashMap<>();
@@ -110,7 +110,7 @@ public class ExcelCsvWriterResolver {
             }
             Appendable printWriter = new PrintWriter(csvFile, Constant.CHARSET);
             CSVPrinter csvPrinter = CSVFormat.EXCEL.builder().setHeader(
-                    excelEntity.getPropertyList().stream().map(ExcelCellEntity::getColumnName).toArray(String[]::new))
+                            excelEntity.getPropertyList().stream().map(ExcelCellEntity::getColumnName).toArray(String[]::new))
                     .build().print(printWriter);
 
             csvPrinter.flush();

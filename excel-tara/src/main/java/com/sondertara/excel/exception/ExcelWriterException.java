@@ -19,7 +19,7 @@ public class ExcelWriterException extends ExcelException {
     }
 
     public ExcelWriterException(Integer sheetIndex, Integer rowIndex, Integer colIndex, String cellValue,
-            String message, Throwable cause) {
+                                String message, Throwable cause) {
         this.sheetIndex = sheetIndex;
         this.rowIndex = rowIndex;
         this.colIndex = colIndex;

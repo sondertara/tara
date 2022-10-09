@@ -9,12 +9,12 @@ import java.util.Map;
 
 /**
  * 单元格样式缓存
- * 
+ *
  * @author huangxiaohu
  */
 public class CellStyleCache {
 
-    private volatile static CellStyleCache instance = null;
+    private static final CellStyleCache instance = null;
     private final Map<String, CellStyleBuilder> cellStyleCacheMap;
 
     public static CellStyleCache getInstance() {

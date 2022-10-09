@@ -23,7 +23,7 @@ public enum FieldRangeType {
     RANGE_RIGHT_OPEN(4),
     ;
 
-    private Integer type;
+    private final Integer type;
 
     FieldRangeType(Integer type) {
         this.type = type;

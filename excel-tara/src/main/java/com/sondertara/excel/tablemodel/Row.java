@@ -24,9 +24,9 @@ public class Row implements Iterable<TaraCell>, Serializable {
      * row-num. start from 1
      */
     private int rowNum;
-    private boolean zeroHeight;
-    private float heightInPoints;
-    private short height;
+    private final boolean zeroHeight;
+    private final float heightInPoints;
+    private final short height;
 
     /**
      * key - col-name.

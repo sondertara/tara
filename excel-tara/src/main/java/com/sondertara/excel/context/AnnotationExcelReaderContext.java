@@ -26,8 +26,8 @@ public class AnnotationExcelReaderContext<T> implements ExcelReaderContext {
     private CellReadExCallback cellReadExceptionCallback = new DefaultCellReadExCallback();
 
     public AnnotationExcelReaderContext(InputStream is, Class<T> clazz,
-            RowReadExCallback rowReadExceptionCallback,
-            CellReadExCallback cellReadExceptionCallback) {
+                                        RowReadExCallback rowReadExceptionCallback,
+                                        CellReadExCallback cellReadExceptionCallback) {
         this.inputStream = is;
         this.sheetDefinitionMap = new HashMap<>();
         if (rowReadExceptionCallback != null) {

@@ -12,9 +12,10 @@ import com.sondertara.excel.entity.PageResult;
 public interface ExportFunction<T> {
     /**
      * Query Page Data
-     * @param pageNo page
+     *
+     * @param pageNo   page
      * @param pageSize page size
-     * @return  page
+     * @return page
      */
     PageResult<T> queryPage(Integer pageNo, Integer pageSize);
 }

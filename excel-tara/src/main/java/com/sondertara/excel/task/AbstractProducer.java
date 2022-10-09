@@ -5,9 +5,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * abstract producer
- * 
- * @author huangxiaohu
  *
+ * @author huangxiaohu
  */
 abstract class AbstractProducer implements Producer, Runnable {
     private static final Logger logger = LoggerFactory.getLogger(AbstractProducer.class);

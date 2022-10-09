@@ -17,6 +17,7 @@ import com.sondertara.excel.meta.annotation.ExcelExportField;
 import com.sondertara.excel.meta.annotation.datavalidation.ExcelDataValidation;
 import com.sondertara.excel.meta.model.AnnotationExcelWriterSheetDefinition;
 import com.sondertara.excel.meta.model.ExcelCellStyleDefinition;
+import com.sondertara.excel.meta.model.TaraRow;
 import com.sondertara.excel.meta.model.TaraSheet;
 import com.sondertara.excel.meta.style.CellStyleBuilder;
 import com.sondertara.excel.support.dataconstraint.ExcelDataValidationConstraint;
@@ -45,6 +46,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author huangxiaohu
@@ -74,8 +76,7 @@ public abstract class AbstractExcelWriterExecutor implements TaraExcelExecutor<W
     @Override
     public void sheetPaging() {
         for (final Map.Entry<Integer, ? extends TaraSheet> sheetDefinitionEntry : sheetDefinitions.entrySet()) {
-            AnnotationExcelWriterSheetDefinition<?> sheetDefinition = (AnnotationExcelWriterSheetDefinition<?>) sheetDefinitionEntry
-                    .getValue();
+            AnnotationExcelWriterSheetDefinition<?> sheetDefinition = (AnnotationExcelWriterSheetDefinition<?>) sheetDefinitionEntry.getValue();
             this.curSheetIndex = sheetDefinitionEntry.getKey();
             ExcelDataType excelDataType = sheetDefinition.getExcelDataType();
             switch (excelDataType) {
@@ -88,17 +89,13 @@ public abstract class AbstractExcelWriterExecutor implements TaraExcelExecutor<W
                     double segment = Math.ceil(totalRow * 1.0d / sheetDefinition.getMaxRowsPerSheet());
                     if (segment > 1) {
                         for (int i = 0; i < segment; i++) {
-                            writerContext.addMapper(sheetDefinition.getClass(), sheetDefinition.getQueryFunction(),
-                                    PageQueryParam.builder().pageStart(i * pageCountPreSheet + 1)
-                                            .pageEnd((i + 1) * pageCountPreSheet).pageSize(pagination.getPageSize())
-                                            .build());
+                            writerContext.addMapper(sheetDefinition.getClass(), sheetDefinition.getQueryFunction(), PageQueryParam.builder().pageStart(i * pageCountPreSheet + 1).pageEnd((i + 1) * pageCountPreSheet).pageSize(pagination.getPageSize()).build());
                         }
                         writerContext.removeSheet(sheetDefinitionEntry.getKey());
                     }
                     break;
                 case DIRECT:
-                    List<? extends List<?>> segments = Lists.partition(sheetDefinition.getRows(),
-                            sheetDefinition.getMaxRowsPerSheet());
+                    List<? extends List<?>> segments = Lists.partition(sheetDefinition.getRows(), sheetDefinition.getMaxRowsPerSheet());
                     if (segments.size() > 1) {
                         writerContext.addData(segments);
                         writerContext.removeSheet(sheetDefinitionEntry.getKey());
@@ -113,8 +110,7 @@ public abstract class AbstractExcelWriterExecutor implements TaraExcelExecutor<W
     public void handleComplexHeader() {
         for (final Map.Entry<Integer, ? extends TaraSheet> sheetDefinitionEntry : sheetDefinitions.entrySet()) {
             this.curSheetIndex = sheetDefinitionEntry.getKey();
-            AnnotationExcelWriterSheetDefinition<?> sheetDefinition = (AnnotationExcelWriterSheetDefinition<?>) sheetDefinitionEntry
-                    .getValue();
+            AnnotationExcelWriterSheetDefinition<?> sheetDefinition = (AnnotationExcelWriterSheetDefinition<?>) sheetDefinitionEntry.getValue();
             final Sheet sheet = createSheet(sheetDefinitionEntry.getKey(), sheetDefinition.getName());
             final ExcelComplexHeader excelComplexHeader = sheetDefinition.getAnnotation(ExcelComplexHeader.class);
             if (excelComplexHeader != null) {
@@ -137,15 +133,12 @@ public abstract class AbstractExcelWriterExecutor implements TaraExcelExecutor<W
                     cell.setCellValue(cellRange.title());
 
                     // 合并单元格
-                    final CellRangeAddress cellRangeAddress = new CellRangeAddress(firstRow, lastRow, firstCol,
-                            lastCol);
+                    final CellRangeAddress cellRangeAddress = new CellRangeAddress(firstRow, lastRow, firstCol, lastCol);
                     sheet.addMergedRegion(cellRangeAddress);
 
                     // 设置样式
-                    final CellStyleBuilder cellStyleBuilder = this.cellStyleCache
-                            .getCellStyleInstance(cellRange.cellStyleBuilder());
-                    cell.setCellStyle(cellStyleBuilder.build(this.sxssfWorkbook,
-                            new ExcelCellStyleDefinition(this.sxssfWorkbook), cell));
+                    final CellStyleBuilder cellStyleBuilder = this.cellStyleCache.getCellStyleInstance(cellRange.cellStyleBuilder());
+                    cell.setCellStyle(cellStyleBuilder.build(this.sxssfWorkbook, new ExcelCellStyleDefinition(this.sxssfWorkbook), cell));
                 }
             }
         }
@@ -155,8 +148,7 @@ public abstract class AbstractExcelWriterExecutor implements TaraExcelExecutor<W
     public void addDataValidation() {
         for (final Map.Entry<Integer, ? extends TaraSheet> sheetDefinitionEntry : sheetDefinitions.entrySet()) {
             this.curSheetIndex = sheetDefinitionEntry.getKey();
-            AnnotationExcelWriterSheetDefinition<?> sheetDefinition = (AnnotationExcelWriterSheetDefinition<?>) sheetDefinitionEntry
-                    .getValue();
+            AnnotationExcelWriterSheetDefinition<?> sheetDefinition = (AnnotationExcelWriterSheetDefinition<?>) sheetDefinitionEntry.getValue();
             final Sheet sheet = createSheet(sheetDefinitionEntry.getKey(), sheetDefinition.getName());
             final Map<Integer, Field> columnFields = sheetDefinition.getColFields();
             for (final Map.Entry<Integer, Field> columnFieldEntry : columnFields.entrySet()) {
@@ -172,18 +164,15 @@ public abstract class AbstractExcelWriterExecutor implements TaraExcelExecutor<W
 
                     final DataValidationHelper helper = sheet.getDataValidationHelper();
                     // 加载下拉列表内容
-                    final DataValidationConstraint dataConstraint = helper
-                            .createExplicitListConstraint(dataValidationConstraintList);
+                    final DataValidationConstraint dataConstraint = helper.createExplicitListConstraint(dataValidationConstraintList);
                     dataConstraint.setExplicitListValues(dataValidationConstraintList);
-                    final CellRangeAddressList regions = new CellRangeAddressList(sheetDefinition.getFirstDataRow(),
-                            999, colIndex - 1, colIndex - 1);
+                    final CellRangeAddressList regions = new CellRangeAddressList(sheetDefinition.getFirstDataRow(), 999, colIndex - 1, colIndex - 1);
 
                     final DataValidation dataValidation = helper.createValidation(dataConstraint, regions);
 
                     dataValidation.setSuppressDropDownArrow(true);
                     dataValidation.createPromptBox("提示", "可选值:" + Arrays.toString(dataValidationConstraintList));
-                    dataValidation.createErrorBox("错误提示",
-                            "您的输入有误, 可选值:" + Arrays.toString(dataValidationConstraintList));
+                    dataValidation.createErrorBox("错误提示", "您的输入有误, 可选值:" + Arrays.toString(dataValidationConstraintList));
                     dataValidation.setShowPromptBox(true);
                     dataValidation.setShowErrorBox(true);
 
@@ -197,8 +186,7 @@ public abstract class AbstractExcelWriterExecutor implements TaraExcelExecutor<W
     public void initHeadTitle() {
         for (final Map.Entry<Integer, ? extends TaraSheet> sheetDefinitionEntry : sheetDefinitions.entrySet()) {
             this.curSheetIndex = sheetDefinitionEntry.getKey();
-            AnnotationExcelWriterSheetDefinition<?> sheetDefinition = (AnnotationExcelWriterSheetDefinition<?>) sheetDefinitionEntry
-                    .getValue();
+            AnnotationExcelWriterSheetDefinition<?> sheetDefinition = (AnnotationExcelWriterSheetDefinition<?>) sheetDefinitionEntry.getValue();
             final Sheet sheet = createSheet(sheetDefinitionEntry.getKey(), sheetDefinition.getName());
 
             final Row row = sheet.createRow(sheetDefinition.getFirstDataRow() - 1);
@@ -219,11 +207,9 @@ public abstract class AbstractExcelWriterExecutor implements TaraExcelExecutor<W
                 cell.setCellValue(exportColumn.colName());
 
                 // 设置标题样式
-                final CellStyleBuilder cellStyleBuilder = this.cellStyleCache
-                        .getCellStyleInstance(exportColumn.titleCellStyleBuilder());
+                final CellStyleBuilder cellStyleBuilder = this.cellStyleCache.getCellStyleInstance(exportColumn.titleCellStyleBuilder());
 
-                final CellStyle cellStyle = cellStyleBuilder.build(this.sxssfWorkbook,
-                        new ExcelCellStyleDefinition(this.sxssfWorkbook), cell);
+                final CellStyle cellStyle = cellStyleBuilder.build(this.sxssfWorkbook, new ExcelCellStyleDefinition(this.sxssfWorkbook), cell);
                 cell.setCellStyle(cellStyle);
                 if (!exportColumn.autoWidth()) {
                     sheet.setColumnWidth(colIndex - 1, exportColumn.colWidth() * 256);
@@ -236,26 +222,28 @@ public abstract class AbstractExcelWriterExecutor implements TaraExcelExecutor<W
     public void initData() {
         for (final Map.Entry<Integer, ? extends TaraSheet> sheetDefinitionEntry : sheetDefinitions.entrySet()) {
             this.curSheetIndex = sheetDefinitionEntry.getKey();
-            AnnotationExcelWriterSheetDefinition<?> sheetDefinition = (AnnotationExcelWriterSheetDefinition<?>) sheetDefinitionEntry
-                    .getValue();
+            AnnotationExcelWriterSheetDefinition<?> sheetDefinition = (AnnotationExcelWriterSheetDefinition<?>) sheetDefinitionEntry.getValue();
             final Sheet sheet = createSheet(sheetDefinitionEntry.getKey(), sheetDefinition.getName());
             final Map<Integer, Field> columnFields = sheetDefinition.getColFields();
 
-            final Map<Integer, ExcelCellStyleDefinition> columnCellStyles = sheetDefinition
-                    .getColumnCellStyles(sxssfWorkbook);
+            final Map<Integer, ExcelCellStyleDefinition> columnCellStyles = sheetDefinition.getColumnCellStyles(sxssfWorkbook);
 
             ExportFunction<?> queryFunction = sheetDefinition.getQueryFunction();
             PageQueryParam queryParam = sheetDefinition.getPagination();
-            int pageNo = queryParam.getPageStart();
+            int pageNo = 0;
             while (true) {
-                if (pageNo > queryParam.getPageEnd()) {
-                    break;
+                List<?> rows = sheetDefinition.getRows().stream().map(TaraRow::getRowData).collect(Collectors.toList());
+                if (ExcelDataType.QUERY.equals(sheetDefinition.getExcelDataType())) {
+                    pageNo = queryParam.getPageStart();
+                    if (pageNo > queryParam.getPageEnd()) {
+                        break;
+                    }
+                    PageResult<?> pageResult = queryFunction.queryPage(pageNo, queryParam.getPageSize());
+                    if (CollectionUtils.isEmpty(pageResult.getData())) {
+                        break;
+                    }
+                    rows = pageResult.getData();
                 }
-                PageResult<?> pageResult = queryFunction.queryPage(pageNo, queryParam.getPageSize());
-                if (CollectionUtils.isEmpty(pageResult.getData())) {
-                    break;
-                }
-                final List<?> rows = pageResult.getData();
                 for (int rowIndex = 0; rowIndex < rows.size(); rowIndex++) {
                     final Row row = sheet.createRow(rowIndex + sheetDefinition.getFirstDataRow());
                     row.setHeightInPoints(sheetDefinition.getDataRowHeight());
@@ -281,8 +269,7 @@ public abstract class AbstractExcelWriterExecutor implements TaraExcelExecutor<W
                         CellStyle cellStyle;
 
                         // 设置数据样式
-                        final CellStyleBuilder cellStyleBuilder = this.cellStyleCache
-                                .getCellStyleInstance(exportColumn.dataCellStyleBuilder());
+                        final CellStyleBuilder cellStyleBuilder = this.cellStyleCache.getCellStyleInstance(exportColumn.dataCellStyleBuilder());
                         cellStyle = cellStyleBuilder.build(this.sxssfWorkbook, cellStyleDefinition, cell);
 
                         // 设置数据格式
@@ -315,6 +302,10 @@ public abstract class AbstractExcelWriterExecutor implements TaraExcelExecutor<W
                             sxssfSheet.autoSizeColumn(columnFieldEntry.getKey());
                         }
                     }
+                }
+
+                if (ExcelDataType.DIRECT.equals(sheetDefinition.getExcelDataType())) {
+                    break;
                 }
             }
         }
@@ -354,8 +345,7 @@ public abstract class AbstractExcelWriterExecutor implements TaraExcelExecutor<W
             if (aClass.isAnnotationPresent(ExcelDataValidation.class)) {
                 final ExcelDataValidation dataValidation = aClass.getAnnotation(ExcelDataValidation.class);
                 try {
-                    ExcelDataValidationConstraint<Annotation> dataValidationConstraint = dataValidation.dataConstraint()
-                            .newInstance();
+                    ExcelDataValidationConstraint<Annotation> dataValidationConstraint = dataValidation.dataConstraint().newInstance();
                     dataValidationConstraint.initialize(annotation);
                     return dataValidationConstraint.generate();
                 } catch (final InstantiationException | IllegalAccessException e) {
@@ -397,8 +387,7 @@ public abstract class AbstractExcelWriterExecutor implements TaraExcelExecutor<W
                     if (CellStyleBuilder.class.isAssignableFrom(clazz)) {
                         cellStyleBuilder = (CellStyleBuilder) clazz.newInstance();
                     } else {
-                        throw new ExcelWriterException(
-                                "CellStyle [" + clazz + "] not assignable from CellStyleBuilder.class");
+                        throw new ExcelWriterException("CellStyle [" + clazz + "] not assignable from CellStyleBuilder.class");
                     }
                 } catch (final InstantiationException | IllegalAccessException e) {
                     e.printStackTrace();

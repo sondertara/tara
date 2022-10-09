@@ -21,7 +21,7 @@ public class ExcelReaderException extends ExcelException {
     }
 
     public ExcelReaderException(int sheetIndex, int rowIndex, int colIndex, String cellValue, String message,
-            Throwable cause) {
+                                Throwable cause) {
         this.sheetIndex = sheetIndex;
         this.rowIndex = rowIndex;
         this.colIndex = colIndex;

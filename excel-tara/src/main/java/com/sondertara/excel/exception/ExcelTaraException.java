@@ -1,4 +1,3 @@
-
 package com.sondertara.excel.exception;
 
 import org.slf4j.helpers.MessageFormatter;

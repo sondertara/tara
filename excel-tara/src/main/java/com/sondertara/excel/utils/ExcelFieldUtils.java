@@ -18,8 +18,8 @@ import java.util.Date;
  */
 public class ExcelFieldUtils {
 
-    private static final String[] TRY_DATE_FORMAT_LIST = new String[] { "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd",
-            "yyyy/MM/dd", "yyyy/MM/dd HH:mm:ss" };
+    private static final String[] TRY_DATE_FORMAT_LIST = new String[]{"yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd",
+            "yyyy/MM/dd", "yyyy/MM/dd HH:mm:ss"};
 
     public static void setCellValue(Cell cell, Object o, Field field, ExcelExportField exportColumn)
             throws IllegalAccessException {

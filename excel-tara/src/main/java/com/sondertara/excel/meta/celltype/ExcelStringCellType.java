@@ -14,7 +14,7 @@ public class ExcelStringCellType implements ExcelCellType {
 
     private static final long serialVersionUID = 1368517956940674679L;
 
-    private SharedStrings sst;
+    private final SharedStrings sst;
 
     public ExcelStringCellType(final SharedStrings sst) {
         this.sst = sst;

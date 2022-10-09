@@ -206,7 +206,7 @@ public class ExcelTaraHelper {
         localFile = new File(path);
         if (localFile.exists()) {
             boolean delete = localFile.delete();
-            if (delete == false) {
+            if (!delete) {
                 logger.error("Delete exist file \"{}\" failed!!!", path);
                 throw new ExcelTaraException("Delete exist file \"{}\" failed!!!", path);
             }

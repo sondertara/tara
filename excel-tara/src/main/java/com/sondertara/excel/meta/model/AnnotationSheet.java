@@ -20,7 +20,7 @@ public class AnnotationSheet extends TaraSheet {
     protected int order = 0;
     protected ExcelDataType excelDataType;
 
-    private final Map<Integer, Field> colFields = new HashMap<>();
+    protected final Map<Integer, Field> colFields = new HashMap<>();
 
     public AnnotationSheet(Class<?> mappingClass) {
         super(0);

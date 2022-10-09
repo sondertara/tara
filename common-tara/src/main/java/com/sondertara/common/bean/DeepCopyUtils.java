@@ -96,7 +96,7 @@ public class DeepCopyUtils {
                                     || srcValue instanceof Boolean;
                             if (!base) {
 
-                                Object dstValue = targetPd.getPropertyType().newInstance();
+                                Object dstValue = targetPd.getPropertyType().getConstructor().newInstance();
                                 copyProperties(srcValue, dstValue);
 
                                 Method writeMethod = targetPd.getWriteMethod();
@@ -131,6 +131,7 @@ public class DeepCopyUtils {
      * @param target
      * @throws NoSuchFieldException
      */
+    @SuppressWarnings("unchecked")
     private static void copyMap(PropertyDescriptor sourcePd, PropertyDescriptor targetPd, Object source, Object target)
             throws NoSuchFieldException {
         Field srcField = source.getClass().getDeclaredField(sourcePd.getName());
@@ -146,16 +147,16 @@ public class DeepCopyUtils {
             Map<String, Object> destMap = new HashMap<>();
 
             for (Map.Entry<String, Object> entry : srcMap.entrySet()) {
-                Object destObj = destTrueField.newInstance();
+                Object destObj = destTrueField.getConstructor().newInstance();
                 copyProperties(entry.getValue(), destObj);
                 destMap.put(entry.getKey(), destObj);
             }
 
             destField.set(target, destMap);
-        } catch (IllegalAccessException e) {
+        } catch (IllegalAccessException | InstantiationException e) {
             e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
+        } catch (InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -183,7 +184,7 @@ public class DeepCopyUtils {
             Iterator iterator = srcList.iterator();
             while (iterator.hasNext()) {
                 Object srcObj = iterator.next();
-                Object destObj = destTrueField.newInstance();
+                Object destObj = destTrueField.getConstructor().newInstance();
                 copyProperties(srcObj, destObj);
                 destCollec.add(destObj);
             }

@@ -28,20 +28,20 @@ import java.util.List;
  * @author huangxiaohu
  */
 public class XlsxAnalysisHandler extends DefaultHandler {
-    private StylesTable stylesTable;
-    private SharedStrings sst;
-    private ExcelPerRowProcessor perRowProcessor;
+    private final StylesTable stylesTable;
+    private final SharedStrings sst;
+    private final ExcelPerRowProcessor perRowProcessor;
     private int totalRow = 0;
     private String tagValue;
 
-    private List<String> sheetNames = new ArrayList<>();
+    private final List<String> sheetNames = new ArrayList<>();
     private ExcelRowDef curExcelRow;
     private ExcelCellDef curExcelCell;
-    private List<ExcelCellType> excelCellTypes = new ArrayList<>();
-    private RowReadExCallback rowReadExceptionCallback;
+    private final List<ExcelCellType> excelCellTypes = new ArrayList<>();
+    private final RowReadExCallback rowReadExceptionCallback;
 
     public XlsxAnalysisHandler(final StylesTable stylesTable, final SharedStrings sst,
-            final ExcelPerRowProcessor perRowProcessor, final RowReadExCallback rowReadExceptionCallback) {
+                               final ExcelPerRowProcessor perRowProcessor, final RowReadExCallback rowReadExceptionCallback) {
         this.sst = sst;
         this.stylesTable = stylesTable;
         this.perRowProcessor = perRowProcessor;

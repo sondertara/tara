@@ -44,7 +44,7 @@ public class Cell {
     }
 
     Cell(ReadableWorkbook workbook, CellType type, Object value, CellAddress address, String formula, String rawValue,
-            String dataFormatId, String dataFormatString) {
+         String dataFormatId, String dataFormatString) {
         this.workbook = workbook;
         this.type = type;
         this.value = value;

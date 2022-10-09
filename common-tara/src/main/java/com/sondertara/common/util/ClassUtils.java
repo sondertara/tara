@@ -183,8 +183,7 @@ public class ClassUtils {
      * @return 类集合
      * @see ClassScanner#scanPackageByAnnotation(String, Class)
      */
-    public static Set<Class<?>> scanPackageByAnnotation(String packageName,
-            final Class<? extends Annotation> annotationClass) {
+    public static Set<Class<?>> scanPackageByAnnotation(String packageName, final Class<? extends Annotation> annotationClass) {
         return ClassScanner.scanPackageByAnnotation(packageName, annotationClass);
     }
 
@@ -303,8 +302,7 @@ public class ClassUtils {
      * @return 方法
      * @throws SecurityException 无权访问抛出异常
      */
-    public static Method getPublicMethod(Class<?> clazz, String methodName, Class<?>... paramTypes)
-            throws SecurityException {
+    public static Method getPublicMethod(Class<?> clazz, String methodName, Class<?>... paramTypes) throws SecurityException {
         return ReflectUtils.getPublicMethod(clazz, methodName, paramTypes);
     }
 
@@ -338,8 +336,7 @@ public class ClassUtils {
      * @return 方法
      * @throws SecurityException 无访问权限抛出异常
      */
-    public static Method getDeclaredMethodOfObj(Object obj, String methodName, Object... args)
-            throws SecurityException {
+    public static Method getDeclaredMethodOfObj(Object obj, String methodName, Object... args) throws SecurityException {
         return getDeclaredMethod(obj.getClass(), methodName, getClasses(args));
     }
 
@@ -352,8 +349,7 @@ public class ClassUtils {
      * @return 方法
      * @throws SecurityException 无访问权限抛出异常
      */
-    public static Method getDeclaredMethod(Class<?> clazz, String methodName, Class<?>... parameterTypes)
-            throws SecurityException {
+    public static Method getDeclaredMethod(Class<?> clazz, String methodName, Class<?>... parameterTypes) throws SecurityException {
         return ReflectUtils.getMethod(clazz, methodName, parameterTypes);
     }
 
@@ -707,8 +703,7 @@ public class ClassUtils {
             if (isStatic(method)) {
                 return ReflectUtils.invoke(null, method, args);
             } else {
-                return ReflectUtils.invoke(isSingleton ? Singleton.from(() -> ReflectUtils.newInstanceIfPossible(clazz))
-                        : clazz.newInstance(), method, args);
+                return ReflectUtils.invoke(isSingleton ? Singleton.from(() -> ReflectUtils.newInstanceIfPossible(clazz)) : ReflectUtils.newInstanceIfPossible(clazz), method, args);
             }
         } catch (Exception e) {
             throw new TaraException(e);
@@ -762,7 +757,7 @@ public class ClassUtils {
     /**
      * 是否为简单值类型<br>
      * 包括：
-     * 
+     *
      * <pre>
      *     原始类型
      *     String、other CharSequence
@@ -886,7 +881,7 @@ public class ClassUtils {
      * @return 方法
      */
     public static Method setAccessible(Method method) {
-        if (null != method && false == method.isAccessible()) {
+        if (null != method && !method.isAccessible()) {
             method.setAccessible(true);
         }
         return method;

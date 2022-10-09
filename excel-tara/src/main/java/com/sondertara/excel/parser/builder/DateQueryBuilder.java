@@ -1,6 +1,6 @@
 package com.sondertara.excel.parser.builder;
 
-import com.sondertara.excel.boot.AbstractExcelWriter;
+import com.sondertara.excel.entity.PageQueryParam;
 import com.sondertara.excel.enums.ExcelDataType;
 import com.sondertara.excel.function.ExportFunction;
 
@@ -17,8 +17,13 @@ public class DateQueryBuilder<T> {
     }
 
     public AbstractExcelWriter<T> pagination(Integer start, Integer end, Integer pageSize) {
-        this.writerHandler.pagination(start, end, pageSize);
 
+
+        this.writerHandler.setPageQueryParam(PageQueryParam.builder().pageEnd(end).pageStart(start).pageSize(pageSize).build());
+        return this.writerHandler;
+    }
+
+    public AbstractExcelWriter<T> then() {
         return this.writerHandler;
     }
 
@@ -26,11 +31,11 @@ public class DateQueryBuilder<T> {
         return new ExcelMappingBuilder<>(excelClass, this);
     }
 
-    public AbstractExcelWriter<T> getWriterHandler() {
+    protected AbstractExcelWriter<T> getWriterHandler() {
         return writerHandler;
     }
 
-    public DateQueryBuilder<T> excelMapping(Class<?> excelClass, ExportFunction<?> query) {
+    protected DateQueryBuilder<T> excelMapping(Class<?> excelClass, ExportFunction<?> query) {
         writerHandler.excelMapping(excelClass, query);
         return this;
     }

@@ -9,7 +9,7 @@ import java.io.InputStream;
 public class RawExcelReaderContext implements ExcelRawReaderContext {
 
     private final InputStream inputStream;
-    private TaraExcelExecutor<TaraWorkbook> excelExecutor;
+    private final TaraExcelExecutor<TaraWorkbook> excelExecutor;
 
     public RawExcelReaderContext(InputStream is) {
         this.inputStream = is;

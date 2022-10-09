@@ -13,7 +13,7 @@ public class PageQueryParam implements Serializable {
     private final Integer pageSize;
 
     private final Integer pageStart;
-    private final Integer pageEnd;
+    private Integer pageEnd = -1;
 
     public static Builder builder() {
         return new Builder();

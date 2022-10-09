@@ -18,7 +18,7 @@ import java.util.Date;
 public class ExcelDateCellType implements ExcelCellType {
 
     private static final long serialVersionUID = -9216501976104636864L;
-    private StylesTable stylesTable;
+    private final StylesTable stylesTable;
 
     public ExcelDateCellType(final StylesTable stylesTable) {
         this.stylesTable = stylesTable;

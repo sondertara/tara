@@ -6,6 +6,7 @@ import com.sondertara.excel.factory.ExcelMappingFactory;
 import com.sondertara.excel.fast.Cell;
 import com.sondertara.excel.parser.ExcelCsvWriterResolver;
 import com.sondertara.excel.parser.ExcelReader;
+import com.sondertara.excel.parser.builder.AbstractExcelWriter;
 import com.sondertara.excel.parser.builder.DataCollectionBuilder;
 import com.sondertara.excel.parser.builder.DateQueryBuilder;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -28,7 +29,7 @@ public class ExcelCsvWriter extends AbstractExcelWriter<String> {
 
     private static final Logger logger = LoggerFactory.getLogger(ExcelReader.class);
 
-    private Integer nullCellCount = 0;
+    private final Integer nullCellCount = 0;
     private XSSFCellStyle headCellStyle;
     private final Map<Integer, Integer> columnWidthMap = new HashMap<>();
     private String fileName;

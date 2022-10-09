@@ -9,7 +9,7 @@ import java.util.List;
  */
 public class DataVariableParserVisitor extends VariableParserBaseVisitor<Object> {
 
-    private Object data;
+    private final Object data;
 
     public DataVariableParserVisitor(Object data) {
         this.data = data;

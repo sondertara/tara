@@ -2,6 +2,7 @@ package com.sondertara.excel.boot;
 
 import com.sondertara.excel.common.Constant;
 import com.sondertara.excel.parser.ExcelDefaultWriterResolver;
+import com.sondertara.excel.parser.builder.AbstractExcelWriter;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.streaming.SXSSFCell;
@@ -25,7 +26,7 @@ public class ExcelSimpleWriter extends AbstractExcelWriter<Workbook> {
 
     private XSSFCellStyle headCellStyle;
 
-    private List<String> titles;
+    private final List<String> titles;
     private String sheetName;
     private SXSSFWorkbook workbook;
 

@@ -2,10 +2,13 @@ package com.sondertara.excel.parser.builder;
 
 import com.sondertara.excel.function.ExportFunction;
 
+/**
+ * @author huangxiaohu
+ */
 public class ExcelMappingBuilder<T> {
-    private Class<?> excelClass;
+    private final Class<?> excelClass;
 
-    private DateQueryBuilder<T> dateQueryBuilder;
+    private final DateQueryBuilder<T> dateQueryBuilder;
 
     public ExcelMappingBuilder(Class<?> excelClass, DateQueryBuilder<T> dateQueryBuilder) {
         this.excelClass = excelClass;

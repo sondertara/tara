@@ -30,8 +30,9 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
-import org.xml.sax.helpers.XMLReaderFactory;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParserFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
@@ -100,23 +101,23 @@ public class ExcelReader extends DefaultHandler {
     /**
      * excel entity via annotation
      */
-    private ExcelReadSheetEntity excelMapping;
+    private final ExcelReadSheetEntity excelMapping;
     /**
      * class which will parse data
      */
-    private Class excelClass;
+    private final Class excelClass;
     /**
      * data of one row
      */
-    private List<String> cellsOnRow = new ArrayList<String>();
+    private final List<String> cellsOnRow = new ArrayList<String>();
     /**
      * data of the head
      */
-    private List<String> titleRow = new ArrayList<String>();
+    private final List<String> titleRow = new ArrayList<String>();
     /**
      * the row index begin to read.( head is 0)
      */
-    private Integer beginReadRowIndex;
+    private final Integer beginReadRowIndex;
     /**
      * is enable the index mapping relation
      * <p>
@@ -124,7 +125,7 @@ public class ExcelReader extends DefaultHandler {
      * one-to-one
      *
      * @see ExcelImportField#index()
-     *      </p>
+     * </p>
      */
     private Boolean enableIndex = false;
     /**
@@ -142,7 +143,7 @@ public class ExcelReader extends DefaultHandler {
     private ImportErrorResolver importErrorResolver;
 
     public ExcelReader(Class entityClass, ExcelReadSheetEntity excelMapping, Integer beginReadRowIndex,
-            Boolean enableIndex) {
+                       Boolean enableIndex) {
         this.excelClass = entityClass;
         this.excelMapping = excelMapping;
         this.beginReadRowIndex = beginReadRowIndex;
@@ -199,6 +200,8 @@ public class ExcelReader extends DefaultHandler {
                     }
                 }
             }
+        } catch (ParserConfigurationException e) {
+            throw new RuntimeException(e);
         } finally {
             if (opcPackage != null) {
                 opcPackage.close();
@@ -213,8 +216,8 @@ public class ExcelReader extends DefaultHandler {
      * @return XMLReader
      * @throws SAXException exception
      */
-    private XMLReader fetchSheetParser(SharedStrings sst) throws SAXException {
-        XMLReader parser = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser");
+    private XMLReader fetchSheetParser(SharedStrings sst) throws SAXException, ParserConfigurationException {
+        XMLReader parser = SAXParserFactory.newInstance().newSAXParser().getXMLReader();
         parser.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
         this.mSharedStringsTable = sst;
         parser.setContentHandler(this);
@@ -549,10 +552,10 @@ public class ExcelReader extends DefaultHandler {
 
         if ("Date".equals(simpleName)) {
             return checkRangeDate(cellIndex, filedClazz, range, cellValue, mappingProperty.getRangeType());
-        } else if ("Integer".equals(simpleName) || "double".equals(simpleName.toLowerCase())
-                || "BigDecimal".equals(simpleName) || "float".equals(simpleName.toLowerCase())
-                || "int".equals(simpleName) || "short".equals(simpleName.toLowerCase())
-                || "long".equals(simpleName.toLowerCase())) {
+        } else if ("Integer".equals(simpleName) || "double".equalsIgnoreCase(simpleName)
+                || "BigDecimal".equals(simpleName) || "float".equalsIgnoreCase(simpleName)
+                || "int".equals(simpleName) || "short".equalsIgnoreCase(simpleName)
+                || "long".equalsIgnoreCase(simpleName)) {
             return checkRangeNumber(cellIndex, filedClazz, range, cellValue, mappingProperty.getRangeType());
         }
         return null;
@@ -626,7 +629,7 @@ public class ExcelReader extends DefaultHandler {
      * @throws Exception
      */
     private ErrorEntity checkRangeDate(Integer cellIndex, Class filedClazz, String[] range, Object cellValue,
-            FieldRangeType rangeType) throws Exception {
+                                       FieldRangeType rangeType) throws Exception {
         final Date min = LocalDateTimeUtils.parseDate(range[0]);
         final Date max = LocalDateTimeUtils.parseDate(range[1]);
         if (null == min && null == max) {
@@ -733,7 +736,7 @@ public class ExcelReader extends DefaultHandler {
      * @throws Exception
      */
     private ErrorEntity checkRangeNumber(Integer cellIndex, Class filedClazz, String[] range, Object cellValue,
-            FieldRangeType rangeType) throws Exception {
+                                         FieldRangeType rangeType) throws Exception {
 
         Double min = null;
         Double max = null;

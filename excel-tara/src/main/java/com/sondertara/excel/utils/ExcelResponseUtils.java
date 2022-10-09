@@ -4,11 +4,10 @@ import com.sondertara.excel.constants.ExcelConstants;
 import com.sondertara.excel.exception.ExcelException;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * @author huangxiaohu
@@ -17,7 +16,7 @@ public class ExcelResponseUtils {
 
     /**
      * 获取内建的response
-     * 
+     *
      * @param response
      * @param fileName
      * @return

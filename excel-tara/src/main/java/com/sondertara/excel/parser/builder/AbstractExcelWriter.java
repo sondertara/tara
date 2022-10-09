@@ -1,4 +1,4 @@
-package com.sondertara.excel.boot;
+package com.sondertara.excel.parser.builder;
 
 import com.sondertara.common.exception.TaraException;
 import com.sondertara.excel.base.TaraExcelWriter;
@@ -9,6 +9,7 @@ import com.sondertara.excel.function.ExportFunction;
 import org.apache.commons.io.FileUtils;
 import org.apache.poi.ss.usermodel.Workbook;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -16,8 +17,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * @author huangxiaohu
@@ -42,9 +41,9 @@ public abstract class AbstractExcelWriter<T> implements TaraExcelWriter {
 
     }
 
-    public void pagination(Integer start, Integer end, Integer pageSize) {
-        this.pageQueryParam = PageQueryParam.builder().pageEnd(end).pageStart(start).pageSize(pageSize).build();
 
+    protected void setPageQueryParam(PageQueryParam query) {
+        this.pageQueryParam = query;
     }
 
     /**
@@ -85,11 +84,8 @@ public abstract class AbstractExcelWriter<T> implements TaraExcelWriter {
         }
     }
 
-    protected <R> void exportFunction(ExportFunction<R> exportFunction) {
-        this.exportFunction = exportFunction;
-    }
 
-    public <R> void excelMapping(Class<?> excelClass, ExportFunction<R> exportFunction) {
+    protected <R> void excelMapping(Class<?> excelClass, ExportFunction<R> exportFunction) {
         this.excelMapping.put(excelClass, exportFunction);
     }
 
@@ -101,11 +97,11 @@ public abstract class AbstractExcelWriter<T> implements TaraExcelWriter {
         this.writerContext.addData(Arrays.asList(dataList));
     }
 
-    public ExcelDataType getExcelDataType() {
+    protected ExcelDataType getExcelDataType() {
         return excelDataType;
     }
 
-    public void setExcelDataType(ExcelDataType excelDataType) {
+    protected void setExcelDataType(ExcelDataType excelDataType) {
         this.excelDataType = excelDataType;
     }
 }
