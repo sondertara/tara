@@ -51,8 +51,7 @@ public class ExcelHelper {
     private ExcelHelper() {
     }
 
-    private static final char[] COL_SET = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',
-            'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'};
+    private static final char[] COL_SET = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'};
 
     public static String getColName(Integer index) {
         StringBuilder sb = new StringBuilder();
@@ -193,8 +192,7 @@ public class ExcelHelper {
 
                 for (TaraCell cell : row) {
                     CellType cellType = cell.getCellType();
-                    org.apache.poi.ss.usermodel.Cell xssfCell = xssfRow.createCell(getColIndex(cell.getCol()),
-                            cellType);
+                    org.apache.poi.ss.usermodel.Cell xssfCell = xssfRow.createCell(getColIndex(cell.getCol()), cellType);
 
                     Object value = cell.getValue();
 
@@ -250,16 +248,13 @@ public class ExcelHelper {
                     }
 
                     // set cell style
-                    org.apache.poi.ss.usermodel.CellStyle xssfCellStyle = toExcelCellStyle(xssfWorkbook,
-                            cell.getCellStyle());
+                    org.apache.poi.ss.usermodel.CellStyle xssfCellStyle = toExcelCellStyle(xssfWorkbook, cell.getCellStyle());
                     xssfCell.setCellStyle(xssfCellStyle);
 
                     // set merged region
                     MergedRegion mergedRegion = cell.getMergedRegion();
                     if (mergedRegion != null) {
-                        CellRangeAddress cellRangeAddress = new CellRangeAddress(mergedRegion.getFirstRowNum() - 1,
-                                mergedRegion.getLastRowNum() - 1, getColIndex(mergedRegion.getFirstColName()),
-                                getColIndex(mergedRegion.getLastColName()));
+                        CellRangeAddress cellRangeAddress = new CellRangeAddress(mergedRegion.getFirstRowNum() - 1, mergedRegion.getLastRowNum() - 1, getColIndex(mergedRegion.getFirstColName()), getColIndex(mergedRegion.getLastColName()));
                         xssfSheet.addMergedRegion(cellRangeAddress);
                     }
 
@@ -289,8 +284,7 @@ public class ExcelHelper {
      * 转换 cellStyle 对象为 Apache poi 的对象 convert {@link CellStyle} to
      * {@link org.apache.poi.ss.usermodel.CellStyle}
      */
-    private static org.apache.poi.ss.usermodel.CellStyle toExcelCellStyle(XSSFWorkbook xssfWorkbook,
-                                                                          CellStyle cellStyle) {
+    private static org.apache.poi.ss.usermodel.CellStyle toExcelCellStyle(XSSFWorkbook xssfWorkbook, CellStyle cellStyle) {
         XSSFCellStyle xssfCellStyle = xssfWorkbook.createCellStyle();
 
         xssfCellStyle.setBorderTop(cellStyle.getBorderTopEnum());
@@ -439,7 +433,8 @@ public class ExcelHelper {
         }
 
         try {
-            PropertyDescriptor pd = new PropertyDescriptor(declaredField.getName(), obj.getClass());
+            // Don`t remove the String case, fix jdk 11
+            PropertyDescriptor pd = new PropertyDescriptor((String) declaredField.getName(), obj.getClass());
             Method method = pd.getReadMethod();
             return method.invoke(obj);
         } catch (Exception e) {

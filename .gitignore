@@ -162,7 +162,7 @@ hs_err_pid*
 target/
 
 # End of https://www.gitignore.io/api/java,java-web,intellij,code-java
-export/
+
 .DS_Store
 baidu.png
 common-tara/.DS_Store
