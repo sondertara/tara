@@ -5,8 +5,10 @@ import com.sondertara.domain.ExcelDutyAdjustRecord;
 import com.sondertara.domain.ExcelDutyStaffArrangementTemplate;
 import com.sondertara.domain.ExcelDutyVacation;
 import com.sondertara.domain.HolidayCfg;
-import com.sondertara.excel.meta.model.ExcelRowDefinition;
+import com.sondertara.excel.exception.ExcelReaderException;
+import com.sondertara.excel.meta.model.ExcelRowDef;
 import com.sondertara.excel.support.ExcelReader;
+import com.sondertara.excel.support.callback.RowReadExCallback;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -61,13 +63,13 @@ public class ExcelReaderTest {
 
     @Test
     public void testWithCallback() {
-        final List<ExcelRowDefinition> list = new ArrayList<>();
+        final List<ExcelRowDef> list = new ArrayList<>();
         final InputStream is = Thread.currentThread().getContextClassLoader()
                 .getResourceAsStream(EXCEL_TEMPLATE_DIR + "duty_template.xlsx");
         final List<ExcelDutyStaffArrangementTemplate> dutyStaffArrangementTemplate = ExcelReader.newInstance(is)
-                /*.configRowReadExceptionCallback(new ExcelRowReadExceptionCallback() {
+                .configRowReadExceptionCallback(new RowReadExCallback() {
                     @Override
-                    public void call(ExcelRowDefinition rowDefinition, Exception ex) {
+                    public void call(ExcelRowDef rowDefinition, Exception ex) {
                         System.out.println(rowDefinition);
 
 
@@ -76,7 +78,7 @@ public class ExcelReaderTest {
                         throw (ExcelReaderException) ex;
 
                     }
-                })*/
+                })
                 .configCellReadExceptionCallback((rowDefinition, cellDefinition, ex) -> {
                     System.out.println(cellDefinition.getColTitle());
                     System.out.println(ex);

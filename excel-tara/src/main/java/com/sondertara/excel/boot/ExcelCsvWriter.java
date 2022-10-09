@@ -1,10 +1,9 @@
 package com.sondertara.excel.boot;
 
-
 import com.sondertara.excel.entity.ExcelWriteSheetEntity;
 import com.sondertara.excel.exception.ExcelTaraException;
 import com.sondertara.excel.factory.ExcelMappingFactory;
-import com.sondertara.excel.parser.AbstractExcelWriter;
+import com.sondertara.excel.fast.Cell;
 import com.sondertara.excel.parser.ExcelCsvWriterResolver;
 import com.sondertara.excel.parser.ExcelReader;
 import com.sondertara.excel.parser.builder.DataCollectionBuilder;
@@ -14,8 +13,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.OutputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,7 +27,6 @@ import java.util.Map;
 public class ExcelCsvWriter extends AbstractExcelWriter<String> {
 
     private static final Logger logger = LoggerFactory.getLogger(ExcelReader.class);
-
 
     private Integer nullCellCount = 0;
     private XSSFCellStyle headCellStyle;
@@ -55,7 +55,6 @@ public class ExcelCsvWriter extends AbstractExcelWriter<String> {
     public DataCollectionBuilder<String> fromData() {
         return new DataCollectionBuilder<>(this);
     }
-
 
     /**
      * validate param and set default value when some field is null.
@@ -87,5 +86,9 @@ public class ExcelCsvWriter extends AbstractExcelWriter<String> {
     @Override
     public void to(HttpServletResponse httpServletResponse, String fileName) {
 
+    }
+
+    public static void main(String[] args) {
+        List<Cell> list = ExcelBeanReader.load(new File("")).read(Cell.class);
     }
 }

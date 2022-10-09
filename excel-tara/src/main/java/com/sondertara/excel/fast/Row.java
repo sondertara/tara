@@ -17,7 +17,10 @@ package com.sondertara.excel.fast;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class Row implements Iterable<Cell> {
@@ -34,6 +37,7 @@ public class Row implements Iterable<Cell> {
 
     /**
      * Returns a cell in this row by column index;
+     *
      * @param index - zero-based column index
      * @return Cell value
      * @throws IndexOutOfBoundsException if index is invalid
@@ -44,7 +48,8 @@ public class Row implements Iterable<Cell> {
 
     public Cell getCell(CellAddress address) {
         if (rowNum != address.getRow()) {
-            throw new IllegalArgumentException("The given address " + address + " concerns another row (" + rowNum + ")");
+            throw new IllegalArgumentException(
+                    "The given address " + address + " concerns another row (" + rowNum + ")");
         }
         return getCell(address.getColumn());
     }
@@ -71,6 +76,7 @@ public class Row implements Iterable<Cell> {
 
     /**
      * Get row number of this row
+     *
      * @return the row number (1 based)
      */
     public int getRowNum() {
@@ -93,6 +99,10 @@ public class Row implements Iterable<Cell> {
 
     public Stream<Cell> stream() {
         return cells.stream();
+    }
+
+    public List<Cell> read() {
+        return cells;
     }
 
     public Optional<String> getCellAsString(int cellIndex) {

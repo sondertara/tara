@@ -5,7 +5,7 @@ import java.util.Comparator;
 /**
  * 比较工具类
  *
- * @author looly
+ * @author huangxiaohu
  */
 public class CompareUtils {
 
@@ -24,7 +24,7 @@ public class CompareUtils {
      * @see Comparator#compare(Object, Object)
      * @since 4.6.9
      */
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <T> int compare(T c1, T c2, Comparator<T> comparator) {
         if (null == comparator) {
             return compare((Comparable) c1, (Comparable) c2);
@@ -82,7 +82,7 @@ public class CompareUtils {
      * @param isNullGreater null值是否做为最大值
      * @return 比较结果，如果o1 &lt; o2，返回数小于0，o1==o2返回0，o1 &gt; o2 大于0
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public static <T> int compare(T o1, T o2, boolean isNullGreater) {
         if (o1 == o2) {
             return 0;
@@ -94,7 +94,7 @@ public class CompareUtils {
         }
 
         if (o1 instanceof Comparable && o2 instanceof Comparable) {
-            //如果bean可比较，直接比较bean
+            // 如果bean可比较，直接比较bean
             return ((Comparable) o1).compareTo(o2);
         }
 

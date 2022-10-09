@@ -10,7 +10,7 @@ public class ShortWrapperTypeConverter extends AbstractTypeConverter<Short> {
         if (value instanceof Number) {
             return ((Number) value).shortValue();
         } else if (value instanceof Boolean) {
-            return (Boolean)value?(short)1:(short)0;
+            return (Boolean) value ? (short) 1 : (short) 0;
         }
         String sValue = convertToStr(value);
         if (StringUtils.isBlank(sValue)) {

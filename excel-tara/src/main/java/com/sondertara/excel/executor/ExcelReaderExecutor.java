@@ -1,33 +1,35 @@
 package com.sondertara.excel.executor;
 
-
-import com.sondertara.excel.ExcelFieldUtils;
 import com.sondertara.excel.context.ExcelReaderContext;
 import com.sondertara.excel.exception.ExcelReaderException;
-import com.sondertara.excel.meta.model.ExcelRowDefinition;
+import com.sondertara.excel.meta.model.AnnotationSheet;
+import com.sondertara.excel.meta.model.ExcelRowDef;
 import com.sondertara.excel.processor.ExcelPerRowProcessor;
+import com.sondertara.excel.utils.ExcelFieldUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 /**
- * @author chenzw
+ * @author huangxiaohu
  */
 public class ExcelReaderExecutor<T> extends AbstractExcelReaderExecutor<T> implements ExcelPerRowProcessor {
 
     private static final Logger logger = LoggerFactory.getLogger(ExcelReaderExecutor.class);
 
-
     public ExcelReaderExecutor(ExcelReaderContext readerContext) {
         super(readerContext);
     }
 
-    private void preProcess(ExcelRowDefinition row) {
+    private void preProcess(ExcelRowDef row) {
         row.setSheetIndex(curSheetIndex);
 
         this.curRowIndex = row.getRowIndex();
-        this.curSheet = readerContext.getSheetDefinitions().get(curSheetIndex);
+        this.curSheet = (AnnotationSheet) readerContext.getSheetDefinitions().get(curSheetIndex);
+        if (this.curSheet == null) {
+            this.curSheet = (AnnotationSheet) readerContext.getSheetDefinitions().get(curSheetIndex + 1);
+        }
     }
 
     @Override
@@ -37,7 +39,7 @@ public class ExcelReaderExecutor<T> extends AbstractExcelReaderExecutor<T> imple
     }
 
     @Override
-    public void processPerRow(ExcelRowDefinition row) {
+    public void processPerRow(ExcelRowDef row) {
         preProcess(row);
 
         if (this.isTitleRow(row)) {
@@ -52,14 +54,13 @@ public class ExcelReaderExecutor<T> extends AbstractExcelReaderExecutor<T> imple
         }
     }
 
-
     @Override
     protected ExcelPerRowProcessor getExcelRowProcess() {
         return this;
     }
 
     @Override
-    public boolean isEmptyRow(ExcelRowDefinition row) {
+    public boolean isEmptyRow(ExcelRowDef row) {
         logger.debug("start validate empty row!");
         long startTimeMillis = System.currentTimeMillis();
 
@@ -71,46 +72,48 @@ public class ExcelReaderExecutor<T> extends AbstractExcelReaderExecutor<T> imple
                 return false;
             }
         } catch (Throwable e) {
-            throw new ExcelReaderException(this.curSheetIndex, this.curRowIndex, this.curColIndex, ExcelFieldUtils.getCellValue(row, this.curColIndex), e.getMessage(), e);
+            throw new ExcelReaderException(this.curSheetIndex, this.curRowIndex, this.curColIndex,
+                    ExcelFieldUtils.getCellValue(row, this.curColIndex), e.getMessage(), e);
         } finally {
             logger.debug("finish validate emtpy row! [cost:{}ms] ", (System.currentTimeMillis() - startTimeMillis));
         }
     }
 
     @Override
-    public void preSet(ExcelRowDefinition row) {
+    public void preSet(ExcelRowDef row) {
         super.preSet(row);
     }
 
-
     @Override
-    public boolean validate(ExcelRowDefinition row) {
+    public boolean validate(ExcelRowDef row) {
         logger.debug("start validate empty row!");
         long startTimeMillis = System.currentTimeMillis();
         try {
             return super.validate(row);
         } catch (Throwable e) {
-            throw new ExcelReaderException(this.curSheetIndex, this.curRowIndex, this.curColIndex, ExcelFieldUtils.getCellValue(row, this.curColIndex), e.getMessage(), e);
+            throw new ExcelReaderException(this.curSheetIndex, this.curRowIndex, this.curColIndex,
+                    ExcelFieldUtils.getCellValue(row, this.curColIndex), e.getMessage(), e);
         } finally {
             logger.debug("finish validate empty row! [cost:{}ms]", (System.currentTimeMillis() - startTimeMillis));
         }
     }
 
     @Override
-    public void format(ExcelRowDefinition row) {
+    public void format(ExcelRowDef row) {
         logger.debug("start format and assign value!");
         long startTimeMillis = System.currentTimeMillis();
         try {
             super.format(row);
         } catch (Throwable e) {
-            throw new ExcelReaderException(this.curSheetIndex, this.curRowIndex, this.curColIndex, ExcelFieldUtils.getCellValue(row, this.curColIndex), e.getMessage(), e);
+            throw new ExcelReaderException(this.curSheetIndex, this.curRowIndex, this.curColIndex,
+                    ExcelFieldUtils.getCellValue(row, this.curColIndex), e.getMessage(), e);
         } finally {
             logger.debug("finish format and assign value! [cost:{}ms]", (System.currentTimeMillis() - startTimeMillis));
         }
     }
 
     @Override
-    protected boolean isTitleRow(ExcelRowDefinition row) {
+    protected boolean isTitleRow(ExcelRowDef row) {
         return super.isTitleRow(row);
     }
 

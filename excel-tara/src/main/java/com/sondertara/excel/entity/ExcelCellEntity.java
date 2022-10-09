@@ -70,13 +70,15 @@ public class ExcelCellEntity {
     /**
      * range
      * <p>
-     * number  eg:{"2",""}(2, ),{"2","5"},{"","5"}
-     * date eg:{"2019-08-01 12:00:00",""},{"2019-08-01 12:00:00","2019-10-01 12:00:00"}
+     * number eg:{"2",""}(2, ),{"2","5"},{"","5"}
+     * date eg:{"2019-08-01 12:00:00",""},{"2019-08-01 12:00:00","2019-10-01
+     * 12:00:00"}
      * </p>
      */
     private String[] range;
     /**
-     * range type {@link FieldRangeType} ,default is {@link FieldRangeType#RANGE_CLOSE}
+     * range type {@link FieldRangeType} ,default is
+     * {@link FieldRangeType#RANGE_CLOSE}
      */
     private FieldRangeType rangeType;
 }

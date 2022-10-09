@@ -1,6 +1,5 @@
 package com.sondertara.excel.parser;
 
-
 import com.sondertara.common.exception.TaraException;
 import com.sondertara.common.util.LocalDateTimeUtils;
 import com.sondertara.common.util.StringUtils;
@@ -45,7 +44,6 @@ public class ExcelWriterResolver extends ExcelTemplateWriterResolver {
 
     private Integer nullCellCount = 0;
 
-
     public ExcelWriterResolver(ExcelWriteSheetEntity excelEntity) {
         super(excelEntity);
 
@@ -55,7 +53,6 @@ public class ExcelWriterResolver extends ExcelTemplateWriterResolver {
         super(excelEntity, excelHelper);
 
     }
-
 
     public void generateCsv(String fileName) {
         try {
@@ -70,7 +67,8 @@ public class ExcelWriterResolver extends ExcelTemplateWriterResolver {
                     return;
                 }
                 Collections.addAll(fileList, files);
-                final List<File> collect = fileList.stream().sorted(Comparator.comparing(File::getName)).collect(Collectors.toList());
+                final List<File> collect = fileList.stream().sorted(Comparator.comparing(File::getName))
+                        .collect(Collectors.toList());
                 File csvFile = new File(workPath + fileName + ".csv");
 
                 if (csvFile.exists()) {
@@ -85,7 +83,8 @@ public class ExcelWriterResolver extends ExcelTemplateWriterResolver {
                     }
                 }
                 Appendable printWriter = new PrintWriter(csvFile, Constant.CHARSET);
-                CSVPrinter csvPrinter = CSVFormat.EXCEL.builder().setHeader(excelEntity.getPropertyList().stream().map(ExcelCellEntity::getColumnName).toArray(String[]::new)).build().print(printWriter);
+                CSVPrinter csvPrinter = CSVFormat.EXCEL.builder().setHeader(excelEntity.getPropertyList().stream()
+                        .map(ExcelCellEntity::getColumnName).toArray(String[]::new)).build().print(printWriter);
 
                 csvPrinter.flush();
                 csvPrinter.close();
@@ -166,14 +165,14 @@ public class ExcelWriterResolver extends ExcelTemplateWriterResolver {
             }
             if (data.size() < param.getPageSize()) {
                 sizeColumnWidth(sheet, propertyList.size());
-                logger.warn("current query data size is [{}],less than pageSize[{}],is the last page,query exit!", data.size(), param.getPageSize());
+                logger.warn("current query data size is [{}],less than pageSize[{}],is the last page,query exit!",
+                        data.size(), param.getPageSize());
                 break;
             }
             firstPageNo++;
         }
         return workbook;
     }
-
 
     /**
      * 构建多Sheet Excel
@@ -228,14 +227,14 @@ public class ExcelWriterResolver extends ExcelTemplateWriterResolver {
             }
             if (data.size() < param.getPageSize()) {
                 sizeColumnWidth(sheet, propertyList.size());
-                logger.warn("current query data size is [{}],less than pageSize[{}],is the last page,query exit!", data.size(), param.getPageSize());
+                logger.warn("current query data size is [{}],less than pageSize[{}],is the last page,query exit!",
+                        data.size(), param.getPageSize());
                 break;
             }
             pageNo++;
         }
         return workbook;
     }
-
 
     /**
      * create the column of row start at the second row
@@ -253,13 +252,15 @@ public class ExcelWriterResolver extends ExcelTemplateWriterResolver {
         } catch (IllegalAccessException e) {
             throw new TaraException("BuildCellValue error", e);
         }
-        if (StringUtils.isBlank(cellValue) || "0".equals(cellValue.toString()) || "0.0".equals(cellValue.toString()) || "0.00".equals(cellValue.toString())) {
+        if (StringUtils.isBlank(cellValue) || "0".equals(cellValue.toString()) || "0.0".equals(cellValue.toString())
+                || "0.00".equals(cellValue.toString())) {
             nullCellCount++;
         }
         if (cellValue == null) {
             cell.setCellValue("");
         } else if (cellValue instanceof BigDecimal) {
-            cell.setCellValue((((BigDecimal) cellValue).setScale(property.getScale(), property.getRoundingMode())).toString());
+            cell.setCellValue(
+                    (((BigDecimal) cellValue).setScale(property.getScale(), property.getRoundingMode())).toString());
 
         } else if (cellValue instanceof Date) {
             cell.setCellValue(LocalDateTimeUtils.format((Date) cellValue, property.getDateFormat().value()));

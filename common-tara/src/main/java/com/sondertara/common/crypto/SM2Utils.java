@@ -19,7 +19,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Arrays;
 
-
 /**
  * SM2椭圆曲线参数加密与解密实现 包括 -签名,验签 -密钥交换 -公钥加密,私钥解密 SM2非对称加密的结果由C1,C2,C3三部分组成。
  * 其中C1是生成随机数的计算出的椭圆曲线点，C2是密文数据，C3是SM3的摘要值。 旧国密标准的结果是按C1C2C3顺序，新标准的是按C1C3C2顺序存放!
@@ -33,25 +32,32 @@ public class SM2Utils {
      * <p>
      * 椭圆曲线方程：y2=x3+ax+b 曲线参数：a,b,n,p,Gx,Gy
      */
-    private static final BigInteger A = new BigInteger("FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFC", 16);
-    private static final BigInteger B = new BigInteger("28E9FA9E9D9F5E344D5A9E4BCF6509A7F39789F515AB8F92DDBCBD414D940E93", 16);
-    private static final BigInteger N = new BigInteger("FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFF7203DF6B21C6052B53BBF40939D54123", 16);
-    private static final BigInteger P = new BigInteger("FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFF", 16);
-    private static final BigInteger GX = new BigInteger("32C4AE2C1F1981195F9904466A39C9948FE30BBFF2660BE1715A4589334C74C7", 16);
-    private static final BigInteger GY = new BigInteger("BC3736A2F4F6779C59BDCEE36B692153D0A9877CC62A474002DF32E52139F0A0", 16);
+    private static final BigInteger A = new BigInteger(
+            "FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFC", 16);
+    private static final BigInteger B = new BigInteger(
+            "28E9FA9E9D9F5E344D5A9E4BCF6509A7F39789F515AB8F92DDBCBD414D940E93", 16);
+    private static final BigInteger N = new BigInteger(
+            "FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFF7203DF6B21C6052B53BBF40939D54123", 16);
+    private static final BigInteger P = new BigInteger(
+            "FFFFFFFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000FFFFFFFFFFFFFFFF", 16);
+    private static final BigInteger GX = new BigInteger(
+            "32C4AE2C1F1981195F9904466A39C9948FE30BBFF2660BE1715A4589334C74C7", 16);
+    private static final BigInteger GY = new BigInteger(
+            "BC3736A2F4F6779C59BDCEE36B692153D0A9877CC62A474002DF32E52139F0A0", 16);
 
     /**
      * 初始常量，长度64位,可根据实际需要生成
      */
 
-    private static final BigInteger IV = new BigInteger("2C98EEFD718C73C9CF4925CEF2CE6A878C7AFBEF126F97B2D2938C2498397A8B", 16);
+    private static final BigInteger IV = new BigInteger(
+            "2C98EEFD718C73C9CF4925CEF2CE6A878C7AFBEF126F97B2D2938C2498397A8B", 16);
     private static final int BYTEARRAY_OUTPUT_STREAM_SIZE = 32;
     private static final int DIGEST_LENGTH = 32;
 
     // 0x80十进制为-128
-    private static final byte[] START_POSITION = {(byte) 0x80};
+    private static final byte[] START_POSITION = { (byte) 0x80 };
     // 0x00十进制为0
-    private static final byte[] ZERO_POSITION = {(byte) 0x00};
+    private static final byte[] ZERO_POSITION = { (byte) 0x00 };
     // 常量Tj={79cc4519，其中0≤j≤15；7a879d8a，其中16≤j≤63}
     private static final Integer TJ_15 = Integer.valueOf("79cc4519", 16);
     private static final Integer TJ_63 = Integer.valueOf("7a879d8a", 16);
@@ -131,7 +137,6 @@ public class SM2Utils {
         return baoStream.toByteArray();
     }
 
-
     /**
      * 随机数生成器 max属于[1, max-1]
      */
@@ -208,7 +213,8 @@ public class SM2Utils {
         }
 
         // 加密第7步：生成消息摘要C3，计算公式：C3 = Hash(x2 || M || y2)
-        byte[] C3 = byteHash(kpb.getXCoord().toBigInteger().toByteArray(), inputBuffer, kpb.getYCoord().toBigInteger().toByteArray());
+        byte[] C3 = byteHash(kpb.getXCoord().toBigInteger().toByteArray(), inputBuffer,
+                kpb.getYCoord().toBigInteger().toByteArray());
 
         // 加密第8步：生成最后的密文encryptResult，计算公式：encryptResult=C1 || C2 || C3
         // 加密结果由：根据随机数计算出的椭圆曲线点C1，密文数据C2，SM3的摘要值C3三个部分组成
@@ -219,12 +225,11 @@ public class SM2Utils {
             System.arraycopy(C3, 0, encryptResult, C1.length + C2.length, C3.length);
             System.arraycopy(C2, 0, encryptResult, C1.length, C2.length);
         } else {
-            //旧SM2标准存放顺序C1C2C3
+            // 旧SM2标准存放顺序C1C2C3
             System.arraycopy(C1, 0, encryptResult, 0, C1.length);
             System.arraycopy(C2, 0, encryptResult, C1.length, C2.length);
             System.arraycopy(C3, 0, encryptResult, C1.length + C2.length, C3.length);
         }
-
 
         return encryptResult;
     }
@@ -273,7 +278,8 @@ public class SM2Utils {
         // 生成消息摘要messageDigest,计算公式：messageDigest= Hash(x2 || M' || y2) 再判断消息摘要与C3是否一致
         byte[] C3 = new byte[DIGEST_LENGTH];
         System.arraycopy(encryptData, encryptData.length - DIGEST_LENGTH, C3, 0, DIGEST_LENGTH);
-        byte[] messageDigest = byteHash(dBC1.getXCoord().toBigInteger().toByteArray(), Plaintext, dBC1.getYCoord().toBigInteger().toByteArray());
+        byte[] messageDigest = byteHash(dBC1.getXCoord().toBigInteger().toByteArray(), Plaintext,
+                dBC1.getYCoord().toBigInteger().toByteArray());
         if (Arrays.equals(messageDigest, C3)) {
             return new String(Plaintext, StandardCharsets.UTF_8);
         } else {
@@ -471,7 +477,8 @@ public class SM2Utils {
             w[i] = toInteger(bi, i);
         }
         for (int j = 16; j < 68; j++) {
-            w[j] = P1(w[j - 16] ^ w[j - 9] ^ Integer.rotateLeft(w[j - 3], 15)) ^ Integer.rotateLeft(w[j - 13], 7) ^ w[j - 6];
+            w[j] = P1(w[j - 16] ^ w[j - 9] ^ Integer.rotateLeft(w[j - 3], 15)) ^ Integer.rotateLeft(w[j - 13], 7)
+                    ^ w[j - 6];
         }
         for (int j = 0; j < 64; j++) {
             w1[j] = w[j] ^ w[j + 4];
@@ -544,8 +551,9 @@ public class SM2Utils {
     private static byte[] ZA(String IDA, ECPoint publicKey) {
         byte[] idaBytes = IDA.getBytes();
         int entlenA = idaBytes.length * 8;
-        byte[] ENTLA = new byte[]{(byte) (entlenA & 0xFF00), (byte) (entlenA & 0x00FF)};
-        return byteHash(ENTLA, idaBytes, A.toByteArray(), B.toByteArray(), GX.toByteArray(), GY.toByteArray(), publicKey.getXCoord().toBigInteger().toByteArray(), publicKey.getYCoord().toBigInteger().toByteArray());
+        byte[] ENTLA = new byte[] { (byte) (entlenA & 0xFF00), (byte) (entlenA & 0x00FF) };
+        return byteHash(ENTLA, idaBytes, A.toByteArray(), B.toByteArray(), GX.toByteArray(), GY.toByteArray(),
+                publicKey.getXCoord().toBigInteger().toByteArray(), publicKey.getYCoord().toBigInteger().toByteArray());
     }
 
     /**
@@ -570,7 +578,8 @@ public class SM2Utils {
             r = r.mod(N);
         } while (r.equals(BigInteger.ZERO) || r.add(k).equals(N));
 
-        BigInteger s = ((keyPair.getPrivateKey().add(BigInteger.ONE).modInverse(N)).multiply((k.subtract(r.multiply(keyPair.getPrivateKey()))).mod(N))).mod(N);
+        BigInteger s = ((keyPair.getPrivateKey().add(BigInteger.ONE).modInverse(N))
+                .multiply((k.subtract(r.multiply(keyPair.getPrivateKey()))).mod(N))).mod(N);
 
         return new Signature(r, s);
     }
@@ -693,20 +702,20 @@ public class SM2Utils {
         // 利用导入的公钥进行加密
         byte[] encryptData = SM2Utils.encrypt(srcStr, importPublicKey, false);
         System.out.println("原始信息（明文）:" + srcStr);
-        //密文字节数组转字符串（密文字符串）
+        // 密文字节数组转字符串（密文字符串）
         String encryptStr = HexUtils.encodeHexStr(encryptData);
         System.out.println("利用导入的公钥进行加密后的密文:");
         System.out.println(encryptStr);
-        //密文字符串转密文字节数组
+        // 密文字符串转密文字节数组
         byte[] _encryptData = HexUtils.decodeHex(encryptStr);
         // 利用导入的私钥进行解密
         System.out.println("解密后的明文:" + SM2Utils.decrypt(_encryptData, importPrivateKey));
 
         System.out.println("#####################签 名 与 验 证###################");
-        //IDA为签名方唯一标识
+        // IDA为签名方唯一标识
         String IDA = "Sondertara";
         String signatureMessage = "需要进行签名的信息";
-        //进行签名
+        // 进行签名
         Signature signature = SM2Utils.signature(signatureMessage, IDA, new SM2KeyPair(publicKey, privateKey));
         System.out.println("用户标识:" + IDA);
         System.out.println("签名信息:" + signatureMessage);

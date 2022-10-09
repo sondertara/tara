@@ -19,7 +19,6 @@ public class PageQueryParam implements Serializable {
         return new Builder();
     }
 
-
     private PageQueryParam(Integer pageSize, Integer pageStart, Integer pageEnd) {
         this.pageSize = pageSize;
         this.pageStart = pageStart;
@@ -68,6 +67,5 @@ public class PageQueryParam implements Serializable {
             return new PageQueryParam(this.pageSize, this.pageStart, this.pageEnd);
         }
     }
-
 
 }

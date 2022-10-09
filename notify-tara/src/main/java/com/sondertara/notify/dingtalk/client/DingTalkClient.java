@@ -2,14 +2,13 @@ package com.sondertara.notify.dingtalk.client;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.sondertara.common.model.ResultDTO;
+import com.sondertara.common.util.CollectionUtils;
 import com.sondertara.common.util.HttpUtils;
 import com.sondertara.common.util.StringUtils;
-import com.sondertara.notify.dingtalk.message.DingTalkMessage;
+import com.sondertara.notify.dingtalk.message.NotifyMessage;
 import com.sondertara.notify.dingtalk.message.TextMessage;
-import org.apache.commons.collections.CollectionUtils;
 
 import java.util.List;
-
 
 /**
  * @author huangxiaohu
@@ -48,7 +47,7 @@ public class DingTalkClient {
     }
 
     @SuppressWarnings("rawtypes")
-    public ResultDTO send(String webhook, DingTalkMessage message) {
+    public ResultDTO send(String webhook, NotifyMessage message) {
 
         String result = HttpUtils.sendPostJson(webhook, message.toJsonString());
 

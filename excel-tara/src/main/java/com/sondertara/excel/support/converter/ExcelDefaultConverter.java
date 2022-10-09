@@ -1,12 +1,14 @@
 package com.sondertara.excel.support.converter;
 
+import java.lang.annotation.Annotation;
+
 /**
- * @author chenzw
+ * @author huangxiaohu
  */
-public class ExcelDefaultConverter implements AbstractExcelColumnConverter {
+public class ExcelDefaultConverter implements AbstractExcelColumnConverter<Annotation, Object> {
 
     @Override
-    public void initialize(Object annotation) {
+    public void initialize(Annotation annotation) {
 
     }
 

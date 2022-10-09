@@ -1,6 +1,5 @@
 package com.sondertara.excel.meta.annotation.validation;
 
-
 import com.sondertara.excel.support.validator.AbstractExcelColumnValidator;
 
 import java.lang.annotation.ElementType;

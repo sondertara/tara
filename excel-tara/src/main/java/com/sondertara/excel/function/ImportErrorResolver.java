@@ -1,5 +1,4 @@
 
-
 package com.sondertara.excel.function;
 
 import com.sondertara.excel.entity.ErrorEntity;

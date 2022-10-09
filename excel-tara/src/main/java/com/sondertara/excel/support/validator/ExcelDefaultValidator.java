@@ -4,12 +4,13 @@ import java.lang.annotation.Annotation;
 
 /**
  * 默认校验器
- * @author chenzw
+ * 
+ * @author huangxiaohu
  */
 public class ExcelDefaultValidator<T extends Annotation> implements AbstractExcelColumnValidator<T> {
 
     @Override
-    public void initialize(T annotation) {
+    public void initialize(Annotation annotation) {
 
     }
 

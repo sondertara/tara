@@ -15,15 +15,16 @@
  */
 package com.sondertara.excel.fast;
 
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
+
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 
 class SimpleXmlReader implements Closeable {
 
@@ -72,8 +73,8 @@ class SimpleXmlReader implements Closeable {
 
     public String getAttributeRequired(String name) throws XMLStreamException {
         String value = getAttribute(name);
-        if(value == null) {
-            throw new XMLStreamException("missing required attribute "+name);
+        if (value == null) {
+            throw new XMLStreamException("missing required attribute " + name);
         }
         return value;
     }
@@ -91,7 +92,8 @@ class SimpleXmlReader implements Closeable {
         return value == null ? null : Integer.valueOf(value);
     }
 
-    public void forEach(String startChildElement, String untilEndElement, Consumer<SimpleXmlReader> consumer) throws XMLStreamException {
+    public void forEach(String startChildElement, String untilEndElement, Consumer<SimpleXmlReader> consumer)
+            throws XMLStreamException {
         while (goTo(() -> isStartElement(startChildElement) || isEndElement(untilEndElement))) {
             if (untilEndElement.equals(getLocalName())) {
                 break;
@@ -112,9 +114,9 @@ class SimpleXmlReader implements Closeable {
             if (type == XMLStreamReader.CDATA || type == XMLStreamReader.CHARACTERS || type == XMLStreamReader.SPACE) {
                 sb.append(reader.getText());
             } else if (type == XMLStreamReader.START_ELEMENT) {
-                if(skipping.equals(reader.getLocalName())) {
+                if (skipping.equals(reader.getLocalName())) {
                     getValueUntilEndElement(reader.getLocalName());
-                }else {
+                } else {
                     childElement++;
                 }
             } else if (type == XMLStreamReader.END_ELEMENT) {

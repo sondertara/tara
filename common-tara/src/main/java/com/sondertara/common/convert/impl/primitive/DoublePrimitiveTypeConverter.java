@@ -4,10 +4,9 @@ import com.sondertara.common.convert.AbstractTypeConverter;
 import org.apache.commons.lang3.math.NumberUtils;
 
 /**
- * @author chenzw
+ * @author huangxiaohu
  */
 public class DoublePrimitiveTypeConverter extends AbstractTypeConverter<Double> {
-
 
     @Override
     protected Double convertInternal(Object value) {

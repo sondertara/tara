@@ -15,11 +15,17 @@
  */
 package com.sondertara.excel.fast;
 
+import com.sondertara.excel.exception.ExcelReaderException;
+import org.apache.poi.ss.usermodel.CellType;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+/**
+ * @author huangxiaohu
+ */
 public class Cell {
 
     private static final long DAY_MILLISECONDS = 86_400_000L;
@@ -38,7 +44,7 @@ public class Cell {
     }
 
     Cell(ReadableWorkbook workbook, CellType type, Object value, CellAddress address, String formula, String rawValue,
-         String dataFormatId, String dataFormatString) {
+            String dataFormatId, String dataFormatString) {
         this.workbook = workbook;
         this.type = type;
         this.value = value;
@@ -77,19 +83,20 @@ public class Cell {
     }
 
     public BigDecimal asNumber() {
-        requireType(CellType.NUMBER);
+        requireType(CellType.NUMERIC);
         return (BigDecimal) value;
     }
 
     /**
      * Returns a date-time interpretation of a numerical cell.
+     *
      * @return LocalDateTime or null if the cell is empty
      * @throws ExcelReaderException is the cell if not of numerical type or empty
      */
     public LocalDateTime asDate() {
-        if (type == CellType.NUMBER) {
+        if (type == CellType.NUMERIC) {
             return convertToDate(Double.parseDouble(rawValue));
-        } else if (type == CellType.EMPTY) {
+        } else if (type == CellType.BLANK) {
             return null;
         } else {
             throw new ExcelReaderException("Wrong cell type " + type + " for date value");
@@ -131,7 +138,7 @@ public class Cell {
     }
 
     private void requireType(CellType requiredType) {
-        if (type != requiredType && type != CellType.EMPTY) {
+        if (type != requiredType && type != CellType.BLANK) {
             throw new ExcelReaderException("Wrong cell type " + type + ", wanted " + requiredType);
         }
     }

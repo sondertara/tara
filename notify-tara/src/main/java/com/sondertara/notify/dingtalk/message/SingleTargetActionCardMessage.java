@@ -10,7 +10,7 @@ import java.util.Map;
 /**
  * @author huangxiaohu
  */
-public class SingleTargetActionCardMessage implements DingTalkMessage {
+public class SingleTargetActionCardMessage implements NotifyMessage {
     private String title;
 
     private String bannerUrl;
@@ -105,7 +105,7 @@ public class SingleTargetActionCardMessage implements DingTalkMessage {
             throw new TaraException("singleTitle should not be blank");
         }
         if (StringUtils.isBlank(singleURL)) {
-            throw new  TaraException("singleURL should not be blank");
+            throw new TaraException("singleURL should not be blank");
         }
 
         actionCardContent.put("singleTitle", singleTitle);

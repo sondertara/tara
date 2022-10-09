@@ -2,7 +2,7 @@ package com.sondertara;
 
 import com.sondertara.domain.User;
 import com.sondertara.excel.boot.ExcelBeanWriter;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ExcelBeanWriteTest {
 

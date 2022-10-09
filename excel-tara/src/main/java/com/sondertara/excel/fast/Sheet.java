@@ -20,6 +20,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * @author huangxiaohu
+ */
 public class Sheet {
 
     private final ReadableWorkbook workbook;

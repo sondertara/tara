@@ -64,7 +64,6 @@ public class ExcelTaraHelper {
         errorEntityRecordsLocal.set(lists);
     }
 
-
     /**
      * get work file
      *
@@ -117,7 +116,8 @@ public class ExcelTaraHelper {
                 if (CollectionUtils.isEmpty(title)) {
                     csvPrinter = CSVFormat.EXCEL.print(writer);
                 } else {
-                    csvPrinter = CSVFormat.EXCEL.builder().setHeader(title.toArray(new String[0])).build().print(writer);
+                    csvPrinter = CSVFormat.EXCEL.builder().setHeader(title.toArray(new String[0])).build()
+                            .print(writer);
                 }
 
                 printerMap.put(fileName, csvPrinter);
@@ -142,7 +142,6 @@ public class ExcelTaraHelper {
             e.printStackTrace();
         }
     }
-
 
     public static void closeAllPrinter() {
         Map<String, CSVPrinter> printerMap = printerThreadLocal.get();
@@ -186,9 +185,8 @@ public class ExcelTaraHelper {
         }
     }
 
-
     /**
-     * @param fileName file name with  suffix
+     * @param fileName file name with suffix
      * @return the path to work
      * @throws ExcelTaraException errors
      */
@@ -204,7 +202,6 @@ public class ExcelTaraHelper {
         }
 
         String path = WORKSPACE + File.separator + fileName;
-
 
         localFile = new File(path);
         if (localFile.exists()) {
@@ -229,7 +226,6 @@ public class ExcelTaraHelper {
         if (StringUtils.isEmpty(fileName)) {
             throw new ExcelTaraException("fileName is empty");
         }
-
 
         String path = WORKSPACE + File.separator + fileName;
 

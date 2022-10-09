@@ -48,7 +48,7 @@ public class DSAUtils {
      * @return key pair
      */
     public static KeyPair initKey() {
-        //密钥长度范围：512-65536（64的整数倍）
+        // 密钥长度范围：512-65536（64的整数倍）
         return initKey(1024);
     }
 
@@ -92,7 +92,8 @@ public class DSAUtils {
     /**
      * 验签
      */
-    public static boolean verify(byte[] data, byte[] publicKey, byte[] sign, String signatureAlgorithm) throws Exception {
+    public static boolean verify(byte[] data, byte[] publicKey, byte[] sign, String signatureAlgorithm)
+            throws Exception {
         try {
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicKey);
 

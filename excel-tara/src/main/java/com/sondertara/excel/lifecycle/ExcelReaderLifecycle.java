@@ -1,13 +1,11 @@
 package com.sondertara.excel.lifecycle;
 
-
-import com.sondertara.excel.meta.model.ExcelRowDefinition;
+import com.sondertara.excel.meta.model.ExcelRowDef;
 
 /**
- * @author chenzw
+ * @author huangxiaohu
  */
 public interface ExcelReaderLifecycle {
-
 
     /**
      * 是否空行
@@ -15,7 +13,7 @@ public interface ExcelReaderLifecycle {
      * @param row
      * @return
      */
-    boolean isEmptyRow(ExcelRowDefinition row);
+    boolean isEmptyRow(ExcelRowDef row);
 
     /**
      * 前置设置
@@ -23,8 +21,7 @@ public interface ExcelReaderLifecycle {
      * @return
      * @since 1.0.5
      */
-    void preSet(ExcelRowDefinition row);
-
+    void preSet(ExcelRowDef row);
 
     /**
      * 数据校验
@@ -32,7 +29,7 @@ public interface ExcelReaderLifecycle {
      * @param row
      * @return
      */
-    boolean validate(ExcelRowDefinition row);
+    boolean validate(ExcelRowDef row);
 
     /**
      * 格式转换
@@ -40,6 +37,6 @@ public interface ExcelReaderLifecycle {
      * @param row
      * @return
      */
-    void format(ExcelRowDefinition row);
+    void format(ExcelRowDef row);
 
 }

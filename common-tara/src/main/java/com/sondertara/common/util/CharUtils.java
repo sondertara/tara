@@ -4,7 +4,7 @@ package com.sondertara.common.util;
  * 字符工具类<br>
  * 部分工具来自于Apache Commons系列
  *
- * @author looly
+ * @author huangxiaohu
  * @since 4.0.1
  */
 public class CharUtils {
@@ -170,6 +170,7 @@ public class CharUtils {
 
     /**
      * 是否为16进制规范的字符，判断是否为如下字符
+     * 
      * <pre>
      * 1. 0~9
      * 2. a~f
@@ -280,7 +281,8 @@ public class CharUtils {
      * @since 4.0.8
      */
     public static boolean isEmoji(char c) {
-        return !(c == 0x0 || c == 0x9 || c == 0xA || c == 0xD || c >= 0x20 && c <= 0xD7FF || c >= 0xE000 && c <= 0xFFFD);
+        return !(c == 0x0 || c == 0x9 || c == 0xA || c == 0xD || c >= 0x20 && c <= 0xD7FF
+                || c >= 0xE000 && c <= 0xFFFD);
     }
 
     /**

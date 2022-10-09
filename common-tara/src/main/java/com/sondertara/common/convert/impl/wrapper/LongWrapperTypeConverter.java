@@ -5,7 +5,6 @@ import org.apache.commons.lang3.StringUtils;
 
 public class LongWrapperTypeConverter extends AbstractTypeConverter<Long> {
 
-
     @Override
     protected Long convertInternal(Object value) {
         if (value instanceof Number) {

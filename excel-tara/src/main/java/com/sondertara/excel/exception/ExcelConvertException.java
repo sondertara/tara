@@ -3,7 +3,7 @@ package com.sondertara.excel.exception;
 /**
  * 字段值转换异常
  *
- * @author chenzw
+ * @author huangxiaohu
  */
 public class ExcelConvertException extends ExcelException {
 
@@ -23,7 +23,8 @@ public class ExcelConvertException extends ExcelException {
         super(cause);
     }
 
-    protected ExcelConvertException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+    protected ExcelConvertException(String message, Throwable cause, boolean enableSuppression,
+            boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }

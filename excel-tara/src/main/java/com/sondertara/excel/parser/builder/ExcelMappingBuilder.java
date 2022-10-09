@@ -1,8 +1,6 @@
 package com.sondertara.excel.parser.builder;
 
 import com.sondertara.excel.function.ExportFunction;
-import com.sondertara.excel.parser.builder.DateQueryBuilder;
-
 
 public class ExcelMappingBuilder<T> {
     private Class<?> excelClass;
@@ -18,6 +16,5 @@ public class ExcelMappingBuilder<T> {
         dateQueryBuilder.excelMapping(excelClass, query);
         return this.dateQueryBuilder;
     }
-
 
 }

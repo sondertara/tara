@@ -2,13 +2,21 @@ package com.sondertara.excel.context;
 
 import com.sondertara.excel.entity.PageQueryParam;
 import com.sondertara.excel.function.ExportFunction;
+import com.sondertara.excel.meta.model.TaraSheet;
 
 import java.util.List;
+import java.util.Map;
 
 /**
- * @author chenzw
+ * @author huangxiaohu
  */
 public interface ExcelWriterContext extends ExcelContext {
+    /**
+     * 获取sheet 定义
+     *
+     * @return the map
+     */
+    Map<Integer, ? extends TaraSheet> getSheetDefinitions();
 
     /**
      * 添加数据
@@ -39,6 +47,5 @@ public interface ExcelWriterContext extends ExcelContext {
     void removeSheet(int index);
 
     void addMapper(Class<?> excelClass, ExportFunction<?> function, PageQueryParam queryParam);
-
 
 }

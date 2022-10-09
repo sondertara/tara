@@ -17,7 +17,8 @@ public final class CollectionUtils {
         if (isEmpty(list)) {
             return null;
         }
-        @SuppressWarnings("unchecked") T[] array = ((T[]) new Object[list.size()]);
+        @SuppressWarnings("unchecked")
+        T[] array = ((T[]) new Object[list.size()]);
         list.toArray(array);
         return array;
     }
@@ -72,10 +73,10 @@ public final class CollectionUtils {
     }
 
     /**
-     * list is  not empty
+     * list is not empty
      *
      * @param list list
-     * @return is  not empty
+     * @return is not empty
      */
     public static boolean isNotEmpty(Collection<? extends Object> list) {
         return list != null && !list.isEmpty();

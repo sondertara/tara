@@ -16,7 +16,6 @@ import org.apache.poi.xssf.usermodel.XSSFColor;
  */
 public class LightGreenTitleCellStyleBuilder implements CellStyleBuilder {
 
-
     @Override
     public CellStyle build(Workbook workbook, ExcelCellStyleDefinition cellStyleDefinition, Cell cell) {
         XSSFCellStyle cellStyle = (XSSFCellStyle) cellStyleDefinition.getCellStyle();

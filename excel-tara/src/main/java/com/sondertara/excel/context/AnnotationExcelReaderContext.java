@@ -1,14 +1,13 @@
 package com.sondertara.excel.context;
 
-
 import com.sondertara.excel.executor.ExcelReaderExecutor;
 import com.sondertara.excel.executor.TaraExcelExecutor;
-import com.sondertara.excel.meta.AnnotationSheet;
 import com.sondertara.excel.meta.model.AnnotationExcelReaderSheetDefinition;
-import com.sondertara.excel.support.callback.ExcelCellReadExceptionCallback;
-import com.sondertara.excel.support.callback.ExcelRowReadExceptionCallback;
-import com.sondertara.excel.support.callback.impl.DefaultExcelCellReadExceptionCallback;
-import com.sondertara.excel.support.callback.impl.DefaultExcelRowReadExceptionCallback;
+import com.sondertara.excel.meta.model.AnnotationSheet;
+import com.sondertara.excel.support.callback.CellReadExCallback;
+import com.sondertara.excel.support.callback.RowReadExCallback;
+import com.sondertara.excel.support.callback.impl.DefaultCellReadExCallback;
+import com.sondertara.excel.support.callback.impl.DefaultRowReadExCallback;
 
 import java.io.InputStream;
 import java.util.HashMap;
@@ -16,18 +15,19 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author chenzw
+ * @author huangxiaohu
  */
 public class AnnotationExcelReaderContext<T> implements ExcelReaderContext {
 
     private final Map<Integer, AnnotationSheet> sheetDefinitionMap;
     private final TaraExcelExecutor<List<T>> excelExecutor;
     private final InputStream inputStream;
-    private ExcelRowReadExceptionCallback rowReadExceptionCallback = new DefaultExcelRowReadExceptionCallback();
-    private ExcelCellReadExceptionCallback cellReadExceptionCallback = new DefaultExcelCellReadExceptionCallback();
+    private RowReadExCallback rowReadExceptionCallback = new DefaultRowReadExCallback();
+    private CellReadExCallback cellReadExceptionCallback = new DefaultCellReadExCallback();
 
-
-    public AnnotationExcelReaderContext(InputStream is, Class<T> clazz, ExcelRowReadExceptionCallback rowReadExceptionCallback, ExcelCellReadExceptionCallback cellReadExceptionCallback) {
+    public AnnotationExcelReaderContext(InputStream is, Class<T> clazz,
+            RowReadExCallback rowReadExceptionCallback,
+            CellReadExCallback cellReadExceptionCallback) {
         this.inputStream = is;
         this.sheetDefinitionMap = new HashMap<>();
         if (rowReadExceptionCallback != null) {
@@ -38,7 +38,8 @@ public class AnnotationExcelReaderContext<T> implements ExcelReaderContext {
         }
         this.excelExecutor = new ExcelReaderExecutor<T>(this);
 
-        AnnotationExcelReaderSheetDefinition<T> annotationExcelReaderSheetDefinition = new AnnotationExcelReaderSheetDefinition<>(clazz);
+        AnnotationExcelReaderSheetDefinition<T> annotationExcelReaderSheetDefinition = new AnnotationExcelReaderSheetDefinition<>(
+                clazz);
 
         int[] sheetIndexes = annotationExcelReaderSheetDefinition.getSheetIndexes();
         for (int sheetIndex : sheetIndexes) {
@@ -63,14 +64,13 @@ public class AnnotationExcelReaderContext<T> implements ExcelReaderContext {
     }
 
     @Override
-    public ExcelRowReadExceptionCallback getExcelRowReadExceptionCallback() {
+    public RowReadExCallback getExcelRowReadExceptionCallback() {
         return this.rowReadExceptionCallback;
     }
 
     @Override
-    public ExcelCellReadExceptionCallback getExcelCellReadExceptionCallback() {
+    public CellReadExCallback getExcelCellReadExceptionCallback() {
         return this.cellReadExceptionCallback;
     }
-
 
 }

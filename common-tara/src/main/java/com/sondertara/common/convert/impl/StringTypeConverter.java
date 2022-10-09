@@ -5,7 +5,7 @@ import com.sondertara.common.convert.AbstractTypeConverter;
 /**
  * 字符串格式转换器
  *
- * @author chenzw
+ * @author huangxiaohu
  */
 public class StringTypeConverter extends AbstractTypeConverter<String> {
 

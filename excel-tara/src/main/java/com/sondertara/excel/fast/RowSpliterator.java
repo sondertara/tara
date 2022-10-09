@@ -15,16 +15,27 @@
  */
 package com.sondertara.excel.fast;
 
+import com.sondertara.excel.exception.ExcelReaderException;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.DateUtil;
+
 import javax.xml.stream.XMLStreamException;
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-
 import static com.sondertara.excel.fast.DefaultXMLInputFactory.factory;
-import static java.lang.String.format;
+
 class RowSpliterator implements Spliterator<Row> {
 
     private final SimpleXmlReader r;
@@ -77,7 +88,6 @@ class RowSpliterator implements Spliterator<Row> {
         }
     }
 
-
     private Row next() throws XMLStreamException {
         if (!"row".equals(r.getLocalName())) {
             throw new NoSuchElementException();
@@ -126,10 +136,9 @@ class RowSpliterator implements Spliterator<Row> {
         }
     }
 
-    private Cell parseOther(CellAddress addr, String type, String dataFormatId, String dataFormatString)
-        throws XMLStreamException {
+    private Cell parseOther(CellAddress addr, String type, String dataFormatId, String dataFormatString) throws XMLStreamException {
         CellType definedType = parseType(type);
-        Function<String, ?> parser = getParserForType(definedType);
+        Function<String, ?> parser = getParserForType(definedType, dataFormatString);
 
         Object value = null;
         String formula = null;
@@ -163,8 +172,8 @@ class RowSpliterator implements Spliterator<Row> {
             formula = getSharedFormula(addr).orElse(null);
         }
 
-        if (formula == null && value == null && definedType == CellType.NUMBER) {
-            return new Cell(workbook, CellType.EMPTY, null, addr, null, rawValue);
+        if (formula == null && value == null && definedType == CellType.NUMERIC) {
+            return new Cell(workbook, CellType.BLANK, null, addr, null, rawValue);
         } else {
             CellType cellType = (formula != null) ? CellType.FORMULA : definedType;
             return new Cell(workbook, cellType, value, addr, formula, rawValue, dataFormatId, dataFormatString);
@@ -226,25 +235,30 @@ class RowSpliterator implements Spliterator<Row> {
             case "e":
                 return CellType.ERROR;
             case "n":
-                return CellType.NUMBER;
+                return CellType.NUMERIC;
             case "str":
                 return CellType.FORMULA;
             case "s":
             case "inlineStr":
                 return CellType.STRING;
+            default:
         }
         throw new IllegalStateException("Unknown cell type : " + type);
     }
 
-    private Function<String, ?> getParserForType(CellType type) {
+    private Function<String, ?> getParserForType(CellType type, String dataFormatString) {
         switch (type) {
             case BOOLEAN:
                 return RowSpliterator::parseBoolean;
-            case NUMBER:
+            case NUMERIC:
+                if (StringUtils.containsAny(dataFormatString, "y", "m", "d", "h", "s", "Y", "M", "D")) {
+                    return RowSpliterator::parseDate;
+                }
                 return RowSpliterator::parseNumber;
             case FORMULA:
             case ERROR:
                 return Function.identity();
+            default:
         }
         throw new IllegalStateException("No parser defined for type " + type);
     }
@@ -265,6 +279,10 @@ class RowSpliterator implements Spliterator<Row> {
         } else {
             throw new ExcelReaderException("Invalid boolean cell value: '" + s + "'. Expecting '0' or '1'.");
         }
+    }
+
+    private static Date parseDate(String s) {
+        return DateUtil.getJavaDate(Double.parseDouble(s));
     }
 
     private static void ensureSize(List<?> list, int newSize) {

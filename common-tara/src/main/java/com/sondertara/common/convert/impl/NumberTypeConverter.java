@@ -7,6 +7,9 @@ import org.apache.commons.lang3.StringUtils;
 import java.text.NumberFormat;
 import java.text.ParseException;
 
+/**
+ * @author huangxiaohu
+ */
 public class NumberTypeConverter extends AbstractTypeConverter<Number> {
 
     @Override

@@ -3,7 +3,7 @@ package com.sondertara.common.structure;
 import java.util.List;
 
 /**
- * 树节点父类，所有需要使用{@link  TreeUtils}工具类形成树形结构等操作的节点都需要实现该接口
+ * 树节点父类，所有需要使用{@link TreeUtils}工具类形成树形结构等操作的节点都需要实现该接口
  *
  * @param <T> 节点id类型
  * @author huangxiaohu
@@ -33,7 +33,7 @@ public interface TreeNode<T, E> {
     /**
      * 是否叶子节点
      *
-     * @param isLeaf the  leaf node
+     * @param isLeaf the leaf node
      */
     void markLeaf(Boolean isLeaf);
 

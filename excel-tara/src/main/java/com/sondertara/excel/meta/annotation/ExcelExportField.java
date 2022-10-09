@@ -11,25 +11,26 @@ import java.lang.annotation.Target;
 
 /**
  * Excel列
+ * 
  * @author huangxiaohu
  */
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ExcelExportField {
 
-
     /**
      * 标题
+     * 
      * @return
      */
     String colName();
 
     /**
      * 列索引（从1开始）
+     * 
      * @return
      */
     int colIndex() default -1;
-
 
     /**
      * 默认单元格值
@@ -39,36 +40,42 @@ public @interface ExcelExportField {
 
     /**
      * 列类型
+     * 
      * @return the CellType
      */
     CellType cellType() default CellType.STRING;
 
     /**
      * 数据格式
+     * 
      * @return
      */
     ExcelDataFormat dataFormat() default @ExcelDataFormat;
 
     /**
      * 数据样式
+     * 
      * @return
      */
     Class<?> dataCellStyleBuilder() default DefaultDataCellStyleBuilder.class;
 
     /**
      * 标题样式
+     * 
      * @return
      */
     Class<?> titleCellStyleBuilder() default DefaultTitleCellStyleBuilder.class;
 
     /**
      * 是否自动调整宽度
+     * 
      * @return
      */
     boolean autoWidth() default false;
 
     /**
      * 自定义cell宽度
+     * 
      * @return
      */
     int colWidth() default 16;

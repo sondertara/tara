@@ -3,9 +3,8 @@ package com.sondertara.common.convert.impl.primitive;
 import com.sondertara.common.convert.AbstractTypeConverter;
 import com.sondertara.common.util.StringUtils;
 
-
 /**
- * @author chenzw
+ * @author huangxiaohu
  */
 public class IntegerPrimitiveTypeConverter extends AbstractTypeConverter<Integer> {
 

@@ -6,7 +6,7 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Workbook;
 
 /**
- * @author chenzw
+ * @author huangxiaohu
  */
 public interface CellStyleBuilder {
 

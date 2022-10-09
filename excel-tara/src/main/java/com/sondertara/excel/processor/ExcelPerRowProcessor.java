@@ -1,14 +1,13 @@
 package com.sondertara.excel.processor;
 
-
-import com.sondertara.excel.meta.model.ExcelRowDefinition;
+import com.sondertara.excel.meta.model.ExcelRowDef;
 
 /**
- * @author chenzw
+ * @author huangxiaohu
  */
 public interface ExcelPerRowProcessor {
 
     void processTotalRow(int totalRows);
 
-    void processPerRow(ExcelRowDefinition row) throws Exception;
+    void processPerRow(ExcelRowDef row) throws Exception;
 }

@@ -6,8 +6,9 @@ import java.io.Serializable;
 
 /**
  * 类型转换器
+ * 
  * @param <T>
- * @author chenzw
+ * @author huangxiaohu
  */
 public abstract class AbstractTypeConverter<T> implements TypeConverter<T>, Serializable {
 
@@ -24,6 +25,7 @@ public abstract class AbstractTypeConverter<T> implements TypeConverter<T>, Seri
 
     /**
      * 内部转化
+     * 
      * @param value
      * @return
      */

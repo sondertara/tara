@@ -1,9 +1,10 @@
 package com.sondertara.excel.support;
 
-
 import com.sondertara.excel.context.AnnotationExcelReaderContext;
-import com.sondertara.excel.support.callback.ExcelCellReadExceptionCallback;
-import com.sondertara.excel.support.callback.ExcelRowReadExceptionCallback;
+import com.sondertara.excel.context.RawExcelReaderContext;
+import com.sondertara.excel.meta.model.TaraWorkbook;
+import com.sondertara.excel.support.callback.CellReadExCallback;
+import com.sondertara.excel.support.callback.RowReadExCallback;
 import org.apache.commons.io.IOUtils;
 
 import java.io.ByteArrayInputStream;
@@ -13,16 +14,15 @@ import java.io.InputStream;
 import java.util.List;
 
 /**
- * @author chenzw
+ * @author huangxiaohu
  */
 public class ExcelReader {
 
-    private ByteArrayOutputStream baos;
+    private final ByteArrayOutputStream baos;
 
-    private ExcelRowReadExceptionCallback rowReadExceptionCallback;
+    private RowReadExCallback rowReadExceptionCallback;
 
-    private ExcelCellReadExceptionCallback cellReadExceptionCallback;
-
+    private CellReadExCallback cellReadExceptionCallback;
 
     public ExcelReader(InputStream is) {
         this.baos = new ByteArrayOutputStream();
@@ -37,18 +37,23 @@ public class ExcelReader {
         return new ExcelReader(is);
     }
 
-    public ExcelReader configRowReadExceptionCallback(ExcelRowReadExceptionCallback rowReadExceptionCallback) {
+    public ExcelReader configRowReadExceptionCallback(RowReadExCallback rowReadExceptionCallback) {
         this.rowReadExceptionCallback = rowReadExceptionCallback;
         return this;
     }
 
-    public ExcelReader configCellReadExceptionCallback(ExcelCellReadExceptionCallback cellReadExceptionCallback) {
+    public ExcelReader configCellReadExceptionCallback(CellReadExCallback cellReadExceptionCallback) {
         this.cellReadExceptionCallback = cellReadExceptionCallback;
         return this;
     }
 
     public <T> List<T> read(Class<T> clazz) {
-        return new AnnotationExcelReaderContext<>(new ByteArrayInputStream(baos.toByteArray()), clazz, rowReadExceptionCallback, cellReadExceptionCallback).getExecutor().execute();
+        return new AnnotationExcelReaderContext<>(new ByteArrayInputStream(baos.toByteArray()), clazz,
+                rowReadExceptionCallback, cellReadExceptionCallback).getExecutor().execute();
+    }
+
+    public TaraWorkbook rawRead() {
+        return new RawExcelReaderContext(new ByteArrayInputStream(baos.toByteArray())).getExecutor().execute();
     }
 
 }

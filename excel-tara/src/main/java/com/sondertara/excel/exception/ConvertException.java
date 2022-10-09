@@ -1,7 +1,7 @@
 package com.sondertara.excel.exception;
 
 /**
- * @author Chimm Huang
+ * @author huangxiaohu
  */
 public class ConvertException extends RuntimeException {
 

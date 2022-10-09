@@ -1,7 +1,7 @@
 package com.sondertara.excel.tablemodel;
 
 /**
- * @author Chimm Huang
+ * @author huangxiaohu
  */
 public enum BorderPositionEnum {
     /**

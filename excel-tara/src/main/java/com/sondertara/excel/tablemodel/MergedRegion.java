@@ -5,7 +5,7 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
- * @author Chimm Huang
+ * @author huangxiaohu
  */
 @Data
 public class MergedRegion implements Serializable {

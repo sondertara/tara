@@ -1,8 +1,8 @@
 package com.sondertara.excel.parser.builder;
 
+import com.sondertara.excel.boot.AbstractExcelWriter;
 import com.sondertara.excel.enums.ExcelDataType;
 import com.sondertara.excel.function.ExportFunction;
-import com.sondertara.excel.parser.AbstractExcelWriter;
 
 /**
  * @author huangxiaohu
@@ -10,7 +10,6 @@ import com.sondertara.excel.parser.AbstractExcelWriter;
 public class DateQueryBuilder<T> {
 
     private final AbstractExcelWriter<T> writerHandler;
-
 
     public DateQueryBuilder(AbstractExcelWriter<T> writerHandler) {
         this.writerHandler = writerHandler;
@@ -30,7 +29,8 @@ public class DateQueryBuilder<T> {
     public AbstractExcelWriter<T> getWriterHandler() {
         return writerHandler;
     }
-    public DateQueryBuilder<T> excelMapping( Class<?> excelClass, ExportFunction<?> query){
+
+    public DateQueryBuilder<T> excelMapping(Class<?> excelClass, ExportFunction<?> query) {
         writerHandler.excelMapping(excelClass, query);
         return this;
     }

@@ -1,10 +1,9 @@
 package com.sondertara.excel.support.dataconstraint;
 
-
 import com.sondertara.excel.meta.annotation.datavalidation.ExcelStringList;
 
 /**
- * @author chenzw
+ * @author huangxiaohu
  */
 public class ExcelStringListDataValidationConstraint implements ExcelDataValidationConstraint<ExcelStringList> {
 
@@ -14,9 +13,6 @@ public class ExcelStringListDataValidationConstraint implements ExcelDataValidat
     public void initialize(ExcelStringList annotation) {
         this.sList = annotation.value();
     }
-
-
-
 
     @Override
     public String[] generate() {

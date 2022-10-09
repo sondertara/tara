@@ -4,7 +4,6 @@ import com.sondertara.excel.common.Constant;
 
 import java.io.Serializable;
 
-
 /**
  * @author SonderTara
  */
@@ -74,7 +73,9 @@ public class ExcelHelper implements Serializable {
 
         @Override
         public String toString() {
-            return "ExcelHelper.ExcelHelperBuilder(recordCountPerSheet=" + this.recordCountPerSheet + ", openAutoColumWidth=" + this.openAutoColumWidth + ", rowAccessWindowSize=" + this.rowAccessWindowSize + ")";
+            return "ExcelHelper.ExcelHelperBuilder(recordCountPerSheet=" + this.recordCountPerSheet
+                    + ", openAutoColumWidth=" + this.openAutoColumWidth + ", rowAccessWindowSize="
+                    + this.rowAccessWindowSize + ")";
         }
     }
 }

@@ -3,7 +3,7 @@ package com.sondertara.excel.exception;
 /**
  * 值校验异常
  *
- * @author chenzw
+ * @author huangxiaohu
  */
 public class ExcelValidationException extends ExcelException {
     private static final long serialVersionUID = 1888228315406130225L;
@@ -24,7 +24,8 @@ public class ExcelValidationException extends ExcelException {
         super(cause);
     }
 
-    protected ExcelValidationException(final String message, final Throwable cause, final boolean enableSuppression, final boolean writableStackTrace) {
+    protected ExcelValidationException(final String message, final Throwable cause, final boolean enableSuppression,
+            final boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 }

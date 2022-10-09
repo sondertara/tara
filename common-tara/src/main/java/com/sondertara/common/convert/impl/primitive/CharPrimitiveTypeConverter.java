@@ -10,7 +10,7 @@ public class CharPrimitiveTypeConverter extends AbstractTypeConverter<Character>
         if (value instanceof Character) {
             return (Character) value;
         } else if (value instanceof Boolean) {
-            return (Boolean)value?(char)1:(char)0;
+            return (Boolean) value ? (char) 1 : (char) 0;
         }
         final String sValue = convertToStr(value);
         if (StringUtils.isBlank(sValue)) {

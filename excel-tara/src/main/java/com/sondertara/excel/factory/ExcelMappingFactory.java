@@ -1,9 +1,9 @@
 package com.sondertara.excel.factory;
 
 import com.sondertara.excel.annotation.ExcelImportField;
+import com.sondertara.excel.entity.ExcelCellEntity;
 import com.sondertara.excel.entity.ExcelReadSheetEntity;
 import com.sondertara.excel.entity.ExcelWriteSheetEntity;
-import com.sondertara.excel.entity.ExcelCellEntity;
 import com.sondertara.excel.exception.ExcelTaraException;
 import com.sondertara.excel.executor.CellStyleCache;
 import com.sondertara.excel.meta.annotation.ExcelExport;
@@ -34,7 +34,11 @@ public class ExcelMappingFactory {
             ExcelImportField excelImportField = field.getAnnotation(ExcelImportField.class);
             if (null != excelImportField) {
                 field.setAccessible(true);
-                ExcelCellEntity excelPropertyEntity = ExcelCellEntity.builder().fieldEntity(field).index(excelImportField.index() - 1).required(excelImportField.required()).regex(excelImportField.regex().trim()).regexMessage(excelImportField.regexMessage().trim()).scale(excelImportField.scale()).roundingMode(excelImportField.roundingMode()).range(excelImportField.range()).rangeType(excelImportField.rangeType()).build();
+                ExcelCellEntity excelPropertyEntity = ExcelCellEntity.builder().fieldEntity(field)
+                        .index(excelImportField.index() - 1).required(excelImportField.required())
+                        .regex(excelImportField.regex().trim()).regexMessage(excelImportField.regexMessage().trim())
+                        .scale(excelImportField.scale()).roundingMode(excelImportField.roundingMode())
+                        .range(excelImportField.range()).rangeType(excelImportField.rangeType()).build();
                 propertyList.add(excelPropertyEntity);
             }
         }
@@ -76,7 +80,12 @@ public class ExcelMappingFactory {
 
                 CellStyleBuilder dataStyle = CellStyleCache.getInstance().getCellStyleInstance(styleBuilder);
                 CellStyleBuilder headerStyle = CellStyleCache.getInstance().getCellStyleInstance(headerStyleClass);
-                ExcelCellEntity excelPropertyEntity = ExcelCellEntity.builder().fieldEntity(field).index(excelExportField.colIndex()).cellType(excelExportField.cellType()).dateFormat(excelExportField.dataFormat()).dataStyle(dataStyle).headStyle(headerStyle).authWith(excelExportField.autoWidth()).colWidth(excelExportField.colWidth()).columnName(excelExportField.colName().trim()).defaultValue(excelExportField.defaultCellValue().trim()).build();
+                ExcelCellEntity excelPropertyEntity = ExcelCellEntity.builder().fieldEntity(field)
+                        .index(excelExportField.colIndex()).cellType(excelExportField.cellType())
+                        .dateFormat(excelExportField.dataFormat()).dataStyle(dataStyle).headStyle(headerStyle)
+                        .authWith(excelExportField.autoWidth()).colWidth(excelExportField.colWidth())
+                        .columnName(excelExportField.colName().trim())
+                        .defaultValue(excelExportField.defaultCellValue().trim()).build();
                 propertyList.add(excelPropertyEntity);
             }
         }

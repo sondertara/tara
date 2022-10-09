@@ -6,6 +6,9 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Sets;
 import com.sondertara.common.function.TaraFunction;
 import com.sondertara.common.lang.Assert;
+import com.sondertara.common.lang.MutableObj;
+import com.sondertara.common.regex.PatternPool;
+import com.sondertara.common.regex.RegexPool;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,33 +29,37 @@ import java.util.regex.Pattern;
  */
 public class RegexUtils {
 
-    private final static LoadingCache<String, Pattern> LOAD_CACHE =
-            CacheBuilder.newBuilder()
-                    .maximumSize(30)
-                    .build(new CacheLoader<String, Pattern>() {
-                        @Override
-                        public Pattern load(String pattern) {
-                            return Pattern.compile(pattern);
-                        }
-                    });
+    private final static LoadingCache<String, Pattern> LOAD_CACHE = CacheBuilder.newBuilder()
+            .maximumSize(30)
+            .build(new CacheLoader<String, Pattern>() {
+                @Override
+                public Pattern load(String pattern) {
+                    return Pattern.compile(pattern);
+                }
+            });
 
-    public static Boolean isMatch(String pattern, String value) throws ExecutionException {
-        return LOAD_CACHE.get(pattern).matcher(value).matches();
+    public static Boolean isMatch(String pattern, String value) {
+        try {
+            return LOAD_CACHE.get(pattern).matcher(value).matches();
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
      * 正则表达式匹配中文汉字
      */
-    public final static String RE_CHINESE = com.sondertara.common.util.RegexPool.CHINESE;
+    public final static String RE_CHINESE = RegexPool.CHINESE;
     /**
      * 正则表达式匹配中文字符串
      */
-    public final static String RE_CHINESES = com.sondertara.common.util.RegexPool.CHINESES;
+    public final static String RE_CHINESES = RegexPool.CHINESES;
 
     /**
      * 正则中需要被转义的关键字
      */
-    public final static Set<Character> RE_KEYS = Sets.newHashSet('$', '(', ')', '*', '+', '.', '[', ']', '?', '\\', '^', '{', '}', '|');
+    public final static Set<Character> RE_KEYS = Sets.newHashSet('$', '(', ')', '*', '+', '.', '[', ']', '?', '\\', '^',
+            '{', '}', '|');
 
     /**
      * 获得匹配的字符串，获得正则中分组0的内容
@@ -230,7 +237,6 @@ public class RegexUtils {
         return result;
     }
 
-
     /**
      * 从content中匹配出多个值并根据template生成新的字符串<br>
      * 例如：<br>
@@ -246,7 +252,7 @@ public class RegexUtils {
             return null;
         }
 
-        //提取模板中的编号
+        // 提取模板中的编号
         final TreeSet<Integer> varNums = new TreeSet<>((o1, o2) -> CompareUtils.compare(o2, o1));
         final Matcher matcherForTemplate = PatternPool.GROUP_VAR.matcher(template);
         while (matcherForTemplate.find()) {
@@ -282,7 +288,6 @@ public class RegexUtils {
         final Pattern pattern = PatternPool.get(regex, Pattern.DOTALL);
         return extractMulti(pattern, content, template);
     }
-
 
     /**
      * 删除匹配的第一个内容
@@ -477,7 +482,8 @@ public class RegexUtils {
      * @param collection 返回的集合类型
      * @return 结果集
      */
-    public static <T extends Collection<String>> T findAll(String regex, CharSequence content, int group, T collection) {
+    public static <T extends Collection<String>> T findAll(String regex, CharSequence content, int group,
+            T collection) {
         if (null == regex) {
             return collection;
         }
@@ -532,7 +538,8 @@ public class RegexUtils {
      * @param collection 返回的集合类型
      * @return 结果集
      */
-    public static <T extends Collection<String>> T findAll(Pattern pattern, CharSequence content, int group, T collection) {
+    public static <T extends Collection<String>> T findAll(Pattern pattern, CharSequence content, int group,
+            T collection) {
         if (null == pattern || null == content) {
             return null;
         }
@@ -814,8 +821,8 @@ public class RegexUtils {
      * replaceFun可以通过{@link Matcher}提取出匹配到的内容的不同部分，然后经过重新处理、组装变成新的内容放回原位。
      *
      * <pre class="code">
-     *     replaceAll(this.content, "(\\d+)", parameters -&gt; "-" + parameters.group(1) + "-")
-     *     // 结果为："ZZZaaabbbccc中文-1234-"
+     * replaceAll(this.content, "(\\d+)", parameters -&gt; "-" + parameters.group(1) + "-")
+     * // 结果为："ZZZaaabbbccc中文-1234-"
      * </pre>
      *
      * @param str        要替换的字符串
@@ -833,8 +840,8 @@ public class RegexUtils {
      * replaceFun可以通过{@link Matcher}提取出匹配到的内容的不同部分，然后经过重新处理、组装变成新的内容放回原位。
      *
      * <pre class="code">
-     *     replaceAll(this.content, "(\\d+)", parameters -&gt; "-" + parameters.group(1) + "-")
-     *     // 结果为："ZZZaaabbbccc中文-1234-"
+     * replaceAll(this.content, "(\\d+)", parameters -&gt; "-" + parameters.group(1) + "-")
+     * // 结果为："ZZZaaabbbccc中文-1234-"
      * </pre>
      *
      * @param str        要替换的字符串

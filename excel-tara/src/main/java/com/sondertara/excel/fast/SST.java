@@ -1,12 +1,13 @@
 package com.sondertara.excel.fast;
 
-
-import javax.xml.stream.XMLStreamException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.stream.XMLStreamException;
+
 import static com.sondertara.excel.fast.DefaultXMLInputFactory.factory;
+
 class SST {
   private static final SST EMPTY = new SST();
   private final SimpleXmlReader reader;

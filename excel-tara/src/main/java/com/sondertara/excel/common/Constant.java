@@ -24,7 +24,7 @@ public final class Constant {
      */
     public static final int DEFAULT_RECORD_COUNT_PEER_SHEET = 80000;
     /**
-     * enable cell  auto column width,if open will reduce performance.
+     * enable cell auto column width,if open will reduce performance.
      */
     public static final boolean OPEN_AUTO_COLUMN_WIDTH = false;
     /**
@@ -65,7 +65,8 @@ public final class Constant {
     /**
      * async csv file workspace.
      */
-    public static final String FILE_PATH = System.getProperties().getProperty("user.dir") + File.separator + "export_tmp" + File.separator;
+    public static final String FILE_PATH = System.getProperties().getProperty("user.dir") + File.separator
+            + "export_tmp" + File.separator;
     /**
      * the num query thread
      */

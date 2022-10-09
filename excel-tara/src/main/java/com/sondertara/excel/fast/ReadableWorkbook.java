@@ -15,6 +15,8 @@
  */
 package com.sondertara.excel.fast;
 
+import com.sondertara.excel.exception.ExcelReaderException;
+
 import javax.xml.stream.XMLStreamException;
 import java.io.Closeable;
 import java.io.File;
@@ -30,11 +32,10 @@ import java.util.stream.StreamSupport;
 
 import static com.sondertara.excel.fast.DefaultXMLInputFactory.factory;
 
-
 public class ReadableWorkbook implements Closeable {
 
-    private final OPCPackage pkg;
-    private final SST sst;
+    private final OpcPackage pkg;
+    private final SharedString sharedString;
     private final ReadingOptions readingOptions;
 
     private boolean date1904;
@@ -42,11 +43,11 @@ public class ReadableWorkbook implements Closeable {
     private Integer activeTab;
 
     public ReadableWorkbook(File inputFile) throws IOException {
-        this(OPCPackage.open(inputFile), ReadingOptions.DEFAULT_READING_OPTIONS);
+        this(OpcPackage.open(inputFile), ReadingOptions.DEFAULT_READING_OPTIONS);
     }
 
     public ReadableWorkbook(File inputFile, ReadingOptions readingOptions) throws IOException {
-        this(OPCPackage.open(inputFile), readingOptions);
+        this(OpcPackage.open(inputFile), readingOptions);
     }
 
     /**
@@ -62,14 +63,14 @@ public class ReadableWorkbook implements Closeable {
      * (but will not uncompress it in memory)
      */
     public ReadableWorkbook(InputStream inputStream, ReadingOptions readingOptions) throws IOException {
-        this(OPCPackage.open(inputStream, readingOptions.isWithCellFormat()), readingOptions);
+        this(OpcPackage.open(inputStream, readingOptions.isWithCellFormat()), readingOptions);
     }
 
-    private ReadableWorkbook(OPCPackage pkg, ReadingOptions readingOptions) throws IOException {
+    private ReadableWorkbook(OpcPackage pkg, ReadingOptions readingOptions) throws IOException {
 
         try {
             this.pkg = pkg;
-            sst = SST.fromInputStream(pkg.getSharedStrings());
+            sharedString = SharedString.fromInputStream(pkg.getSharedStrings());
         } catch (XMLStreamException e) {
             throw new ExcelReaderException(e);
         }
@@ -165,8 +166,8 @@ public class ReadableWorkbook implements Closeable {
         return pkg.getFmtIdToFmtString();
     }
 
-    SST getSharedStringsTable() {
-        return sst;
+    SharedString getSharedStringsTable() {
+        return sharedString;
     }
 
     public static boolean isOOXMLZipHeader(byte[] bytes) {

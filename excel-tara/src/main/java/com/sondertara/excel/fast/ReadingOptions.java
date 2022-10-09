@@ -7,8 +7,10 @@ public class ReadingOptions {
 
     /**
      * @param withCellFormat          If true, extract cell formatting
-     * @param cellInErrorIfParseError If true, cell type is ERROR if it is not possible to parse cell value.
-     *                                If false, an exception is throw when there is a parsing error
+     * @param cellInErrorIfParseError If true, cell type is ERROR if it is not
+     *                                possible to parse cell value.
+     *                                If false, an exception is throw when there is
+     *                                a parsing error
      */
     public ReadingOptions(boolean withCellFormat, boolean cellInErrorIfParseError) {
         this.withCellFormat = withCellFormat;
@@ -23,8 +25,9 @@ public class ReadingOptions {
     }
 
     /**
-     * @return true for cell type is ERROR if it is not possible to parse cell value,
-     * false for an exception is throw when there is a parsing error
+     * @return true for cell type is ERROR if it is not possible to parse cell
+     *         value,
+     *         false for an exception is throw when there is a parsing error
      */
     public boolean isCellInErrorIfParseError() {
         return cellInErrorIfParseError;

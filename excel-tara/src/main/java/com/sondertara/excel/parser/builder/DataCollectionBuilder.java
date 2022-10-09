@@ -1,7 +1,7 @@
 package com.sondertara.excel.parser.builder;
 
+import com.sondertara.excel.boot.AbstractExcelWriter;
 import com.sondertara.excel.enums.ExcelDataType;
-import com.sondertara.excel.parser.AbstractExcelWriter;
 
 import java.util.List;
 
@@ -18,7 +18,7 @@ public class DataCollectionBuilder<T> {
     }
 
     public AbstractExcelWriter<T> addData(List<?>... data) {
-        this.excelWriter.getWriterContext().addData(data);
+        this.excelWriter.addData(data);
         return this.excelWriter;
     }
 }

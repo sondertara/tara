@@ -18,6 +18,9 @@ package com.sondertara.excel.fast;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
+/**
+ * @author huangxiaohu
+ */
 public final class CellAddress implements Comparable<CellAddress> {
 
     public static final CellAddress A1 = new CellAddress(0, 0);
@@ -51,7 +54,7 @@ public final class CellAddress implements Comparable<CellAddress> {
                 final char c = address.charAt(offset);
                 if (c == ABSOLUTE_REFERENCE_MARKER) {
                     offset++;
-                    break; //next there must be digits
+                    break; // next there must be digits
                 }
                 if (isAsciiDigit(c)) {
                     break;
@@ -131,7 +134,6 @@ public final class CellAddress implements Comparable<CellAddress> {
         pos++;
         return new String(colRef, pos, (MAX_COL_CHARS - pos), StandardCharsets.ISO_8859_1);
     }
-
 
     private static final boolean isAsciiLowerCase(char c) {
         return 'a' <= c && c <= 'z';

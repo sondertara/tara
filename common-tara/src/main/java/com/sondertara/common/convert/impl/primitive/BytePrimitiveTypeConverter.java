@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 /**
  * Byte格式转换器
  *
- * @author chenzw
+ * @author huangxiaohu
  */
 public class BytePrimitiveTypeConverter extends AbstractTypeConverter<Byte> {
 
@@ -15,7 +15,7 @@ public class BytePrimitiveTypeConverter extends AbstractTypeConverter<Byte> {
         if (value instanceof Number) {
             return ((Number) value).byteValue();
         } else if (value instanceof Boolean) {
-            return (Boolean)value?(byte)1:(byte)0;
+            return (Boolean) value ? (byte) 1 : (byte) 0;
         }
 
         String sValue = convertToStr(value);

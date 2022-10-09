@@ -12,7 +12,6 @@ public class ExcelRegexValidator implements AbstractExcelColumnValidator<ExcelRe
 
     private String message;
 
-
     @Override
     public void initialize(final ExcelRegexValue excelRegexValue) {
         final String regex = excelRegexValue.regex();

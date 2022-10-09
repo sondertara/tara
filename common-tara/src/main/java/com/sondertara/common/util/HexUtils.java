@@ -1,9 +1,8 @@
 package com.sondertara.common.util;
 
-
 import com.sondertara.common.exception.TaraException;
 
-import java.awt.*;
+import java.awt.Color;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -15,15 +14,15 @@ import java.nio.charset.StandardCharsets;
  * <p>
  * 参考：https://my.oschina.net/xinxingegeya/blog/287476
  *
- * @author Looly
+ * @author huangxiaohu
  */
 public class HexUtils {
 
-    public static char[] HEX_DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+    public static char[] HEX_DIGITS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E',
+            'F' };
 
     private final static char[] LOWER_CHARS = "0123456789abcdef".toCharArray();
     private final static char[] UPPER_CHARS = "0123456789ABCDEF".toCharArray();
-
 
     /**
      * 判断给定字符串是否为16进制数<br>
@@ -37,7 +36,7 @@ public class HexUtils {
         final int index = (value.startsWith("-") ? 1 : 0);
         if (value.startsWith("0x", index) || value.startsWith("0X", index) || value.startsWith("#", index)) {
             try {
-                //noinspection ResultOfMethodCallIgnored
+                // noinspection ResultOfMethodCallIgnored
                 Long.decode(value);
             } catch (NumberFormatException e) {
                 return false;
@@ -48,7 +47,8 @@ public class HexUtils {
         return false;
     }
 
-    // ---------------------------------------------------------------------------------------------------- encode
+    // ----------------------------------------------------------------------------------------------------
+    // encode
 
     /**
      * 将字节数组转换为十六进制字符数组
@@ -82,7 +82,7 @@ public class HexUtils {
         char[] alphabets = toLowerCase ? LOWER_CHARS : UPPER_CHARS;
 
         final int len = data.length;
-        //len*2
+        // len*2
         final char[] out = new char[len << 1];
         // two characters from the hex value.
         for (int i = 0, j = 0; i < len; i++) {
@@ -98,7 +98,7 @@ public class HexUtils {
         char[] alphabets = toLowerCase ? LOWER_CHARS : UPPER_CHARS;
 
         final int len = data.length;
-        //len*2
+        // len*2
         final char[] out = new char[len << 1];
         // two characters from the hex value.
         for (int i = 0, j = 0; i < len; i++) {
@@ -108,7 +108,6 @@ public class HexUtils {
             out[j++] = alphabets[0x0F & data[i]];
         }
         return out;
-
 
     }
 
@@ -197,7 +196,8 @@ public class HexUtils {
         return new String(encodeHex(data, toLowerCase));
     }
 
-    // ---------------------------------------------------------------------------------------------------- decode
+    // ----------------------------------------------------------------------------------------------------
+    // decode
 
     /**
      * 将十六进制字符数组转换为字符串，默认编码UTF-8
@@ -266,7 +266,8 @@ public class HexUtils {
         return decode(hexData);
     }
 
-    // ---------------------------------------------------------------------------------------- Color
+    // ----------------------------------------------------------------------------------------
+    // Color
 
     /**
      * 将{@link Color}编码为Hex形式
@@ -389,7 +390,6 @@ public class HexUtils {
         return Long.parseLong(value, 16);
     }
 
-
     /**
      * Hex（16进制）字符串转为BigInteger
      *
@@ -406,6 +406,7 @@ public class HexUtils {
 
     /**
      * 格式化Hex字符串，结果为每2位加一个空格，类似于：
+     * 
      * <pre>
      *     e8 8c 67 03 80 cb 22 00 95 26 8f
      * </pre>
@@ -465,6 +466,5 @@ public class HexUtils {
         }
         return bytes;
     }
-
 
 }

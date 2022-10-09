@@ -10,7 +10,7 @@ import java.util.Map;
 /**
  * @author huangxiaohu
  */
-public class LinkMessage implements DingTalkMessage {
+public class LinkMessage implements NotifyMessage {
 
     private String title;
     private String text;
@@ -49,7 +49,6 @@ public class LinkMessage implements DingTalkMessage {
         this.messageUrl = messageUrl;
     }
 
-
     @Override
     public String toJsonString() {
         Map<String, Object> items = new HashMap<String, Object>();
@@ -62,12 +61,12 @@ public class LinkMessage implements DingTalkMessage {
         linkContent.put("title", title);
 
         if (StringUtils.isBlank(messageUrl)) {
-            throw new  TaraException("messageUrl should not be blank");
+            throw new TaraException("messageUrl should not be blank");
         }
         linkContent.put("messageUrl", messageUrl);
 
         if (StringUtils.isBlank(text)) {
-            throw new  TaraException("text should not be blank");
+            throw new TaraException("text should not be blank");
         }
         linkContent.put("text", text);
 

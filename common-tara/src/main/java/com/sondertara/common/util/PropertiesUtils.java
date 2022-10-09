@@ -27,7 +27,6 @@ public class PropertiesUtils {
     private Properties properties = null;
     private URI uri = null;
 
-
     private PropertiesUtils(String propertyFileName) {
         this.propertyFileName = propertyFileName;
         loadProperties();
@@ -71,7 +70,7 @@ public class PropertiesUtils {
     }
 
     /**
-     * convert stream  to properties
+     * convert stream to properties
      *
      * @param stream InputStream
      * @return Properties
@@ -127,7 +126,7 @@ public class PropertiesUtils {
         if (instanceMap.get(propertyFileName) != null) {
             return instanceMap.get(propertyFileName);
         }
-        //实例化
+        // 实例化
         PropertiesUtils instance = new PropertiesUtils(propertyFileName);
         instanceMap.put(propertyFileName, instance);
 
@@ -211,7 +210,6 @@ public class PropertiesUtils {
             throw new TaraException(e.getMessage());
         }
     }
-
 
     /**
      * 修改文件属性值

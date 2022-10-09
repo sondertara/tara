@@ -3,7 +3,6 @@ package com.sondertara.common.crypto;
 import com.sondertara.common.exception.TaraException;
 import org.apache.commons.codec.binary.Base64;
 
-import javax.crypto.Cipher;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.security.KeyFactory;
@@ -17,6 +16,8 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.crypto.Cipher;
 
 /**
  * RSA: 既能用于数据加密也能用于数字签名的算法
@@ -59,7 +60,6 @@ public class RSAUtils {
      */
     public static final int DEFAULT_BUFFER_SIZE = (DEFAULT_KEY_SIZE / 8) - 11;
 
-
     /**
      * 随机生成RSA密钥对
      *
@@ -71,7 +71,8 @@ public class RSAUtils {
      *                  公钥
      *                  RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
      *                  私钥
-     *                  RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
+     *                  RSAPrivateKey privateKey = (RSAPrivateKey)
+     *                  keyPair.getPrivate();
      * @return KeyPair
      */
     public static KeyPair initKey(int keyLength) {
@@ -85,7 +86,6 @@ public class RSAUtils {
             throw new TaraException("RSA init key pair error", e);
         }
     }
-
 
     /**
      * 公钥对字符串进行加密
@@ -111,11 +111,11 @@ public class RSAUtils {
 
     public static String encryptByPublicKey(String plainText, String publicKeyBase64) {
 
-        byte[] bytes = encryptByPublicKey(plainText.getBytes(StandardCharsets.UTF_8), Base64.decodeBase64(publicKeyBase64));
+        byte[] bytes = encryptByPublicKey(plainText.getBytes(StandardCharsets.UTF_8),
+                Base64.decodeBase64(publicKeyBase64));
 
         return Base64.encodeBase64String(bytes);
     }
-
 
     /**
      * 私钥加密
@@ -143,7 +143,8 @@ public class RSAUtils {
 
     public static String encryptByPrivateKey(String plainText, String privateKeyBase64) {
 
-        byte[] bytes = encryptByPrivateKey(plainText.getBytes(StandardCharsets.UTF_8), Base64.decodeBase64(privateKeyBase64));
+        byte[] bytes = encryptByPrivateKey(plainText.getBytes(StandardCharsets.UTF_8),
+                Base64.decodeBase64(privateKeyBase64));
 
         return Base64.encodeBase64String(bytes);
     }
@@ -209,7 +210,8 @@ public class RSAUtils {
     /**
      * 实现分段加密：
      * RSA非对称加密内容长度有限制，1024位key的最多只能加密127位数据，
-     * 否则就会报错(javax.crypto.IllegalBlockSizeException: Data must not be longer than 117 bytes)
+     * 否则就会报错(javax.crypto.IllegalBlockSizeException: Data must not be longer than
+     * 117 bytes)
      * 最近使用时却出现了“不正确的长度”的异常，研究发现是由于待加密的数据超长所致。
      * RSA 算法规定：
      * 待加密的字节数不能超过密钥的长度值除以 8 再减去 11（即：KeySize / 8 - 11），
@@ -463,7 +465,8 @@ public class RSAUtils {
         System.out.println("公钥：" + keyEncrypt(keyPair.getPublic()));
         System.out.println("私钥：" + keyEncrypt(keyPair.getPrivate()));
 
-        byte[] bytes = RSAUtils.encryptByPublicKey(srcStr.getBytes(StandardCharsets.UTF_8), keyPair.getPublic().getEncoded());
+        byte[] bytes = RSAUtils.encryptByPublicKey(srcStr.getBytes(StandardCharsets.UTF_8),
+                keyPair.getPublic().getEncoded());
         System.out.println("原始信息：" + srcStr + " 加密后的密文为：");
         System.out.println(Base64.encodeBase64String(bytes));
         byte[] bytes1 = RSAUtils.decryptByPrivateKey(bytes, keyPair.getPrivate().getEncoded());

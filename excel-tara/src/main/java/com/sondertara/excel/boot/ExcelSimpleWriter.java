@@ -1,7 +1,6 @@
 package com.sondertara.excel.boot;
 
 import com.sondertara.excel.common.Constant;
-import com.sondertara.excel.parser.AbstractExcelWriter;
 import com.sondertara.excel.parser.ExcelDefaultWriterResolver;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -21,7 +20,6 @@ import java.util.Map;
  * @author huangxiaohu
  */
 public class ExcelSimpleWriter extends AbstractExcelWriter<Workbook> {
-
 
     final Map<Integer, Integer> columnWidthMap = new HashMap<>();
 
@@ -50,7 +48,6 @@ public class ExcelSimpleWriter extends AbstractExcelWriter<Workbook> {
         return this;
     }
 
-
     @Override
     public Workbook generate() {
         if (null == this.workbook) {
@@ -75,6 +72,5 @@ public class ExcelSimpleWriter extends AbstractExcelWriter<Workbook> {
         resolver.sizeColumnWidth(sheet, titles.size());
         return workbook;
     }
-
 
 }

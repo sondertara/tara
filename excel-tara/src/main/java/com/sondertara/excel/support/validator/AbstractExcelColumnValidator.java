@@ -3,7 +3,7 @@ package com.sondertara.excel.support.validator;
 import java.lang.annotation.Annotation;
 
 /**
- * @author chenzw
+ * @author huangxiaohu
  */
 public interface AbstractExcelColumnValidator<T extends Annotation> {
 

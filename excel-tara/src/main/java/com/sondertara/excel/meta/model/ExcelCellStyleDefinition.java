@@ -5,7 +5,7 @@ import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Workbook;
 
 /**
- * @author chenzw
+ * @author huangxiaohu
  */
 public class ExcelCellStyleDefinition {
 

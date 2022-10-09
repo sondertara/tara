@@ -7,7 +7,7 @@ import org.apache.poi.xssf.usermodel.XSSFFont;
 import java.io.Serializable;
 
 /**
- * @author Chimm Huang
+ * @author huangxiaohu
  */
 @Data
 public class Font implements Serializable {
@@ -43,6 +43,5 @@ public class Font implements Serializable {
         this.typeOffset = xssfFont.getTypeOffset();
         this.underline = xssfFont.getUnderline();
     }
-
 
 }

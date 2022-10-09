@@ -12,7 +12,8 @@ import java.util.regex.Pattern;
  */
 public class StringSplitUtils {
 
-    //---------------------------------------------------------------------------------------------- Split by char
+    // ----------------------------------------------------------------------------------------------
+    // Split by char
 
     /**
      * 切分字符串路径，仅支持Unix分界符：/
@@ -127,7 +128,8 @@ public class StringSplitUtils {
      * @return 切分后的集合
      * @since 3.2.1
      */
-    public static List<String> splitIgnoreCase(String str, char separator, int limit, boolean isTrim, boolean ignoreEmpty) {
+    public static List<String> splitIgnoreCase(String str, char separator, int limit, boolean isTrim,
+            boolean ignoreEmpty) {
         return split(str, separator, limit, isTrim, ignoreEmpty, true);
     }
 
@@ -143,7 +145,8 @@ public class StringSplitUtils {
      * @return 切分后的集合
      * @since 3.2.1
      */
-    public static List<String> split(String str, char separator, int limit, boolean isTrim, boolean ignoreEmpty, boolean ignoreCase) {
+    public static List<String> split(String str, char separator, int limit, boolean isTrim, boolean ignoreEmpty,
+            boolean ignoreCase) {
         if (StringUtils.isEmpty(str)) {
             return new ArrayList<String>(0);
         }
@@ -153,19 +156,19 @@ public class StringSplitUtils {
 
         final ArrayList<String> list = new ArrayList<>(limit > 0 ? limit : 16);
         int len = str.length();
-        int start = 0;//切分后每个部分的起始
+        int start = 0;// 切分后每个部分的起始
         for (int i = 0; i < len; i++) {
             if (CharUtils.equals(separator, str.charAt(i), ignoreCase)) {
                 addToList(list, str.substring(start, i), isTrim, ignoreEmpty);
-                start = i + 1;//i+1同时将start与i保持一致
+                start = i + 1;// i+1同时将start与i保持一致
 
-                //检查是否超出范围（最大允许limit-1个，剩下一个留给末尾字符串）
+                // 检查是否超出范围（最大允许limit-1个，剩下一个留给末尾字符串）
                 if (limit > 0 && list.size() > limit - 2) {
                     break;
                 }
             }
         }
-        return addToList(list, str.substring(start, len), isTrim, ignoreEmpty);//收尾
+        return addToList(list, str.substring(start, len), isTrim, ignoreEmpty);// 收尾
     }
 
     /**
@@ -183,7 +186,8 @@ public class StringSplitUtils {
         return toArray(split(str, separator, limit, isTrim, ignoreEmpty));
     }
 
-    //---------------------------------------------------------------------------------------------- Split by String
+    // ----------------------------------------------------------------------------------------------
+    // Split by String
 
     /**
      * 切分字符串，不忽略大小写
@@ -252,7 +256,8 @@ public class StringSplitUtils {
      * @return 切分后的集合
      * @since 3.2.1
      */
-    public static List<String> splitIgnoreCase(String str, String separator, int limit, boolean isTrim, boolean ignoreEmpty) {
+    public static List<String> splitIgnoreCase(String str, String separator, int limit, boolean isTrim,
+            boolean ignoreEmpty) {
         return split(str, separator, limit, isTrim, ignoreEmpty, true);
     }
 
@@ -282,7 +287,8 @@ public class StringSplitUtils {
      * @return 切分后的集合
      * @since 3.2.1
      */
-    public static List<String> split(String str, String separator, int limit, boolean isTrim, boolean ignoreEmpty, boolean ignoreCase) {
+    public static List<String> split(String str, String separator, int limit, boolean isTrim, boolean ignoreEmpty,
+            boolean ignoreCase) {
         if (StringUtils.isEmpty(str)) {
             return new ArrayList<String>(0);
         }
@@ -290,9 +296,9 @@ public class StringSplitUtils {
             return addToList(new ArrayList<String>(1), str, isTrim, ignoreEmpty);
         }
 
-        if (StringUtils.isEmpty(separator)) {//分隔符为空时按照空白符切分
+        if (StringUtils.isEmpty(separator)) {// 分隔符为空时按照空白符切分
             return split(str, limit);
-        } else if (separator.length() == 1) {//分隔符只有一个字符长度时按照单分隔符切分
+        } else if (separator.length() == 1) {// 分隔符只有一个字符长度时按照单分隔符切分
             return split(str, separator.charAt(0), limit, isTrim, ignoreEmpty, ignoreCase);
         }
 
@@ -307,7 +313,7 @@ public class StringSplitUtils {
                 addToList(list, str.substring(start, i), isTrim, ignoreEmpty);
                 start = i + separatorLen;
 
-                //检查是否超出范围（最大允许limit-1个，剩下一个留给末尾字符串）
+                // 检查是否超出范围（最大允许limit-1个，剩下一个留给末尾字符串）
                 if (limit > 0 && list.size() > limit - 2) {
                     break;
                 }
@@ -333,7 +339,8 @@ public class StringSplitUtils {
         return toArray(split(str, separator, limit, isTrim, ignoreEmpty));
     }
 
-    //---------------------------------------------------------------------------------------------- Split by Whitespace
+    // ----------------------------------------------------------------------------------------------
+    // Split by Whitespace
 
     /**
      * 使用空白符切分字符串<br>
@@ -354,19 +361,19 @@ public class StringSplitUtils {
 
         final ArrayList<String> list = new ArrayList<>();
         int len = str.length();
-        int start = 0;//切分后每个部分的起始
+        int start = 0;// 切分后每个部分的起始
         for (int i = 0; i < len; i++) {
             if (CharUtils.isBlankChar(str.charAt(i))) {
                 addToList(list, str.substring(start, i), true, true);
-                start = i + 1;//i+1同时将start与i保持一致
+                start = i + 1;// i+1同时将start与i保持一致
 
-                //检查是否超出范围（最大允许limit-1个，剩下一个留给末尾字符串）
+                // 检查是否超出范围（最大允许limit-1个，剩下一个留给末尾字符串）
                 if (limit > 0 && list.size() > limit - 2) {
                     break;
                 }
             }
         }
-        return addToList(list, str.substring(start, len), true, true);//收尾
+        return addToList(list, str.substring(start, len), true, true);// 收尾
     }
 
     /**
@@ -381,7 +388,6 @@ public class StringSplitUtils {
         return toArray(split(str, limit));
     }
 
-
     /**
      * 通过正则切分字符串
      *
@@ -393,7 +399,8 @@ public class StringSplitUtils {
      * @return 切分后的集合
      * @since 3.0.8
      */
-    public static List<String> split(String str, Pattern separatorPattern, int limit, boolean isTrim, boolean ignoreEmpty) {
+    public static List<String> split(String str, Pattern separatorPattern, int limit, boolean isTrim,
+            boolean ignoreEmpty) {
         if (StringUtils.isEmpty(str)) {
             return new ArrayList<String>(0);
         }
@@ -401,7 +408,7 @@ public class StringSplitUtils {
             return addToList(new ArrayList<String>(1), str, isTrim, ignoreEmpty);
         }
 
-        if (null == separatorPattern) {//分隔符为空时按照空白符切分
+        if (null == separatorPattern) {// 分隔符为空时按照空白符切分
             return split(str, limit);
         }
 
@@ -413,7 +420,7 @@ public class StringSplitUtils {
             addToList(list, str.substring(start, matcher.start()), isTrim, ignoreEmpty);
             start = matcher.end();
 
-            //检查是否超出范围（最大允许limit-1个，剩下一个留给末尾字符串）
+            // 检查是否超出范围（最大允许limit-1个，剩下一个留给末尾字符串）
             if (limit > 0 && list.size() > limit - 2) {
                 break;
             }
@@ -432,11 +439,13 @@ public class StringSplitUtils {
      * @return 切分后的集合
      * @since 3.0.8
      */
-    public static String[] splitToArray(String str, Pattern separatorPattern, int limit, boolean isTrim, boolean ignoreEmpty) {
+    public static String[] splitToArray(String str, Pattern separatorPattern, int limit, boolean isTrim,
+            boolean ignoreEmpty) {
         return toArray(split(str, separatorPattern, limit, isTrim, ignoreEmpty));
     }
 
-    //---------------------------------------------------------------------------------------------- Split by length
+    // ----------------------------------------------------------------------------------------------
+    // Split by length
 
     /**
      * 根据给定长度，将给定字符串截取为多个部分
@@ -464,7 +473,8 @@ public class StringSplitUtils {
         return strs;
     }
 
-    //---------------------------------------------------------------------------------------------------------- Private method start
+    // ----------------------------------------------------------------------------------------------------------
+    // Private method start
 
     /**
      * 将字符串加入List中

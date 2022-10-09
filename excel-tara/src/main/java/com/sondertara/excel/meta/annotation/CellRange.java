@@ -1,6 +1,5 @@
 package com.sondertara.excel.meta.annotation;
 
-
 import com.sondertara.excel.meta.style.DefaultTitleCellStyleBuilder;
 
 import java.lang.annotation.ElementType;

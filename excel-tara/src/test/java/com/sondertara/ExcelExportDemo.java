@@ -1,9 +1,10 @@
 package com.sondertara;
 
-import com.sondertara.excel.entity.PageQueryParam;
-import com.sondertara.excel.parser.ExcelBeanWriter;
 import com.sondertara.domain.UserDTO;
 import com.sondertara.domain.UserInfoVo;
+import com.sondertara.excel.boot.ExcelBeanWriter;
+import com.sondertara.excel.entity.PageQueryParam;
+import com.sondertara.excel.entity.PageResult;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +41,7 @@ public class ExcelExportDemo {
         }
         OutputStream out = new FileOutputStream(file, false);
         PageQueryParam query = PageQueryParam.builder().build();
-        ExcelBeanWriter.mapper(UserInfoVo.class).fromQuery().pagination(1, 10, 200).query((pageNo, pageSize) -> {
+        ExcelBeanWriter.fromQuery().mapper(UserInfoVo.class).query((pageNo, pageSize) -> {
             // query list data from db
             List<UserDTO> list = new ArrayList<>(200);
             for (int i = 0; i < pageSize; i++) {
@@ -57,13 +58,14 @@ public class ExcelExportDemo {
             atomicInteger.getAndAdd(list.size());
 
             // convert to target data list
-            return list.stream().map(u -> {
+            return new PageResult<>(pageNo, pageSize, 1000L, list.stream().map(u -> {
                 UserInfoVo userInfoVo = new UserInfoVo();
                 userInfoVo.setAddress(u.getD());
                 userInfoVo.setAge(u.getA());
                 userInfoVo.setName(u.getN());
                 return userInfoVo;
-            }).collect(Collectors.toList());
-        }).to(out);
+            }).collect(Collectors.toList()));
+        }).pagination(1, 10, 200).to(out);
+
     }
 }

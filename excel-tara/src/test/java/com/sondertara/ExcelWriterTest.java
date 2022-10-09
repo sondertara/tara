@@ -10,10 +10,8 @@ import com.sondertara.domain.export.UserWH;
 import com.sondertara.excel.support.ExcelWriter;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -22,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-@RunWith(JUnit4.class)
+
 public class ExcelWriterTest {
 
     private static final String DEFAULT_TARGET_EXCEL_DIR = "target/generated-excel/";
@@ -30,7 +28,7 @@ public class ExcelWriterTest {
     static List<User> users = new ArrayList<>();
     static List<HolidayCfg> holidayCfgs = new ArrayList<>();
 
-    @BeforeClass
+    @BeforeAll
     public static void setUp() {
 
         for (int i = 0; i < 1000; i++) {

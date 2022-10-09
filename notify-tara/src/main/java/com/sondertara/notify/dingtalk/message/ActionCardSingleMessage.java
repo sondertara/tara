@@ -9,7 +9,7 @@ import java.util.Map;
  * @author wangdongbo
  * @since 2019/3/5.
  */
-public class ActionCardSingleMessage implements DingTalkMessage {
+public class ActionCardSingleMessage implements NotifyMessage {
 
     private String title;
 

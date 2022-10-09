@@ -1,6 +1,5 @@
 package com.sondertara.common.util;
 
-
 import com.sondertara.common.convert.TypeConverter;
 import com.sondertara.common.convert.impl.AtomicIntegerTypeConverter;
 import com.sondertara.common.convert.impl.AtomicLongTypeConverter;
@@ -36,7 +35,7 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * 转换器工具类
  *
- * @author chenzw
+ * @author huangxiaohu
  */
 public class ConvertUtils {
 
@@ -76,7 +75,6 @@ public class ConvertUtils {
     private ConvertUtils() {
 
     }
-
 
     public static <T> T convert(Class<T> type, Object value) {
         return convert((Type) type, value);

@@ -1,6 +1,5 @@
 package com.sondertara.excel.exception;
 
-
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 public class ExcelReaderException extends ExcelException {
@@ -43,7 +42,6 @@ public class ExcelReaderException extends ExcelException {
     public ExcelReaderException(Throwable cause) {
         super(cause);
     }
-
 
     public int getSheetIndex() {
         return sheetIndex;

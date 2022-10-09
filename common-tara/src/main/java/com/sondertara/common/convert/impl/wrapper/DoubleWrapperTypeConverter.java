@@ -10,7 +10,7 @@ public class DoubleWrapperTypeConverter extends AbstractTypeConverter<Double> {
         if (value instanceof Number) {
             return ((Number) value).doubleValue();
         } else if (value instanceof Boolean) {
-            return(Boolean) value ? Double.valueOf("1") : Double.valueOf("0");
+            return (Boolean) value ? Double.valueOf("1") : Double.valueOf("0");
         }
         final String sValue = convertToStr(value);
         if (StringUtils.isEmpty(sValue)) {

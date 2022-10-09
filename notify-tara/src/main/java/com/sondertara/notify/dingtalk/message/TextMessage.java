@@ -9,11 +9,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 /**
  * @author huangxiaohu
  */
-public class TextMessage implements DingTalkMessage {
+public class TextMessage implements NotifyMessage {
 
     private String text;
     private List<String> atMobiles;

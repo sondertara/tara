@@ -3,17 +3,18 @@ package com.sondertara.excel.support;
 import com.sondertara.excel.context.AnnotationExcelWriterContext;
 import org.apache.poi.ss.usermodel.Workbook;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
 
+import javax.servlet.http.HttpServletResponse;
+
 /**
- * @author chenzw
+ * @author huangxiaohu
  */
 public class ExcelWriter {
 
-    private AnnotationExcelWriterContext writerContext;
+    private final AnnotationExcelWriterContext writerContext;
 
     public ExcelWriter() {
         this.writerContext = new AnnotationExcelWriterContext();
@@ -51,7 +52,6 @@ public class ExcelWriter {
         return this;
     }
 
-
     public void write(OutputStream os) throws IOException {
         Workbook workbook = execute();
         workbook.write(os);
@@ -63,7 +63,6 @@ public class ExcelWriter {
         workbook.write(os);
         os.flush();
     }
-
 
     private Workbook execute() {
         return this.writerContext.getExecutor().execute();

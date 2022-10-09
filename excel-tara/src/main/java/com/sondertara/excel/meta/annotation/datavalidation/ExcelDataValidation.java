@@ -1,6 +1,5 @@
 package com.sondertara.excel.meta.annotation.datavalidation;
 
-
 import com.sondertara.excel.support.dataconstraint.ExcelDataValidationConstraint;
 
 import java.lang.annotation.ElementType;

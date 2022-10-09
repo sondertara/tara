@@ -13,4 +13,3 @@ import java.util.function.Function;
 @FunctionalInterface
 public interface TaraFunction<T, R> extends Function<T, R>, Serializable {
 }
-

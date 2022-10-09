@@ -9,13 +9,13 @@ import java.util.Map;
 
 /**
  * 单元格样式缓存
+ * 
  * @author huangxiaohu
  */
 public class CellStyleCache {
 
     private volatile static CellStyleCache instance = null;
     private final Map<String, CellStyleBuilder> cellStyleCacheMap;
-
 
     public static CellStyleCache getInstance() {
         if (instance == null) {
@@ -43,14 +43,14 @@ public class CellStyleCache {
                 if (CellStyleBuilder.class.isAssignableFrom(clazz)) {
                     return (CellStyleBuilder) clazz.newInstance();
                 } else {
-                    throw new ExcelWriterException("CellStyle [" + clazz + "] not assignable from CellStyleBuilder.class");
+                    throw new ExcelWriterException(
+                            "CellStyle [" + clazz + "] not assignable from CellStyleBuilder.class");
                 }
             } catch (final Exception e) {
                 throw new TaraException("Get CellBuilder error", e);
             }
         });
     }
-
 
     public void removeCache(String className) {
         this.cellStyleCacheMap.remove(className);

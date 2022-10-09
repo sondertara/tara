@@ -10,7 +10,6 @@ public enum OSType {
      */
     MAC, UNIX, LINUX, WINDOWS;
 
-
     public static OSType getOsType() {
         String property = System.getProperty("os.name");
         for (OSType value : OSType.values()) {

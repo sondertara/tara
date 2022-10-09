@@ -4,7 +4,7 @@ import com.sondertara.common.convert.AbstractTypeConverter;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * @author chenzw
+ * @author huangxiaohu
  */
 public class ShortPrimitiveTypeConverter extends AbstractTypeConverter<Short> {
 
@@ -12,8 +12,8 @@ public class ShortPrimitiveTypeConverter extends AbstractTypeConverter<Short> {
     protected Short convertInternal(Object value) {
         if (value instanceof Number) {
             return ((Number) value).shortValue();
-        } else if (value instanceof Boolean){
-            return (Boolean)value?(short)1:(short)0;
+        } else if (value instanceof Boolean) {
+            return (Boolean) value ? (short) 1 : (short) 0;
         }
         String sValue = convertToStr(value);
         if (StringUtils.isBlank(sValue)) {

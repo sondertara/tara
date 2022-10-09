@@ -6,7 +6,7 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 /**
  * this class corresponds to the entire excel [workbook].
  *
- * @author Chimm Huang
+ * @author huangxiaohu
  */
 public class ExcelWorkbook {
 
@@ -24,6 +24,10 @@ public class ExcelWorkbook {
     public SheetTable getSheet(int index) {
         SXSSFSheet sheetAt = xssfWorkbook.getSheetAt(index);
         return new SheetTable(sheetAt);
+    }
+
+    public int getSheetCount() {
+        return xssfWorkbook.getNumberOfSheets();
     }
 
     /**

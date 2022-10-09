@@ -12,13 +12,13 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 
 /**
- * @author chenzw
+ * @author huangxiaohu
  */
 public class DefaultTitleCellStyleBuilder implements CellStyleBuilder {
 
-
     @Override
-    public CellStyle build(final Workbook workbook, final ExcelCellStyleDefinition cellStyleDefinition, final Cell cell) {
+    public CellStyle build(final Workbook workbook, final ExcelCellStyleDefinition cellStyleDefinition,
+            final Cell cell) {
         final XSSFCellStyle cellStyle = (XSSFCellStyle) cellStyleDefinition.getCellStyle();
         final Font font = cellStyleDefinition.getFont();
 

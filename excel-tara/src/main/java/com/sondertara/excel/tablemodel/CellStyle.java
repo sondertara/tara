@@ -12,7 +12,7 @@ import org.apache.poi.xssf.usermodel.XSSFColor;
 import java.io.Serializable;
 
 /**
- * @author Chimm Huang
+ * @author huangxiaohu
  */
 @Data
 public class CellStyle implements Serializable {

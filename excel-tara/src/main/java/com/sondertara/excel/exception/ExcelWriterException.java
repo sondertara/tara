@@ -3,7 +3,7 @@ package com.sondertara.excel.exception;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 /**
- * @author chenzw
+ * @author huangxiaohu
  */
 public class ExcelWriterException extends ExcelException {
 
@@ -28,7 +28,6 @@ public class ExcelWriterException extends ExcelException {
         this.cause = cause;
     }
 
-
     public ExcelWriterException(String message) {
         super(message);
         this.message = message;
@@ -41,7 +40,6 @@ public class ExcelWriterException extends ExcelException {
     public ExcelWriterException(Throwable cause) {
         super(cause);
     }
-
 
     public Integer getSheetIndex() {
         return sheetIndex;

@@ -1,7 +1,7 @@
 package com.sondertara.excel.constants;
 
 /**
- * @author chenzw
+ * @author huangxiaohu
  */
 public class ExcelConstants {
 
@@ -9,6 +9,7 @@ public class ExcelConstants {
      * 行数标签
      */
     public static final String DIMENSION_TAG = "dimension";
+    public static final String SHEET = "sheet";
     public static final String DIMENSION_REF_ATTR = "ref";
 
     /**

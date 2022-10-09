@@ -1,9 +1,10 @@
 package com.sondertara.excel.tablemodel;
 
-import com.sondertara.excel.ExcelHelper;
+import com.sondertara.excel.meta.model.TaraCell;
 import com.sondertara.excel.parser.VariableParserBaseVisitor;
 import com.sondertara.excel.parser.VariableParserLexer;
 import com.sondertara.excel.parser.VariableParserParser;
+import com.sondertara.excel.utils.ExcelHelper;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -24,9 +25,9 @@ import java.util.regex.Pattern;
  * 该类对应于 Excel 的 [sheet页]
  * This class corresponds to the [sheet page] of Excel.
  *
- * @author Chimm Huang
+ * @author huangxiaohu
  */
-public class SheetTable implements Iterable<Cell> {
+public class SheetTable implements Iterable<TaraCell> {
 
     /**
      * 行信息存储在这里
@@ -41,7 +42,8 @@ public class SheetTable implements Iterable<Cell> {
 
     /**
      * 单元格的宽度存储在这里，开发者无需操作该属性
-     * the width of the cell is stored here, developers do not need to manipulate this attribute
+     * the width of the TaraCell is stored here, developers do not need to manipulate
+     * this attribute
      * <p>
      * key - 列的索引，从 0 开始（Apache poi 行号和列号都是从 0 开始的）
      * col-index. start from 0 (Apache poi row and column numbers start from 0)
@@ -81,19 +83,19 @@ public class SheetTable implements Iterable<Cell> {
         rowIterator.forEachRemaining(row -> {
             int rowIndex = row.getRowNum();
             lastRowNum = Math.max(lastRowNum, rowIndex + 1);
-            Map<String, Cell> colCellMap = new ConcurrentHashMap<>();
-            Iterator<org.apache.poi.ss.usermodel.Cell> cellIterator = row.cellIterator();
-            cellIterator.forEachRemaining(cell -> {
+            Map<String, TaraCell> colTaraCellMap = new ConcurrentHashMap<>();
+            Iterator<org.apache.poi.ss.usermodel.Cell> TaraCellIterator = row.cellIterator();
+            TaraCellIterator.forEachRemaining(TaraCell -> {
 
-                int columnIndex = cell.getColumnIndex();
+                int columnIndex = TaraCell.getColumnIndex();
 
                 // get the merged region
-                CellRangeAddress cellRangeAddress = mergedRegions.stream().filter(cellAddresses -> cellAddresses.getFirstRow() == rowIndex && cellAddresses.getFirstColumn() == columnIndex).findFirst().orElse(null);
+                CellRangeAddress TaraCellRangeAddress = mergedRegions.stream().filter(TaraCellAddresses -> TaraCellAddresses.getFirstRow() == rowIndex && TaraCellAddresses.getFirstColumn() == columnIndex).findFirst().orElse(null);
 
-                colCellMap.put(ExcelHelper.getColName(columnIndex), new Cell((XSSFCell) cell, cellRangeAddress));
+                colTaraCellMap.put(ExcelHelper.getColName(columnIndex), new TaraCell((XSSFCell) TaraCell, TaraCellRangeAddress));
                 colWidthMap.put(columnIndex, xssfSheet.getColumnWidth(columnIndex));
             });
-            Row descRow = new Row(row, colCellMap);
+            Row descRow = new Row(row, colTaraCellMap);
             rowMap.put(row.getRowNum() + 1, descRow);
         });
     }
@@ -119,58 +121,59 @@ public class SheetTable implements Iterable<Cell> {
     }
 
     @Override
-    public Iterator<Cell> iterator() {
-        return new CellRowIterator();
+    public Iterator<TaraCell> iterator() {
+        return new TaraCellRowIterator();
     }
 
-    public class CellRowIterator implements Iterator<Cell> {
+    public class TaraCellRowIterator implements Iterator<TaraCell> {
         private int currentRowNum = 1;
-        private Iterator<Cell> currentCellIterator;
+        private Iterator<TaraCell> currentTaraCellIterator;
 
         /**
-         * traverse every valid cell.
-         * if there is a valid cell, then return true, after traversing the last cell, return false.
+         * traverse every valid TaraCell.
+         * if there is a valid TaraCell, then return true, after traversing the last TaraCell,
+         * return false.
          */
         @Override
         public boolean hasNext() {
-            if (currentCellIterator == null) {
+            if (currentTaraCellIterator == null) {
                 if (currentRowNum <= getLastRowNum()) {
                     Row currentRow = getRow(currentRowNum);
-                    // init cell iterator.
-                    currentCellIterator = currentRow.iterator();
+                    // init TaraCell iterator.
+                    currentTaraCellIterator = currentRow.iterator();
                 } else {
                     return false;
                 }
             }
 
             /*
-                traverse all cells, line by line,
-                if the current line has been traversed, then traverse the cells of the next line.
+             * traverse all TaraCells, line by line,
+             * if the current line has been traversed, then traverse the TaraCells of the next
+             * line.
              */
-            if (!currentCellIterator.hasNext()) {
+            if (!currentTaraCellIterator.hasNext()) {
                 currentRowNum++;
-                // get the cell of the next row.
+                // get the TaraCell of the next row.
                 if (currentRowNum <= getLastRowNum()) {
                     Row currentRow = getRow(currentRowNum);
-                    currentCellIterator = currentRow.iterator();
+                    currentTaraCellIterator = currentRow.iterator();
                 } else {
                     return false;
                 }
             }
 
-            // start traversing current cells.
-            return currentCellIterator.hasNext();
+            // start traversing current TaraCells.
+            return currentTaraCellIterator.hasNext();
         }
 
         @Override
-        public Cell next() {
+        public TaraCell next() {
             if (hasNext()) {
-                return currentCellIterator.next();
+                return currentTaraCellIterator.next();
             }
             return null;
         }
     }
-
 
     /**
      * 获取行
@@ -205,25 +208,25 @@ public class SheetTable implements Iterable<Cell> {
 
         // update row num
         descRow.setRowNum(lastRowNum);
-        descRow.iterator().forEachRemaining(cell -> {
-            cell.setRow(lastRowNum);
+        descRow.iterator().forEachRemaining(TaraCell -> {
+            TaraCell.setRow(lastRowNum);
 
             int srcRowNum = srcRow.getRowNum();
             int descRowNum = descRow.getRowNum();
             int subtractRowNum = descRowNum - srcRowNum;
 
-            MergedRegion mergedRegion = cell.getMergedRegion();
+            MergedRegion mergedRegion = TaraCell.getMergedRegion();
             if (mergedRegion != null) {
                 // update row num
                 mergedRegion.setFirstRowNum(descRowNum);
                 mergedRegion.setLastRowNum(mergedRegion.getLastRowNum() + subtractRowNum);
-                cell.setMergedRegion(mergedRegion);
+                TaraCell.setMergedRegion(mergedRegion);
             }
 
             // update formula row num
-            if (cell.getCellType().equals(CellType.FORMULA) && cell.getValue() != null) {
+            if (TaraCell.getCellType().equals(CellType.FORMULA) && TaraCell.getValue() != null) {
 
-                String oldFormula = cell.getValue().toString();
+                String oldFormula = TaraCell.getValue().toString();
 
                 // lexical analysis
                 VariableParserLexer lexer = new VariableParserLexer(CharStreams.fromString(oldFormula));
@@ -278,7 +281,7 @@ public class SheetTable implements Iterable<Cell> {
                         return nameTest;
                     }
                 });
-                cell.setFormula(newFormula);
+                TaraCell.setFormula(newFormula);
             }
         });
 
@@ -288,43 +291,44 @@ public class SheetTable implements Iterable<Cell> {
 
     /**
      * 合并单元格
-     * merge cells
+     * merge TaraCells
      * <p>
      * row num start from 1.
      * col name start from "A"
      */
-    public void mergeCell(int firstRowNum, int lastRowNum, String firstColName, String lastColName) {
+    public void mergeTaraCell(int firstRowNum, int lastRowNum, String firstColName, String lastColName) {
         MergedRegion mergedRegion = new MergedRegion(firstRowNum, lastRowNum, firstColName, lastColName);
-        this.mergeCell(mergedRegion);
+        this.mergeTaraCell(mergedRegion);
     }
 
     /**
      * 合并单元格
-     * merge cells
+     * merge TaraCells
      *
      * @param mergedRegion 合并类
      */
-    public void mergeCell(MergedRegion mergedRegion) {
+    public void mergeTaraCell(MergedRegion mergedRegion) {
         int firstRowNum = mergedRegion.getFirstRowNum();
         String firstColName = mergedRegion.getFirstColName();
         Row row = rowMap.get(firstRowNum);
-        Cell cell = row.getCell(firstColName);
-        cell.setMergedRegion(mergedRegion);
+        TaraCell TaraCell = row.getCell(firstColName);
+        TaraCell.setMergedRegion(mergedRegion);
     }
 
     /**
      * 合并单元格
-     * merge cells
+     * merge TaraCells
      *
      * @param mergedRegionList 合并类集合
      */
-    public void mergeCellBatch(List<MergedRegion> mergedRegionList) {
-        mergedRegionList.forEach(this::mergeCell);
+    public void mergeTaraCellBatch(List<MergedRegion> mergedRegionList) {
+        mergedRegionList.forEach(this::mergeTaraCell);
     }
 
     /**
      * 设置指定范围的边框的样式，你可以更改边框的样式，如粗线、虚线等
-     * set border style of the specified range, you can change the style of the border, such as thick line, dotted line, etc.
+     * set border style of the specified range, you can change the style of the
+     * border, such as thick line, dotted line, etc.
      * <p>
      * row-num start from 1.
      * col-name start from "A"
@@ -338,37 +342,37 @@ public class SheetTable implements Iterable<Cell> {
 
         rowMap.entrySet().stream().filter(entry -> entry.getKey() >= firstRowNum && entry.getKey() <= lastRowNum).forEach(entry -> {
             Row row = entry.getValue();
-            row.getColCellMap().entrySet().stream().filter(cellEntry -> ExcelHelper.getColIndex(cellEntry.getKey()) >= firstColIndex && ExcelHelper.getColIndex(cellEntry.getKey()) <= lastColIndex).forEach(cellEntry -> {
-                String colName = cellEntry.getKey();
-                Cell cell = cellEntry.getValue();
-                CellStyle cellStyle = cell.getCellStyle();
+            row.getColCellMap().entrySet().stream().filter(TaraCellEntry -> ExcelHelper.getColIndex(TaraCellEntry.getKey()) >= firstColIndex && ExcelHelper.getColIndex(TaraCellEntry.getKey()) <= lastColIndex).forEach(TaraCellEntry -> {
+                String colName = TaraCellEntry.getKey();
+                TaraCell TaraCell = TaraCellEntry.getValue();
+                CellStyle CellStyle = TaraCell.getCellStyle();
 
                 switch (borderPositionEnum) {
                     case AROUND:
                         if (colName.equals(firstColName)) {
-                            cellStyle.setBorderLeftEnum(borderStyle);
+                            CellStyle.setBorderLeftEnum(borderStyle);
                         } else if (colName.equals(lastColName)) {
-                            cellStyle.setBorderRightEnum(borderStyle);
+                            CellStyle.setBorderRightEnum(borderStyle);
                         }
-                        cellStyle.setBorderTopEnum(borderStyle);
-                        cellStyle.setBorderBottomEnum(borderStyle);
+                        CellStyle.setBorderTopEnum(borderStyle);
+                        CellStyle.setBorderBottomEnum(borderStyle);
                         break;
                     case LEFT:
-                        cellStyle.setBorderLeftEnum(borderStyle);
+                        CellStyle.setBorderLeftEnum(borderStyle);
                         break;
                     case RIGHT:
-                        cellStyle.setBorderRightEnum(borderStyle);
+                        CellStyle.setBorderRightEnum(borderStyle);
                         break;
                     case TOP:
-                        cellStyle.setBorderTopEnum(borderStyle);
+                        CellStyle.setBorderTopEnum(borderStyle);
                         break;
                     case BOTTOM:
-                        cellStyle.setBorderBottomEnum(borderStyle);
+                        CellStyle.setBorderBottomEnum(borderStyle);
                         break;
                     default:
                         break;
                 }
-                cell.setCellStyle(cellStyle);
+                TaraCell.setCellStyle(CellStyle);
             });
         });
     }

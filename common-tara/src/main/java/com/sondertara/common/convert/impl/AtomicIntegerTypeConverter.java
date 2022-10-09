@@ -13,7 +13,7 @@ public class AtomicIntegerTypeConverter extends AbstractTypeConverter<AtomicInte
         if (value instanceof Number) {
             intValue.set(((Number) value).intValue());
         } else if (value instanceof Boolean) {
-            intValue.set((Boolean) value?1:0);
+            intValue.set((Boolean) value ? 1 : 0);
         }
         final String sValue = convertToStr(value);
         if (StringUtils.isBlank(sValue)) {

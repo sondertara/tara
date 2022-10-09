@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *  @author huangxiaohu
+ * @author huangxiaohu
  */
-public class FeedCardMessage implements DingTalkMessage {
+public class FeedCardMessage implements NotifyMessage {
 
     private List<FeedCardMessageItem> feedItems;
 
@@ -35,13 +35,13 @@ public class FeedCardMessage implements DingTalkMessage {
         }
         for (FeedCardMessageItem item : feedItems) {
             if (StringUtils.isBlank(item.getTitle())) {
-                throw new  TaraException("title should not be blank");
+                throw new TaraException("title should not be blank");
             }
             if (StringUtils.isBlank(item.getMessageURL())) {
-                throw new  TaraException("messageURL should not be blank");
+                throw new TaraException("messageURL should not be blank");
             }
             if (StringUtils.isBlank(item.getPicURL())) {
-                throw new  TaraException("picURL should not be blank");
+                throw new TaraException("picURL should not be blank");
             }
         }
         feedCard.put("links", feedItems);

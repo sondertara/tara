@@ -1,6 +1,5 @@
 package com.sondertara.excel.meta.annotation.converter;
 
-
 import com.sondertara.excel.support.converter.AbstractExcelColumnConverter;
 
 import java.lang.annotation.ElementType;
