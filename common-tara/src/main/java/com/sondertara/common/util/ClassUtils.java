@@ -6,7 +6,7 @@ import com.sondertara.common.lang.Assert;
 import com.sondertara.common.lang.BasicType;
 import com.sondertara.common.lang.Singleton;
 import com.sondertara.common.lang.loader.ClassScanner;
-import com.sondertara.common.lang.refelect.ReflectUtils;
+import com.sondertara.common.lang.reflect.ReflectUtils;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;

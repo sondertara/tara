@@ -1,9 +1,10 @@
 package com.sondertara.common.util;
 
-import com.sondertara.common.bean.BeanCopy;
+import com.sondertara.common.bean.copier.BeanCopy;
+import com.sondertara.common.bean.copier.BeanToMapCopier;
+import com.sondertara.common.bean.copier.MapToBeanCopier;
 import com.sondertara.common.lang.Assert;
-import com.sondertara.common.lang.refelect.ReflectUtils;
-import org.apache.commons.beanutils.BeanMap;
+import com.sondertara.common.lang.reflect.ReflectUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -63,12 +64,7 @@ public class BeanUtils {
         if (bean == null) {
             return map;
         }
-        BeanMap beanMap = new BeanMap(bean);
-        for (Object key : beanMap.keySet()) {
-            if (beanMap.get(key) != null) {
-                map.put(key.toString(), beanMap.get(key));
-            }
-        }
+        new BeanToMapCopier().copy(bean, map);
         return map;
     }
 
@@ -81,10 +77,8 @@ public class BeanUtils {
      * @return the bean instance
      */
     @SuppressWarnings("unchecked")
-    public static <T> T mapToBean(Map<?, ?> map, T t) {
-        BeanMap beanMap = new BeanMap(t);
-        beanMap.putAll(map);
-        return (T) beanMap.getBean();
+    public static <T> void mapToBean(Map<?, ?> map, T t) {
+        new MapToBeanCopier().copy(map, t);
     }
 
     /**
@@ -98,9 +92,8 @@ public class BeanUtils {
     @SuppressWarnings("unchecked")
     public static <T> T mapToBean(Map<?, ?> map, Class<T> clazz) {
         T instance = ReflectUtils.newInstance(clazz);
-        BeanMap beanMap = new BeanMap(instance);
-        beanMap.putAll(map);
-        return (T) beanMap.getBean();
+        mapToBean(map, instance);
+        return instance;
     }
 
     /**
@@ -138,10 +131,9 @@ public class BeanUtils {
             return null;
         }
         for (Map<?, Object> map : list) {
-            T t1;
-            t1 = ReflectUtils.newInstance(t);
-            T t2 = mapToBean(map, t1);
-            beans.add(t2);
+            T t1 = ReflectUtils.newInstance(t);
+            mapToBean(map, t1);
+            beans.add(t1);
         }
         return beans;
     }

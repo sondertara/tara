@@ -5,10 +5,12 @@ package com.sondertara.excel.task;
  * 消费
  */
 public interface Consumer {
+
+    void init();
+
     /**
      * 消费任务
      *
-     * @throws InterruptedException
      */
-    void consume() throws InterruptedException;
+    void consume();
 }

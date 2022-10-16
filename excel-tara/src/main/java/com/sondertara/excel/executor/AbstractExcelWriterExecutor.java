@@ -1,9 +1,7 @@
 package com.sondertara.excel.executor;
 
 import com.google.common.collect.Lists;
-import com.sondertara.common.util.CollectionUtils;
 import com.sondertara.excel.context.ExcelWriterContext;
-import com.sondertara.excel.entity.PageQueryParam;
 import com.sondertara.excel.entity.PageResult;
 import com.sondertara.excel.enums.ExcelDataType;
 import com.sondertara.excel.exception.ExcelException;
@@ -14,13 +12,19 @@ import com.sondertara.excel.meta.annotation.CellRange;
 import com.sondertara.excel.meta.annotation.ExcelComplexHeader;
 import com.sondertara.excel.meta.annotation.ExcelDataFormat;
 import com.sondertara.excel.meta.annotation.ExcelExportField;
+import com.sondertara.excel.meta.annotation.converter.ExcelConverter;
 import com.sondertara.excel.meta.annotation.datavalidation.ExcelDataValidation;
 import com.sondertara.excel.meta.model.AnnotationExcelWriterSheetDefinition;
 import com.sondertara.excel.meta.model.ExcelCellStyleDefinition;
 import com.sondertara.excel.meta.model.TaraRow;
 import com.sondertara.excel.meta.model.TaraSheet;
 import com.sondertara.excel.meta.style.CellStyleBuilder;
+import com.sondertara.excel.parser.ExcelDefaultWriterResolver;
+import com.sondertara.excel.support.converter.AbstractExcelColumnConverter;
+import com.sondertara.excel.support.converter.ExcelDefaultConverter;
 import com.sondertara.excel.support.dataconstraint.ExcelDataValidationConstraint;
+import com.sondertara.excel.utils.CacheUtils;
+import com.sondertara.excel.utils.ExcelAnnotationUtils;
 import com.sondertara.excel.utils.ExcelFieldUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -42,7 +46,9 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,11 +69,14 @@ public abstract class AbstractExcelWriterExecutor implements TaraExcelExecutor<W
     private final SXSSFWorkbook sxssfWorkbook;
     private Map<Integer, ? extends TaraSheet> sheetDefinitions;
 
+    private final ExcelDefaultWriterResolver resolver;
+
     public AbstractExcelWriterExecutor(final ExcelWriterContext writerContext) {
         this.sxssfWorkbook = new SXSSFWorkbook(new XSSFWorkbook(), 1000);
         this.sxssfWorkbook.setCompressTempFiles(true);
         this.writerContext = writerContext;
         this.cellStyleCache = new CellStyleCache();
+        this.resolver = new ExcelDefaultWriterResolver();
     }
 
     @Override
@@ -81,18 +90,8 @@ public abstract class AbstractExcelWriterExecutor implements TaraExcelExecutor<W
             ExcelDataType excelDataType = sheetDefinition.getExcelDataType();
             switch (excelDataType) {
                 case QUERY:
-                    PageQueryParam pagination = sheetDefinition.getPagination();
-                    PageResult<?> page = sheetDefinition.getQueryFunction().queryPage(1, 1);
-                    long totalRow = page.getTotal();
-
-                    int pageCountPreSheet = sheetDefinition.getMaxRowsPerSheet() / pagination.getPageSize();
-                    double segment = Math.ceil(totalRow * 1.0d / sheetDefinition.getMaxRowsPerSheet());
-                    if (segment > 1) {
-                        for (int i = 0; i < segment; i++) {
-                            writerContext.addMapper(sheetDefinition.getClass(), sheetDefinition.getQueryFunction(), PageQueryParam.builder().pageStart(i * pageCountPreSheet + 1).pageEnd((i + 1) * pageCountPreSheet).pageSize(pagination.getPageSize()).build());
-                        }
-                        writerContext.removeSheet(sheetDefinitionEntry.getKey());
-                    }
+                    writerContext.addMapper(sheetDefinition.getClass(), sheetDefinition.getQueryFunction());
+                    writerContext.removeSheet(sheetDefinitionEntry.getKey());
                     break;
                 case DIRECT:
                     List<? extends List<?>> segments = Lists.partition(sheetDefinition.getRows(), sheetDefinition.getMaxRowsPerSheet());
@@ -204,7 +203,7 @@ public abstract class AbstractExcelWriterExecutor implements TaraExcelExecutor<W
 
                 final ExcelExportField exportColumn = field.getAnnotation(ExcelExportField.class);
                 final Cell cell = row.createCell(colIndex - 1);
-                cell.setCellValue(exportColumn.colName());
+                cell.setCellValue(ExcelAnnotationUtils.getColName(exportColumn));
 
                 // 设置标题样式
                 final CellStyleBuilder cellStyleBuilder = this.cellStyleCache.getCellStyleInstance(exportColumn.titleCellStyleBuilder());
@@ -226,29 +225,26 @@ public abstract class AbstractExcelWriterExecutor implements TaraExcelExecutor<W
             final Sheet sheet = createSheet(sheetDefinitionEntry.getKey(), sheetDefinition.getName());
             final Map<Integer, Field> columnFields = sheetDefinition.getColFields();
 
+            Class<?> mappingClass = sheetDefinition.getMappingClass();
+
             final Map<Integer, ExcelCellStyleDefinition> columnCellStyles = sheetDefinition.getColumnCellStyles(sxssfWorkbook);
 
             ExportFunction<?> queryFunction = sheetDefinition.getQueryFunction();
-            PageQueryParam queryParam = sheetDefinition.getPagination();
             int pageNo = 0;
             while (true) {
                 List<?> rows = sheetDefinition.getRows().stream().map(TaraRow::getRowData).collect(Collectors.toList());
                 if (ExcelDataType.QUERY.equals(sheetDefinition.getExcelDataType())) {
-                    pageNo = queryParam.getPageStart();
-                    if (pageNo > queryParam.getPageEnd()) {
+                    PageResult<?> result = queryFunction.query(pageNo);
+                    if (pageNo > result.endIndex() || result.isEmpty()) {
                         break;
                     }
-                    PageResult<?> pageResult = queryFunction.queryPage(pageNo, queryParam.getPageSize());
-                    if (CollectionUtils.isEmpty(pageResult.getData())) {
-                        break;
-                    }
-                    rows = pageResult.getData();
+                    rows = result.getData();
                 }
                 for (int rowIndex = 0; rowIndex < rows.size(); rowIndex++) {
                     final Row row = sheet.createRow(rowIndex + sheetDefinition.getFirstDataRow());
                     row.setHeightInPoints(sheetDefinition.getDataRowHeight());
                     this.curRowIndex = row.getRowNum() + 1;
-                    final Object rowData = rows.get(rowIndex);
+                    Object rowData = rows.get(rowIndex);
                     for (final Map.Entry<Integer, Field> columnFieldEntry : columnFields.entrySet()) {
                         this.curColIndex = columnFieldEntry.getKey();
                         final Field field = columnFieldEntry.getValue();
@@ -278,13 +274,31 @@ public abstract class AbstractExcelWriterExecutor implements TaraExcelExecutor<W
                             final DataFormat dataFormat = this.sxssfWorkbook.createDataFormat();
                             cellStyle.setDataFormat(dataFormat.getFormat(excelDataFormat.value()));
                         }
-
                         cell.setCellStyle(cellStyle);
 
+                        // 值转换
+                        List<AbstractExcelColumnConverter<Annotation, ?>> columnConverters = CacheUtils.getColConverterCache().getIfPresent(mappingClass.getName() + "#" + field.getName());
+                        if (columnConverters == null) {
+                            columnConverters = findColumnConverter(field);
+                            CacheUtils.getColConverterCache().put(mappingClass.getName() + "#" + field.getName(), columnConverters);
+                        }
+                        Object value = null;
                         try {
-                            ExcelFieldUtils.setCellValue(cell, rowData, field, exportColumn);
+                            value = field.get(rowData);
+                            if (null == value && StringUtils.isNoneBlank(exportColumn.defaultCellValue())) {
+                                value = exportColumn.defaultCellValue();
+                            }
+                        } catch (IllegalAccessException e) {
+                            throw new ExcelWriterException(e);
+                        }
+                        for (final AbstractExcelColumnConverter<Annotation, ?> columnConverter : columnConverters) {
+                            value = columnConverter.convert(value);
+                        }
+
+                        try {
+                            ExcelFieldUtils.setCellValue(cell, value, field, exportColumn, resolver);
                         } catch (final IllegalAccessException e) {
-                            throw new ExcelWriterException("", e);
+                            throw new ExcelWriterException(e);
                         }
                     }
                     pageNo++;
@@ -299,7 +313,7 @@ public abstract class AbstractExcelWriterExecutor implements TaraExcelExecutor<W
                         final Field field = columnFieldEntry.getValue();
                         final ExcelExportField exportColumn = field.getAnnotation(ExcelExportField.class);
                         if (exportColumn.autoWidth()) {
-                            sxssfSheet.autoSizeColumn(columnFieldEntry.getKey());
+                            resolver.sizeColumnWidth(sxssfSheet, columnFieldEntry.getKey());
                         }
                     }
                 }
@@ -405,5 +419,30 @@ public abstract class AbstractExcelWriterExecutor implements TaraExcelExecutor<W
             this.cellStyleCacheMap.remove(clazz);
         }
 
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<AbstractExcelColumnConverter<Annotation, ?>> findColumnConverter(final Field field) {
+        List<AbstractExcelColumnConverter<Annotation, ?>> columnConverters = new ArrayList<>();
+        final Annotation[] annotations = field.getAnnotations();
+        for (final Annotation annotation : annotations) {
+            final Class<? extends Annotation> aClass = annotation.annotationType();
+            if (aClass.isAnnotationPresent(ExcelConverter.class)) {
+                final ExcelConverter excelConverter = aClass.getAnnotation(ExcelConverter.class);
+                try {
+                    AbstractExcelColumnConverter<Annotation, ?> columnConverter = excelConverter.convertBy().newInstance();
+                    columnConverter.initialize(annotation);
+                    columnConverters.add(columnConverter);
+                } catch (final InstantiationException | IllegalAccessException e) {
+                    throw new ExcelException("实例化转换器[" + excelConverter.convertBy() + "]时失败!", e);
+                }
+            }
+        }
+
+        if (columnConverters.size() == 0) {
+            columnConverters = Collections.singletonList(new ExcelDefaultConverter());
+        }
+
+        return columnConverters;
     }
 }

@@ -7,6 +7,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+/**
+ * @author huangxiaohu
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 @ExcelConverter(convertBy = ExcelKVConverter.class)
@@ -17,7 +20,7 @@ public @interface ExcelKVConvert {
      *
      * @return
      */
-    String[] kvmap() default {};
+    String[] kvMap() default {};
 
     /**
      * 是否允许未匹配的值

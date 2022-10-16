@@ -46,6 +46,6 @@ public interface ExcelWriterContext extends ExcelContext {
      */
     void removeSheet(int index);
 
-    void addMapper(Class<?> excelClass, ExportFunction<?> function, PageQueryParam queryParam);
+    void addMapper(Class<?> excelClass, ExportFunction<?> function);
 
 }

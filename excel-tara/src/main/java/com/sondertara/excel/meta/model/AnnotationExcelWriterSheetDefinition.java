@@ -12,6 +12,7 @@ import com.sondertara.excel.meta.annotation.ExcelExport;
 import com.sondertara.excel.meta.annotation.ExcelExportField;
 import com.sondertara.excel.utils.ColorUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -31,7 +32,7 @@ import java.util.stream.Collectors;
  * @author
  */
 public class AnnotationExcelWriterSheetDefinition<T> extends AnnotationSheet {
-    private PageQueryParam pagination;
+
     private ExportFunction<?> queryFunction;
 
     private int maxRowsPerSheet;
@@ -40,7 +41,6 @@ public class AnnotationExcelWriterSheetDefinition<T> extends AnnotationSheet {
     private int titleRowHeight;
     private int dataRowHeight;
     private Map<Integer, ExcelCellStyleDefinition> columnCellStyles;
-    private boolean colIndexEnabled = false;
 
     public AnnotationExcelWriterSheetDefinition(Class<T> clazz, List<?> rowDatas) {
         super(clazz);
@@ -57,11 +57,9 @@ public class AnnotationExcelWriterSheetDefinition<T> extends AnnotationSheet {
         init();
     }
 
-    public AnnotationExcelWriterSheetDefinition(Class<T> clazz, ExportFunction<?> exportFunction,
-                                                PageQueryParam param) {
+    public AnnotationExcelWriterSheetDefinition(Class<T> clazz, ExportFunction<?> exportFunction) {
         super(clazz);
         this.queryFunction = exportFunction;
-        this.pagination = param;
         this.excelDataType = ExcelDataType.QUERY;
         init();
     }
@@ -108,9 +106,6 @@ public class AnnotationExcelWriterSheetDefinition<T> extends AnnotationSheet {
         return this.dataRowHeight;
     }
 
-    public PageQueryParam getPagination() {
-        return this.pagination;
-    }
 
     public ExportFunction<?> getQueryFunction() {
         return this.queryFunction;
@@ -124,19 +119,20 @@ public class AnnotationExcelWriterSheetDefinition<T> extends AnnotationSheet {
                 // 单双行样式
                 for (Map.Entry<Integer, Field> columnFieldEntry : colFields.entrySet()) {
                     CellStyle oddCellStyle = workbook.createCellStyle();
+                    oddCellStyle.setBorderBottom(BorderStyle.THIN);
+                    oddCellStyle.setBorderLeft(BorderStyle.THIN);
+                    oddCellStyle.setBorderRight(BorderStyle.THIN);
+                    oddCellStyle.setBorderTop(BorderStyle.THIN);
                     ((XSSFCellStyle) oddCellStyle).setFillForegroundColor(new XSSFColor(this.rowStripeColor, null));
                     oddCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
-                    columnCellStyles.put(columnFieldEntry.getKey() * 2 - 1,
-                            new ExcelCellStyleDefinition(oddCellStyle, workbook.createFont()));
+                    columnCellStyles.put(columnFieldEntry.getKey() * 2 - 1, new ExcelCellStyleDefinition(oddCellStyle, workbook.createFont()));
 
-                    columnCellStyles.put(columnFieldEntry.getKey() * 2,
-                            new ExcelCellStyleDefinition(workbook.createCellStyle(), workbook.createFont()));
+                    columnCellStyles.put(columnFieldEntry.getKey() * 2, new ExcelCellStyleDefinition(workbook.createCellStyle(), workbook.createFont()));
                 }
             } else {
                 for (Map.Entry<Integer, Field> columnFieldEntry : colFields.entrySet()) {
-                    columnCellStyles.put(columnFieldEntry.getKey(),
-                            new ExcelCellStyleDefinition(workbook.createCellStyle(), workbook.createFont()));
+                    columnCellStyles.put(columnFieldEntry.getKey(), new ExcelCellStyleDefinition(workbook.createCellStyle(), workbook.createFont()));
                 }
             }
         }
@@ -149,18 +145,14 @@ public class AnnotationExcelWriterSheetDefinition<T> extends AnnotationSheet {
         for (Field field : fields) {
             ExcelExportField exportColumn = field.getAnnotation(ExcelExportField.class);
             if (exportColumn != null) {
-                if (colIndexEnabled) {
+                if (enableColIndex) {
                     if (exportColumn.colIndex() < 1) {
-                        throw new ExcelException("The @ExcelExportColumn on Field [" + field.getName() + "] of Class["
-                                + this.mappingClass.getCanonicalName()
-                                + "] miss \"colIndex\" attribute or less than 1 !");
+                        throw new ExcelException("The @ExcelExportColumn on Field [" + field.getName() + "] of Class[" + this.mappingClass.getCanonicalName() + "] miss \"colIndex\" attribute or less than 1 !");
                     }
 
                     // exists colIndex
                     if (this.colFields.containsKey(exportColumn.colIndex())) {
-                        throw new ExcelException("The @ExcelExportColumn on Field [" + field.getName() + "] of Class["
-                                + this.mappingClass.getCanonicalName() + "] has conflicting \"colIndex\" value => ["
-                                + exportColumn.colIndex() + "] !");
+                        throw new ExcelException("The @ExcelExportColumn on Field [" + field.getName() + "] of Class[" + this.mappingClass.getCanonicalName() + "] has conflicting \"colIndex\" value => [" + exportColumn.colIndex() + "] !");
                     }
 
                     field.setAccessible(true);
@@ -180,7 +172,7 @@ public class AnnotationExcelWriterSheetDefinition<T> extends AnnotationSheet {
         }
         this.order = excelExport.order();
         this.name = excelExport.sheetName();
-        this.colIndexEnabled = excelExport.colIndexEnabled();
+        this.enableColIndex = excelExport.enableColIndex();
         this.maxRowsPerSheet = excelExport.maxRowsPerSheet();
         this.isRowStriped = excelExport.rowStriped();
         if (this.isRowStriped && !StringUtils.isBlank(excelExport.rowStripeColor())) {

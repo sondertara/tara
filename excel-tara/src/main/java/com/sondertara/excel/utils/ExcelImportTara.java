@@ -1,6 +1,6 @@
 package com.sondertara.excel.utils;
 
-import com.sondertara.excel.annotation.ExcelImportField;
+import com.sondertara.excel.meta.annotation.ExcelImportField;
 import com.sondertara.excel.entity.ExcelReadSheetEntity;
 import com.sondertara.excel.exception.ExcelTaraException;
 import com.sondertara.excel.factory.ExcelMappingFactory;

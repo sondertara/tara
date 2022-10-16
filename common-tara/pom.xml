@@ -82,25 +82,21 @@
             <artifactId>httpasyncclient</artifactId>
         </dependency>
         <dependency>
-            <groupId>commons-beanutils</groupId>
-            <artifactId>commons-beanutils</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>commons-collections</artifactId>
-                    <groupId>commons-collections</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-collections4</artifactId>
         </dependency>
 
         <dependency>
+            <groupId>org.javassist</groupId>
+            <artifactId>javassist</artifactId>
+            <version>3.29.2-GA</version>
+        </dependency>
+        <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
             <scope>provided</scope>
         </dependency>
+
     </dependencies>
 
 </project>

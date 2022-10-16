@@ -2,7 +2,7 @@ package com.sondertara.excel.meta.model;
 
 import com.sondertara.excel.exception.ExcelReaderException;
 import com.sondertara.excel.meta.annotation.ExcelImport;
-import com.sondertara.excel.meta.annotation.ExcelImportColumn;
+import com.sondertara.excel.meta.annotation.ExcelImportField;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -35,15 +35,17 @@ public class AnnotationExcelReaderSheetDefinition<T> extends AnnotationSheet {
         }
         this.sheetIndexes = excelImport.sheetIndex();
         this.firstDataRow = excelImport.firstDataRow();
+        this.enableColIndex = excelImport.enableColIndex();
     }
 
     private void initColumnFields() {
         Field[] fields = this.mappingClass.getDeclaredFields();
+        int colIndex = 1;
         for (Field field : fields) {
-            ExcelImportColumn importColumn = field.getAnnotation(ExcelImportColumn.class);
+            ExcelImportField importColumn = field.getAnnotation(ExcelImportField.class);
             if (importColumn != null) {
                 field.setAccessible(true);
-                this.getColFields().put(importColumn.colIndex(), field);
+                this.getColFields().put(enableColIndex ? importColumn.colIndex() : colIndex++, field);
                 this.getTitles().put(importColumn.colIndex(), importColumn.title());
             }
         }

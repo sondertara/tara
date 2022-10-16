@@ -1,8 +1,8 @@
 package com.sondertara.common.util;
 
-import com.sondertara.common.lang.refelect.ActualTypeMapperPool;
-import com.sondertara.common.lang.refelect.ParameterizedTypeImpl;
-import com.sondertara.common.lang.refelect.ReflectUtils;
+import com.sondertara.common.lang.reflect.ActualTypeMapperPool;
+import com.sondertara.common.lang.reflect.ParameterizedTypeImpl;
+import com.sondertara.common.lang.reflect.ReflectUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;

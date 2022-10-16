@@ -1,6 +1,6 @@
 package com.sondertara.excel.parser;
 
-import com.sondertara.excel.common.Constant;
+import com.sondertara.excel.constants.Constants;
 import com.sondertara.excel.entity.ExcelCellEntity;
 import com.sondertara.excel.entity.ExcelHelper;
 import com.sondertara.excel.entity.ExcelWriteSheetEntity;
@@ -68,13 +68,13 @@ public class ExcelTemplateWriterResolver extends ExcelDefaultWriterResolver {
     protected SXSSFSheet generateHeader(SXSSFWorkbook workbook, List<ExcelCellEntity> propertyList, String sheetName) {
         SXSSFSheet sheet = workbook.createSheet(sheetName);
         SXSSFRow headerRow = sheet.createRow(0);
-        if (Constant.OPEN_CELL_STYLE) {
+        if (Constants.OPEN_CELL_STYLE) {
             headerRow.setHeight((short) 600);
             CellStyle headCellStyle = getHeaderCellStyle(workbook);
         }
         for (int i = 0; i < propertyList.size(); i++) {
             SXSSFCell cell = headerRow.createCell(i);
-            if (Constant.OPEN_CELL_STYLE) {
+            if (Constants.OPEN_CELL_STYLE) {
                 cell.setCellStyle(headCellStyle);
             }
             cell.setCellValue(propertyList.get(i).getColumnName());

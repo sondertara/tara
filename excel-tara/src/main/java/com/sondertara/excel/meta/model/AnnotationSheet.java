@@ -20,6 +20,8 @@ public class AnnotationSheet extends TaraSheet {
     protected int order = 0;
     protected ExcelDataType excelDataType;
 
+    protected boolean enableColIndex=false;
+
     protected final Map<Integer, Field> colFields = new HashMap<>();
 
     public AnnotationSheet(Class<?> mappingClass) {

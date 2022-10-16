@@ -8,11 +8,9 @@ import com.sondertara.common.bean.model.FileBaitEntity;
 import com.sondertara.common.bean.model.FileBaitVo;
 import com.sondertara.common.bean.model.ProcessBaitEntity;
 import com.sondertara.common.bean.model.ProcessBaitVo;
-import org.apache.commons.beanutils.BeanUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,26 +20,18 @@ public class BeanUtilsTest {
     @Test
     public void test() {
         // 90ms 93ms 106ms 101ms 100ms
-        try {
-            //native
-            BaitTemplateVo baitTemplateVo = getBaitTemplateVo();
-            BaitTemplateEntity entity = convertToBaitTemplateEntity(baitTemplateVo);
-            BaitTemplateEntity entity1 = new BaitTemplateEntity();
-            //Deep copy
-            //DeepCopyUtils.copyProperties(baitTemplateVo, entity1);
-            //Assertions.assertEquals(entity.toString(), entity1.toString());
+        //native
+        BaitTemplateVo baitTemplateVo = getBaitTemplateVo();
+        BaitTemplateEntity entity = convertToBaitTemplateEntity(baitTemplateVo);
+        BaitTemplateEntity entity1 = new BaitTemplateEntity();
+        //Deep copy
+        //DeepCopyUtils.copyProperties(baitTemplateVo, entity1);
+        //Assertions.assertEquals(entity.toString(), entity1.toString());
 
-            //local
-            BaitTemplateEntity entity3 = new BaitTemplateEntity();
-            com.sondertara.common.util.BeanUtils.copyProperties(baitTemplateVo, entity3);
-            Assertions.assertEquals(entity.toString(), entity3.toString());
-            // apache
-            BaitTemplateEntity entity2 = new BaitTemplateEntity();
-            BeanUtils.copyProperties(entity2, baitTemplateVo);
-            Assertions.assertEquals(entity.toString(), entity2.toString());
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new RuntimeException(e);
-        }
+        //local
+        BaitTemplateEntity entity3 = new BaitTemplateEntity();
+        com.sondertara.common.util.BeanUtils.copyProperties(baitTemplateVo, entity3);
+        Assertions.assertEquals(entity.toString(), entity3.toString());
 
     }
 

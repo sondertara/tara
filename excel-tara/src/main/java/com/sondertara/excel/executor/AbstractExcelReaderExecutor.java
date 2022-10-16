@@ -5,7 +5,7 @@ import com.sondertara.excel.context.ExcelReaderContext;
 import com.sondertara.excel.exception.ExcelException;
 import com.sondertara.excel.exception.ExcelReaderException;
 import com.sondertara.excel.lifecycle.ExcelReaderLifecycle;
-import com.sondertara.excel.meta.annotation.ExcelImportColumn;
+import com.sondertara.excel.meta.annotation.ExcelImportField;
 import com.sondertara.excel.meta.annotation.converter.ExcelConverter;
 import com.sondertara.excel.meta.annotation.validation.ConstraintValidator;
 import com.sondertara.excel.meta.model.AnnotationSheet;
@@ -35,11 +35,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author huangxiaohu
@@ -138,7 +134,7 @@ public abstract class AbstractExcelReaderExecutor<T> implements ExcelReaderLifec
         // 空值
         if (StringUtils.isBlank(cell.getCellValue())) {
             // 非空校验
-            final ExcelImportColumn importColumn = field.getAnnotation(ExcelImportColumn.class);
+            final ExcelImportField importColumn = field.getAnnotation(ExcelImportField.class);
             if (!importColumn.allowBlank()) {
                 throw new ExcelException("该字段值为空!");
             }
@@ -177,7 +173,6 @@ public abstract class AbstractExcelReaderExecutor<T> implements ExcelReaderLifec
 
             if (!StringUtils.isBlank(cell.getCellValue())) {
                 final Field field = columnFields.get(cell.getColIndex());
-
                 Object cellValue = cell.getCellValue();
                 // 值转换
                 List<AbstractExcelColumnConverter<Annotation, ?>> columnConverters = CacheUtils.getColConverterCache().getIfPresent(field.getName());
@@ -188,7 +183,7 @@ public abstract class AbstractExcelReaderExecutor<T> implements ExcelReaderLifec
 
                 try {
                     for (final AbstractExcelColumnConverter<Annotation, ?> columnConverter : columnConverters) {
-                        cellValue = columnConverter.convert((String) cellValue);
+                        cellValue = columnConverter.convert(cellValue);
                     }
                 } catch (final Exception ex) {
                     allPassed = false;
@@ -197,7 +192,7 @@ public abstract class AbstractExcelReaderExecutor<T> implements ExcelReaderLifec
                 }
 
                 try {
-                    ExcelFieldUtils.setFieldValue(field, instance, cellValue, field.getAnnotation(ExcelImportColumn.class).dateFormat());
+                    ExcelFieldUtils.setFieldValue(field, instance, cellValue, field.getAnnotation(ExcelImportField.class).dateFormat());
                 } catch (final Exception ex) {
                     allPassed = false;
                     readerContext.getExcelCellReadExceptionCallback().call(row, cell, new ExcelException("字段赋值失败!", ex));

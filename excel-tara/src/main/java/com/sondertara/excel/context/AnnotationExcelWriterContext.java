@@ -57,8 +57,8 @@ public class AnnotationExcelWriterContext implements ExcelWriterContext {
     }
 
     @Override
-    public void addMapper(Class<?> excelClass, ExportFunction<?> function, PageQueryParam queryParam) {
-        sheetDefinitions.add(new AnnotationExcelWriterSheetDefinition<>(excelClass, function, queryParam));
+    public void addMapper(Class<?> excelClass, ExportFunction<?> function) {
+        sheetDefinitions.add(new AnnotationExcelWriterSheetDefinition<>(excelClass, function));
     }
 
     @Override

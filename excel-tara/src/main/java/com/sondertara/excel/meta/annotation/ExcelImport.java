@@ -26,4 +26,10 @@ public @interface ExcelImport {
      */
     int firstDataRow() default 2;
 
+    /**
+     * 是否指定列序号，否则使用属性定义的顺序
+     * @return
+     */
+    boolean enableColIndex() default  false;
+
 }

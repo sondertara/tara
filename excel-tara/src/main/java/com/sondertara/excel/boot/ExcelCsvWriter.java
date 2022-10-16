@@ -1,23 +1,21 @@
 package com.sondertara.excel.boot;
 
+import com.sondertara.excel.constants.Constants;
 import com.sondertara.excel.entity.ExcelWriteSheetEntity;
 import com.sondertara.excel.exception.ExcelTaraException;
 import com.sondertara.excel.factory.ExcelMappingFactory;
-import com.sondertara.excel.fast.Cell;
 import com.sondertara.excel.parser.ExcelCsvWriterResolver;
 import com.sondertara.excel.parser.ExcelReader;
 import com.sondertara.excel.parser.builder.AbstractExcelWriter;
 import com.sondertara.excel.parser.builder.DataCollectionBuilder;
 import com.sondertara.excel.parser.builder.DateQueryBuilder;
+import com.sondertara.excel.utils.ExcelResponseUtils;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.OutputStream;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -45,7 +43,6 @@ public class ExcelCsvWriter extends AbstractExcelWriter<String> {
     public DateQueryBuilder<String> fromQuery() {
 
         return new DateQueryBuilder<>(this);
-
     }
 
     public ExcelCsvWriter fileName(String fileName) {
@@ -73,23 +70,19 @@ public class ExcelCsvWriter extends AbstractExcelWriter<String> {
             verifyAndBuildParams();
             ExcelWriteSheetEntity excelMapping = ExcelMappingFactory.loadExportExcelClass(excelClass);
             ExcelCsvWriterResolver resolver = new ExcelCsvWriterResolver(excelMapping, fileName);
-            return resolver.createFile(pageQueryParam, exportFunction);
+            return resolver.createFile(exportFunction);
         } catch (Exception e) {
             throw new ExcelTaraException(e);
         }
     }
 
-    @Override
-    public void to(OutputStream out) {
-
-    }
 
     @Override
     public void to(HttpServletResponse httpServletResponse, String fileName) {
-
+        if (!fileName.endsWith(Constants.CSV_SUFFIX)) {
+            fileName = fileName + Constants.CSV_SUFFIX;
+        }
+        ExcelResponseUtils.writeResponse(httpServletResponse, fileName, this::to);
     }
 
-    public static void main(String[] args) {
-        List<Cell> list = ExcelBeanReader.load(new File("")).read(Cell.class);
-    }
 }

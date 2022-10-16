@@ -4,8 +4,8 @@ import com.sondertara.common.util.LocalDateTimeUtils;
 import com.sondertara.common.util.NumberUtils;
 import com.sondertara.common.util.RegexUtils;
 import com.sondertara.common.util.StringUtils;
-import com.sondertara.excel.annotation.ExcelImportField;
-import com.sondertara.excel.common.Constant;
+import com.sondertara.excel.meta.annotation.ExcelImportField;
+import com.sondertara.excel.constants.ExcelConstants;
 import com.sondertara.excel.entity.ErrorEntity;
 import com.sondertara.excel.entity.ExcelCellEntity;
 import com.sondertara.excel.entity.ExcelReadSheetEntity;
@@ -124,7 +124,6 @@ public class ExcelReader extends DefaultHandler {
      * if true the index value is the column in excel,else the field and column
      * one-to-one
      *
-     * @see ExcelImportField#index()
      * </p>
      */
     private Boolean enableIndex = false;
@@ -234,14 +233,14 @@ public class ExcelReader extends DefaultHandler {
      */
     @Override
     public void startElement(String uri, String localName, String name, Attributes attributes) {
-        if (Constant.CELL.equals(name)) {
+        if (ExcelConstants.CELL_TAG.equals(name)) {
             excelCellType = null;
-            String xyzLocation = attributes.getValue(Constant.XYZ_LOCATION);
+            String xyzLocation = attributes.getValue(ExcelConstants.CELL_ABC_INDEX_ATTR);
             previousCellLocation = null == previousCellLocation ? xyzLocation : currentCellLocation;
             currentCellLocation = xyzLocation;
-            String cellType = attributes.getValue(Constant.CELL_T_PROPERTY);
-            String cellStyleStr = attributes.getValue(Constant.CELL_S_VALUE);
-            isNeedSharedStrings = (null != cellType && cellType.equals(Constant.CELL_S_VALUE));
+            String cellType = attributes.getValue(ExcelConstants.CELL_TYPE_ATTR);
+            String cellStyleStr = attributes.getValue(ExcelConstants.CELL_STYLE_ATTR);
+            isNeedSharedStrings = (null != cellType && cellType.equals(ExcelConstants.CELL_STRING_TYPE));
             setCellType(cellType, cellStyleStr);
 
         }
@@ -270,7 +269,7 @@ public class ExcelReader extends DefaultHandler {
      */
     @Override
     public void endElement(String uri, String localName, String name) {
-        if (Constant.CELL.equals(name)) {
+        if (ExcelConstants.CELL_TAG.equals(name)) {
             if (isNeedSharedStrings && !StringUtils.isBlank(currentCellValue)
                     && StringUtils.isNumeric(currentCellValue)) {
                 int index = Integer.parseInt(currentCellValue);
@@ -290,7 +289,7 @@ public class ExcelReader extends DefaultHandler {
                 cellsOnRow.add(dataCurrentCellIndex, value);
                 dataCurrentCellIndex++;
             }
-        } else if (Constant.ROW.equals(name)) {
+        } else if (ExcelConstants.ROW_TAG.equals(name)) {
             if (currentRowIndex == 0) {
                 endCellLocation = currentCellLocation;
                 int propertySize = excelMapping.getPropertyList().size();
@@ -539,24 +538,12 @@ public class ExcelReader extends DefaultHandler {
             }
         }
         // value range
-        Class filedClazz = mappingProperty.getFieldEntity().getType();
-        String[] range = mappingProperty.getRange();
-        if (range.length == 0) {
-            return null;
-        } else if (StringUtils.isEmpty(range[0]) && StringUtils.isEmpty(range[1])) {
-            return null;
-        } else if (range.length != 2) {
-            throw new Exception("the ImportFiled annotation attribute[range] should a string[] with two elements!");
-        }
-        String simpleName = filedClazz.getSimpleName();
-
-        if ("Date".equals(simpleName)) {
-            return checkRangeDate(cellIndex, filedClazz, range, cellValue, mappingProperty.getRangeType());
-        } else if ("Integer".equals(simpleName) || "double".equalsIgnoreCase(simpleName)
-                || "BigDecimal".equals(simpleName) || "float".equalsIgnoreCase(simpleName)
-                || "int".equals(simpleName) || "short".equalsIgnoreCase(simpleName)
-                || "long".equalsIgnoreCase(simpleName)) {
-            return checkRangeNumber(cellIndex, filedClazz, range, cellValue, mappingProperty.getRangeType());
+        if (null!=mappingProperty.getRangeValidator()){
+            try {
+                mappingProperty.getRangeValidator().validate(cellValue.toString());
+            } catch (Exception e) {
+                return buildErrorMsg(cellIndex, cellValue, e.getMessage());
+            }
         }
         return null;
     }

@@ -17,17 +17,26 @@ public class PageResult<T> implements Serializable {
 
     private final Integer page;
     private final Integer pageSize;
-    private final Long total;
+    private final Integer total;
     private final List<T> data;
 
-    public PageResult(Integer page, Integer pageSize, Long total, List<T> data) {
+    public PageResult(List<T> data, Integer total, Integer page, Integer pageSize) {
         this.page = page;
         this.pageSize = pageSize;
         this.total = total;
         if (null == data) {
-            this.data = new ArrayList<T>();
+            this.data = new ArrayList<>();
         } else {
             this.data = data;
         }
     }
+
+    public boolean isEmpty() {
+        return this.data.isEmpty();
+    }
+
+    public int endIndex() {
+        return (int) Math.ceil(this.total * 1.0f / pageSize) - 1;
+    }
+
 }

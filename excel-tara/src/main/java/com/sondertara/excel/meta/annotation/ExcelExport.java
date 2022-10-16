@@ -66,6 +66,6 @@ public @interface ExcelExport {
      *
      * @return whether enable colIndex
      */
-    boolean colIndexEnabled() default false;
+    boolean enableColIndex() default false;
 
 }

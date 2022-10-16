@@ -1,7 +1,7 @@
 package com.sondertara.excel.meta.model;
 
 import com.sondertara.excel.exception.ExcelException;
-import com.sondertara.excel.meta.annotation.ExcelImportColumn;
+import com.sondertara.excel.meta.annotation.ExcelImportField;
 import com.sondertara.excel.meta.annotation.validation.ConstraintValidator;
 import com.sondertara.excel.support.validator.AbstractExcelColumnValidator;
 import com.sondertara.excel.support.validator.ExcelDefaultValidator;
@@ -36,7 +36,7 @@ public class AnnotationCellDef extends ExcelCellDef {
         // 空值
         if (StringUtils.isBlank(this.getCellValue())) {
             // 非空校验
-            final ExcelImportColumn importColumn = field.getAnnotation(ExcelImportColumn.class);
+            final ExcelImportField importColumn = field.getAnnotation(ExcelImportField.class);
             if (!importColumn.allowBlank()) {
                 throw new ExcelException("该字段值为空!");
             }

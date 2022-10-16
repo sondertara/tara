@@ -17,12 +17,12 @@ public class ExcelKVConverter implements AbstractExcelColumnConverter<ExcelKVCon
     @Override
     public void initialize(ExcelKVConvert annotation) {
         this.allowMissHit = annotation.allowMissHit();
-        String[] kvmap = annotation.kvmap();
-        this.kvMap = new HashMap<>();
-        for (String kv : kvmap) {
+        String[] kvMap1 = annotation.kvMap();
+        this.kvMap = new HashMap<>(8);
+        for (String kv : kvMap1) {
             String[] aKv = StringUtils.split(kv, "=");
             if (aKv == null || aKv.length != 2) {
-                throw new IllegalArgumentException("@ExcelKVConvert's kvmap attributes must include \"=\"");
+                throw new IllegalArgumentException("@ExcelKVConvert's kvMap attributes must include \"=\"");
             }
             this.kvMap.put(aKv[0], aKv[1]);
         }
@@ -30,8 +30,11 @@ public class ExcelKVConverter implements AbstractExcelColumnConverter<ExcelKVCon
     }
 
     @Override
-    public Object convert(String value) {
-        if (this.kvMap.containsKey(value)) {
+    public Object convert(Object value) {
+        if (value == null) {
+            return null;
+        }
+        if (this.kvMap.containsKey(value.toString())) {
             return MapUtils.getObject(this.kvMap, value);
         } else {
             if (!this.allowMissHit) {

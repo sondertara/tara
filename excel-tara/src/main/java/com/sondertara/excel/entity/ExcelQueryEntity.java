@@ -21,4 +21,6 @@ public class ExcelQueryEntity<T> {
      * 页码
      */
     private Integer page;
+
+    private boolean finish = false;
 }

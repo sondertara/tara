@@ -18,12 +18,16 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ExcelExportField {
 
+    @AliasFor("colName")
+    String value() default "";
+
     /**
      * 标题
      *
      * @return
      */
-    String colName();
+    @AliasFor("value")
+    String colName() default "";
 
     /**
      * 列索引（从1开始）

@@ -1,14 +1,7 @@
 package com.sondertara.excel.meta.style;
 
 import com.sondertara.excel.meta.model.ExcelCellStyleDefinition;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.FillPatternType;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.HorizontalAlignment;
-import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.ss.usermodel.VerticalAlignment;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 
 /**
@@ -26,8 +19,14 @@ public class DefaultTitleCellStyleBuilder implements CellStyleBuilder {
         cellStyle.setFillForegroundColor(IndexedColors.GREEN.getIndex());
         cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
+        cellStyle.setBorderBottom(BorderStyle.THIN);
+        cellStyle.setBorderLeft(BorderStyle.THIN);
+        cellStyle.setBorderRight(BorderStyle.THIN);
+        cellStyle.setBorderTop(BorderStyle.THIN);
+
         // 设置字体
         font.setBold(true);
+
 
         // 设置对齐方式
         cellStyle.setAlignment(HorizontalAlignment.CENTER);

@@ -68,7 +68,7 @@ import java.util.zip.ZipFile;
  * @author huangxiaohu
  * @version 1.0
  * @since 1.0
- *        date 2019/11/8 1:00 下午
+ * date 2019/11/8 1:00 下午
  **/
 public class FileUtils {
 
@@ -1707,7 +1707,7 @@ public class FileUtils {
 
     /**
      * 返回文件名<br>
-     * 
+     *
      * <pre>
      * "d:/test/aaa" 返回 "aaa"
      * "/test/aaa.jpg" 返回 "aaa.jpg"
@@ -2456,7 +2456,7 @@ public class FileUtils {
         if (null == path) {
             return false;
         }
-        final LinkOption[] options = isFollowLinks ? new LinkOption[0] : new LinkOption[] { LinkOption.NOFOLLOW_LINKS };
+        final LinkOption[] options = isFollowLinks ? new LinkOption[0] : new LinkOption[]{LinkOption.NOFOLLOW_LINKS};
         return Files.isDirectory(path, options);
     }
 
@@ -2541,7 +2541,7 @@ public class FileUtils {
             return null;
         }
 
-        final LinkOption[] options = isFollowLinks ? new LinkOption[0] : new LinkOption[] { LinkOption.NOFOLLOW_LINKS };
+        final LinkOption[] options = isFollowLinks ? new LinkOption[0] : new LinkOption[]{LinkOption.NOFOLLOW_LINKS};
         try {
             return Files.readAttributes(path, BasicFileAttributes.class, options);
         } catch (IOException e) {
@@ -2622,8 +2622,7 @@ public class FileUtils {
     public static Path moveContent(Path src, Path target, boolean isOverride) {
         Assert.notNull(src, "Src path must be not null !");
         Assert.notNull(target, "Target path must be not null !");
-        final CopyOption[] options = isOverride ? new CopyOption[] { StandardCopyOption.REPLACE_EXISTING }
-                : new CopyOption[] {};
+        final CopyOption[] options = isOverride ? new CopyOption[]{StandardCopyOption.REPLACE_EXISTING} : new CopyOption[]{};
 
         // 自动创建目标的父目录
         mkParentDirs(target);
@@ -2678,7 +2677,7 @@ public class FileUtils {
         if (null == path) {
             return false;
         }
-        final LinkOption[] options = isFollowLinks ? new LinkOption[0] : new LinkOption[] { LinkOption.NOFOLLOW_LINKS };
+        final LinkOption[] options = isFollowLinks ? new LinkOption[0] : new LinkOption[]{LinkOption.NOFOLLOW_LINKS};
         return Files.isRegularFile(path, options);
     }
 
@@ -2702,7 +2701,7 @@ public class FileUtils {
      * @since 5.5.3
      */
     public static boolean exists(Path path, boolean isFollowLinks) {
-        final LinkOption[] options = isFollowLinks ? new LinkOption[0] : new LinkOption[] { LinkOption.NOFOLLOW_LINKS };
+        final LinkOption[] options = isFollowLinks ? new LinkOption[0] : new LinkOption[]{LinkOption.NOFOLLOW_LINKS};
         return Files.exists(path, options);
     }
 

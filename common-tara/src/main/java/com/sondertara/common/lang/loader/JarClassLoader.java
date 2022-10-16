@@ -2,7 +2,7 @@ package com.sondertara.common.lang.loader;
 
 import com.sondertara.common.exception.TaraException;
 import com.sondertara.common.io.FileUtils;
-import com.sondertara.common.lang.refelect.ReflectUtils;
+import com.sondertara.common.lang.reflect.ReflectUtils;
 import com.sondertara.common.util.ClassUtils;
 import com.sondertara.common.util.URLUtils;
 

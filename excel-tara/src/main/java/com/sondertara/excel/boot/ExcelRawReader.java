@@ -2,7 +2,7 @@ package com.sondertara.excel.boot;
 
 import com.sondertara.excel.base.TaraExcelReader;
 import com.sondertara.excel.exception.ExcelReaderException;
-import com.sondertara.excel.fast.ReadableWorkbook;
+import com.sondertara.excel.fast.reader.ReadableWorkbook;
 
 import java.io.File;
 import java.io.IOException;

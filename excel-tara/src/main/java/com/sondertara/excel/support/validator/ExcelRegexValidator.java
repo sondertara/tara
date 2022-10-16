@@ -6,6 +6,9 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.regex.Pattern;
 
+/**
+ * @author huangxiaohu
+ */
 public class ExcelRegexValidator implements AbstractExcelColumnValidator<ExcelRegexValue> {
 
     private Pattern pattern;

@@ -1,6 +1,5 @@
 package com.sondertara.excel.factory;
 
-import com.sondertara.excel.annotation.ExcelImportField;
 import com.sondertara.excel.entity.ExcelCellEntity;
 import com.sondertara.excel.entity.ExcelReadSheetEntity;
 import com.sondertara.excel.entity.ExcelWriteSheetEntity;
@@ -8,7 +7,12 @@ import com.sondertara.excel.exception.ExcelTaraException;
 import com.sondertara.excel.executor.CellStyleCache;
 import com.sondertara.excel.meta.annotation.ExcelExport;
 import com.sondertara.excel.meta.annotation.ExcelExportField;
+import com.sondertara.excel.meta.annotation.ExcelImportField;
+import com.sondertara.excel.meta.annotation.validation.ExcelRangeRule;
+import com.sondertara.excel.meta.annotation.validation.ExcelRegexValue;
 import com.sondertara.excel.meta.style.CellStyleBuilder;
+import com.sondertara.excel.support.validator.ValueRangeValidator;
+import com.sondertara.excel.utils.ExcelAnnotationUtils;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -35,10 +39,20 @@ public class ExcelMappingFactory {
             if (null != excelImportField) {
                 field.setAccessible(true);
                 ExcelCellEntity excelPropertyEntity = ExcelCellEntity.builder().fieldEntity(field)
-                        .index(excelImportField.index() - 1).required(excelImportField.required())
-                        .regex(excelImportField.regex().trim()).regexMessage(excelImportField.regexMessage().trim())
-                        .scale(excelImportField.scale()).roundingMode(excelImportField.roundingMode())
-                        .range(excelImportField.range()).rangeType(excelImportField.rangeType()).build();
+                        .index(excelImportField.colIndex() - 1).required(!excelImportField.allowBlank()).build();
+
+                ExcelRegexValue regexValue = field.getAnnotation(ExcelRegexValue.class);
+                if (null!=regexValue){
+                    excelPropertyEntity.setRegex(regexValue.regex());
+                    excelPropertyEntity.setRegexMessage(regexValue.message());
+                }
+
+                ExcelRangeRule rangeRule = field.getAnnotation(ExcelRangeRule.class);
+                if (null!=rangeRule){
+                    ValueRangeValidator validator = new ValueRangeValidator();
+                    validator.initialize(rangeRule);
+                    excelPropertyEntity.setRangeValidator(validator);
+                }
                 propertyList.add(excelPropertyEntity);
             }
         }
@@ -84,7 +98,7 @@ public class ExcelMappingFactory {
                         .index(excelExportField.colIndex()).cellType(excelExportField.cellType())
                         .dateFormat(excelExportField.dataFormat()).dataStyle(dataStyle).headStyle(headerStyle)
                         .authWith(excelExportField.autoWidth()).colWidth(excelExportField.colWidth())
-                        .columnName(excelExportField.colName().trim())
+                        .columnName(ExcelAnnotationUtils.getColName(excelExportField))
                         .defaultValue(excelExportField.defaultCellValue().trim()).build();
                 propertyList.add(excelPropertyEntity);
             }

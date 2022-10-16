@@ -7,8 +7,8 @@ package com.sondertara.excel.task;
 public interface Producer {
     /**
      * 生产任务
-     *
-     * @throws InterruptedException 异常信息
      */
-    void produce() throws InterruptedException;
+    boolean produce();
+
+    void init();
 }
