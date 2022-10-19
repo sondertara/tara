@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sondertara.common.util.CollectionUtils;
 import com.sondertara.common.util.StringUtils;
+import com.sondertara.excel.constants.Constants;
 import com.sondertara.excel.entity.ErrorEntity;
 import com.sondertara.excel.exception.ExcelTaraException;
 import org.apache.commons.csv.CSVFormat;
@@ -18,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static com.sondertara.excel.common.Constant.FILE_STORAGE_PREFIX;
+import static com.sondertara.excel.constants.Constants.FILE_STORAGE_PREFIX;
 
 /**
  * excel tara tools
@@ -98,7 +99,7 @@ public class ExcelTaraHelper {
         if (printerMap == null) {
 
             File errorFile = new File(generateWorkspaceFilePath(fileName));
-            Appendable writer = new PrintWriter(errorFile, Constant.CHARSET);
+            Appendable writer = new PrintWriter(errorFile, Constants.CHARSET);
             if (CollectionUtils.isEmpty(title)) {
                 csvPrinter = CSVFormat.EXCEL.print(writer);
             } else {
@@ -112,7 +113,7 @@ public class ExcelTaraHelper {
             csvPrinter = printerMap.get(fileName);
             if (null == csvPrinter) {
                 File errorFile = new File(generateWorkspaceFilePath(fileName));
-                Appendable writer = new PrintWriter(errorFile, Constant.CHARSET);
+                Appendable writer = new PrintWriter(errorFile, Constants.CHARSET);
                 if (CollectionUtils.isEmpty(title)) {
                     csvPrinter = CSVFormat.EXCEL.print(writer);
                 } else {

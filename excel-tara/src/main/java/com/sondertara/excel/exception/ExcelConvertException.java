@@ -7,24 +7,12 @@ package com.sondertara.excel.exception;
  */
 public class ExcelConvertException extends ExcelException {
 
-    public ExcelConvertException() {
-        super();
-    }
 
     public ExcelConvertException(String message) {
         super(message);
     }
 
-    public ExcelConvertException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public ExcelConvertException(Throwable cause) {
-        super(cause);
-    }
-
-    protected ExcelConvertException(String message, Throwable cause, boolean enableSuppression,
-                                    boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
+    public ExcelConvertException(String format, Object... arguments) {
+        super(format, arguments);
     }
 }

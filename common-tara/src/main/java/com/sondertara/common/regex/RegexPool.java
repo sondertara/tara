@@ -14,7 +14,7 @@ public interface RegexPool {
     /**
      * 数字
      */
-    String NUMBERS = "\\d+";
+    String NUMBERS = "-?(0|[1-9]\\d*)(\\.\\d+)?";
     /**
      * 字母
      */

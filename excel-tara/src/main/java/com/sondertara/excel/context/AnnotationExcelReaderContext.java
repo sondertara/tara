@@ -17,7 +17,7 @@ import java.util.Map;
 /**
  * @author huangxiaohu
  */
-public class AnnotationExcelReaderContext<T> implements ExcelReaderContext {
+public class AnnotationExcelReaderContext<T> implements ExcelRawReaderContext<List<T>> {
 
     private final Map<Integer, AnnotationSheet> sheetDefinitionMap;
     private final TaraExcelExecutor<List<T>> excelExecutor;
@@ -64,12 +64,12 @@ public class AnnotationExcelReaderContext<T> implements ExcelReaderContext {
     }
 
     @Override
-    public RowReadExCallback getExcelRowReadExceptionCallback() {
+    public RowReadExCallback getExcelRowReadExCallback() {
         return this.rowReadExceptionCallback;
     }
 
     @Override
-    public CellReadExCallback getExcelCellReadExceptionCallback() {
+    public CellReadExCallback getExcelCellReadExCallback() {
         return this.cellReadExceptionCallback;
     }
 

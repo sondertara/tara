@@ -29,14 +29,13 @@ public class ExcelWriter {
      * @param clazzs
      * @return
      */
-    public static ExcelWriter newTemplateInstance(Class<?>... clazzs) {
+    public static ExcelWriter newTemplateInstance() {
         ExcelWriter excelWriter = new ExcelWriter();
-        excelWriter.addModel(clazzs);
         return excelWriter;
     }
 
-    public ExcelWriter addModel(Class<?>... clazzs) {
-        this.writerContext.addModel(clazzs);
+    public ExcelWriter addModel(Class<?> clazzs) {
+        this.writerContext.addMapper(clazzs);
         return this;
     }
 
@@ -46,7 +45,7 @@ public class ExcelWriter {
      * @param data
      * @return
      */
-    public ExcelWriter addData(List<?>... data) {
+    public ExcelWriter addData(List<?> data) {
         this.writerContext.addData(data);
         return this;
     }

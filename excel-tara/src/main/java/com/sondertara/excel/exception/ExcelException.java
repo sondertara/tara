@@ -1,24 +1,17 @@
 package com.sondertara.excel.exception;
 
-public class ExcelException extends RuntimeException {
+import com.sondertara.common.exception.TaraException;
 
-    public ExcelException() {
-        super();
-    }
+/**
+ * @author huangxiaohu
+ */
+public class ExcelException extends TaraException {
 
-    public ExcelException(String message) {
-        super(message);
-    }
-
-    public ExcelException(String message, Throwable cause) {
-        super(message, cause);
+    public ExcelException(String format, Object... arguments) {
+        super(format, arguments);
     }
 
     public ExcelException(Throwable cause) {
         super(cause);
-    }
-
-    protected ExcelException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
     }
 }

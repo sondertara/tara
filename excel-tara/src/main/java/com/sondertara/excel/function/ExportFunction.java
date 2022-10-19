@@ -1,6 +1,6 @@
 package com.sondertara.excel.function;
 
-import com.sondertara.excel.entity.PageResult;
+import com.sondertara.common.model.PageResult;
 
 /**
  * 分页查询
@@ -13,9 +13,8 @@ public interface ExportFunction<T> {
     /**
      * Query Page Data
      *
-     * @param pageNo   page
-     * @param pageSize page size
+     * @param index page
      * @return page
      */
-    PageResult<T> queryPage(Integer pageNo, Integer pageSize);
+   PageResult<T> query(Integer index);
 }

@@ -1,7 +1,7 @@
 package com.sondertara.common.lang.resource;
 
 import com.sondertara.common.lang.Assert;
-import com.sondertara.common.lang.refelect.ReflectUtils;
+import com.sondertara.common.lang.reflect.ReflectUtils;
 import com.sondertara.common.util.ClassLoaderUtils;
 
 import java.io.InputStream;

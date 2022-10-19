@@ -3,11 +3,12 @@ package com.sondertara.excel.parser;
 import com.sondertara.common.exception.TaraException;
 import com.sondertara.common.util.LocalDateTimeUtils;
 import com.sondertara.common.util.StringUtils;
-import com.sondertara.excel.common.Constant;
+import com.sondertara.excel.constants.Constants;
 import com.sondertara.excel.entity.ExcelCellEntity;
 import com.sondertara.excel.entity.ExcelHelper;
 import com.sondertara.excel.entity.ExcelWriteSheetEntity;
 import com.sondertara.excel.entity.PageQueryParam;
+import com.sondertara.common.model.PageResult;
 import com.sondertara.excel.function.ExportFunction;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -56,7 +57,7 @@ public class ExcelWriterResolver extends ExcelTemplateWriterResolver {
 
     public void generateCsv(String fileName) {
         try {
-            final String workPath = Constant.FILE_PATH + File.separator + fileName + File.separator;
+            final String workPath = Constants.FILE_PATH + File.separator + fileName + File.separator;
             File path = new File(workPath);
 
             List<File> fileList = new ArrayList<File>();
@@ -67,8 +68,7 @@ public class ExcelWriterResolver extends ExcelTemplateWriterResolver {
                     return;
                 }
                 Collections.addAll(fileList, files);
-                final List<File> collect = fileList.stream().sorted(Comparator.comparing(File::getName))
-                        .collect(Collectors.toList());
+                final List<File> collect = fileList.stream().sorted(Comparator.comparing(File::getName)).collect(Collectors.toList());
                 File csvFile = new File(workPath + fileName + ".csv");
 
                 if (csvFile.exists()) {
@@ -82,9 +82,8 @@ public class ExcelWriterResolver extends ExcelTemplateWriterResolver {
                         throw new IOException("Create file:" + csvFile.getAbsolutePath() + " failed");
                     }
                 }
-                Appendable printWriter = new PrintWriter(csvFile, Constant.CHARSET);
-                CSVPrinter csvPrinter = CSVFormat.EXCEL.builder().setHeader(excelEntity.getPropertyList().stream()
-                        .map(ExcelCellEntity::getColumnName).toArray(String[]::new)).build().print(printWriter);
+                Appendable printWriter = new PrintWriter(csvFile, Constants.CHARSET);
+                CSVPrinter csvPrinter = CSVFormat.EXCEL.builder().setHeader(excelEntity.getPropertyList().stream().map(ExcelCellEntity::getColumnName).toArray(String[]::new)).build().print(printWriter);
 
                 csvPrinter.flush();
                 csvPrinter.close();
@@ -124,12 +123,13 @@ public class ExcelWriterResolver extends ExcelTemplateWriterResolver {
         SXSSFSheet sheet = generateHeader(workbook, propertyList, excelEntity.getSheetName());
 
         // generate data rows
-        int firstPageNo = 1;
+        int firstPageNo = 0;
         while (true) {
-            List<R> data = exportFunction.queryPage(firstPageNo, param.getPageSize()).getData();
-            if (data == null || data.isEmpty()) {
+            PageResult<R> result = exportFunction.query(firstPageNo);
+            List<R> data = result.getData();
+            if (firstPageNo > result.endIndex() || result.isEmpty()) {
                 if (rowNum != 1) {
-                    if (Constant.OPEN_CELL_STYLE) {
+                    if (Constants.OPEN_CELL_STYLE) {
                         sizeColumnWidth(sheet, propertyList.size());
                     }
                 }
@@ -137,11 +137,10 @@ public class ExcelWriterResolver extends ExcelTemplateWriterResolver {
                 break;
             }
             int dataSize = data.size();
-
             for (int i = 1; i <= dataSize; i++, rowNum++) {
                 R queryResult = data.get(i - 1);
-                if (rowNum > Constant.MAX_RECORD_COUNT_PEER_SHEET) {
-                    if (Constant.OPEN_CELL_STYLE) {
+                if (rowNum > Constants.MAX_RECORD_COUNT_PEER_SHEET) {
+                    if (Constants.OPEN_CELL_STYLE) {
                         sizeColumnWidth(sheet, propertyList.size());
                     }
                     sheet = generateHeader(workbook, propertyList, excelEntity.getSheetName() + "_" + sheetNo);
@@ -165,8 +164,7 @@ public class ExcelWriterResolver extends ExcelTemplateWriterResolver {
             }
             if (data.size() < param.getPageSize()) {
                 sizeColumnWidth(sheet, propertyList.size());
-                logger.warn("current query data size is [{}],less than pageSize[{}],is the last page,query exit!",
-                        data.size(), param.getPageSize());
+                logger.warn("current query data size is [{}],less than pageSize[{}],is the last page,query exit!", data.size(), param.getPageSize());
                 break;
             }
             firstPageNo++;
@@ -187,7 +185,7 @@ public class ExcelWriterResolver extends ExcelTemplateWriterResolver {
      * @throws IllegalAccessException    e
      */
     public <R> SXSSFWorkbook generateMultiSheetWorkbook(PageQueryParam param, ExportFunction<R> exportFunction) {
-        int pageNo = 1;
+        int pageNo = 0;
         int sheetNo = 1;
         int rowNum = 1;
         SXSSFWorkbook workbook = new SXSSFWorkbook(excelHelper.getRowAccessWindowSize());
@@ -195,14 +193,16 @@ public class ExcelWriterResolver extends ExcelTemplateWriterResolver {
         SXSSFSheet sheet = generateHeader(workbook, propertyList, excelEntity.getSheetName());
 
         while (true) {
-            List<R> data = exportFunction.queryPage(pageNo, param.getPageSize()).getData();
-            if (data == null || data.isEmpty()) {
+            PageResult<R> result = exportFunction.query(pageNo);
+            if (pageNo > result.endIndex() || result.isEmpty()) {
                 if (rowNum != 1) {
                     sizeColumnWidth(sheet, propertyList.size());
                 }
                 logger.warn("query result is empty,query exit!");
                 break;
             }
+            List<R> data = result.getData();
+
             for (int i = 1; i <= data.size(); i++, rowNum++) {
                 R queryResult = data.get(i - 1);
                 if (rowNum > excelHelper.getRecordCountPerSheet()) {
@@ -227,8 +227,7 @@ public class ExcelWriterResolver extends ExcelTemplateWriterResolver {
             }
             if (data.size() < param.getPageSize()) {
                 sizeColumnWidth(sheet, propertyList.size());
-                logger.warn("current query data size is [{}],less than pageSize[{}],is the last page,query exit!",
-                        data.size(), param.getPageSize());
+                logger.warn("current query data size is [{}],less than pageSize[{}],is the last page,query exit!", data.size(), param.getPageSize());
                 break;
             }
             pageNo++;
@@ -252,15 +251,13 @@ public class ExcelWriterResolver extends ExcelTemplateWriterResolver {
         } catch (IllegalAccessException e) {
             throw new TaraException("BuildCellValue error", e);
         }
-        if (StringUtils.isBlank(cellValue) || "0".equals(cellValue.toString()) || "0.0".equals(cellValue.toString())
-                || "0.00".equals(cellValue.toString())) {
+        if (StringUtils.isBlank(cellValue) || "0".equals(cellValue.toString()) || "0.0".equals(cellValue.toString()) || "0.00".equals(cellValue.toString())) {
             nullCellCount++;
         }
         if (cellValue == null) {
             cell.setCellValue("");
         } else if (cellValue instanceof BigDecimal) {
-            cell.setCellValue(
-                    (((BigDecimal) cellValue).setScale(property.getScale(), property.getRoundingMode())).toString());
+            cell.setCellValue((((BigDecimal) cellValue).setScale(property.getScale(), property.getRoundingMode())).toString());
 
         } else if (cellValue instanceof Date) {
             cell.setCellValue(LocalDateTimeUtils.format((Date) cellValue, property.getDateFormat().value()));

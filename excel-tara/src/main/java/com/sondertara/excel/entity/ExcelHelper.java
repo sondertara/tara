@@ -1,6 +1,6 @@
 package com.sondertara.excel.entity;
 
-import com.sondertara.excel.common.Constant;
+import com.sondertara.excel.constants.Constants;
 
 import java.io.Serializable;
 
@@ -60,13 +60,13 @@ public class ExcelHelper implements Serializable {
         public ExcelHelper build() {
 
             if (this.openAutoColumWidth == null) {
-                this.openAutoColumWidth = Constant.OPEN_AUTO_COLUMN_WIDTH;
+                this.openAutoColumWidth = Constants.OPEN_AUTO_COLUMN_WIDTH;
             }
             if (this.rowAccessWindowSize == null) {
-                this.rowAccessWindowSize = Constant.DEFAULT_ROW_ACCESS_WINDOW_SIZE;
+                this.rowAccessWindowSize = Constants.DEFAULT_ROW_ACCESS_WINDOW_SIZE;
             }
             if (this.recordCountPerSheet == null) {
-                this.recordCountPerSheet = Constant.DEFAULT_RECORD_COUNT_PEER_SHEET;
+                this.recordCountPerSheet = Constants.DEFAULT_RECORD_COUNT_PEER_SHEET;
             }
             return new ExcelHelper(this.recordCountPerSheet, this.openAutoColumWidth, this.rowAccessWindowSize);
         }

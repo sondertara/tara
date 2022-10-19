@@ -373,5 +373,6 @@
         <module>common-tara</module>
         <module>excel-tara</module>
         <module>notify-tara</module>
+        <module>example</module>
     </modules>
 </project>

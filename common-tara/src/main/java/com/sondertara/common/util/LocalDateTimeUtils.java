@@ -70,34 +70,34 @@ public class LocalDateTimeUtils extends CalendarUtils {
     /**
      * java.util.Date EEE MMM zzz 缩写数组
      */
-    private final static String[] wtb = { "sun", "mon", "tue", "wed", "thu", "fri", "sat", "jan", "feb", "mar", "apr",
+    private final static String[] wtb = {"sun", "mon", "tue", "wed", "thu", "fri", "sat", "jan", "feb", "mar", "apr",
             "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec", "gmt", "ut", "utc", "est", "edt", "cst", "cdt",
-            "mst", "mdt", "pst", "pdt" };
+            "mst", "mdt", "pst", "pdt"};
 
     /**
      * 常用的UTC时间格式
      */
-    private final static String[] FREQUENTLEY_USED_UTC_WITH_Z_DATE_FORMATS = new String[] { "yyyy-MM-dd'T'HH:mm:ss'Z'",
-            "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" };
+    private final static String[] FREQUENTLEY_USED_UTC_WITH_Z_DATE_FORMATS = new String[]{"yyyy-MM-dd'T'HH:mm:ss'Z'",
+            "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"};
 
     /**
      * 常用纯数字时间格式
      */
-    private final static String[] FREQUENTLY_USED_NUMBER_DATE_FORMATS = new String[] { "yyyyMMddHHmmss",
-            "yyyyMMddHHmmssSSS", "yyyyMMdd", "yyyyMMss", "HHmmss" };
+    private final static String[] FREQUENTLY_USED_NUMBER_DATE_FORMATS = new String[]{"yyyyMMddHHmmss",
+            "yyyyMMddHHmmssSSS", "yyyyMMdd", "yyyyMMss", "HHmmss"};
 
     /**
      * CST格式
      */
-    private final static String[] FREQUENTLY_USED_CST_DATE_FORMATS = new String[] { "EEE, dd MMM yyyy HH:mm:ss z",
-            "EEE MMM dd HH:mm:ss zzz yyyy" };
+    private final static String[] FREQUENTLY_USED_CST_DATE_FORMATS = new String[]{"EEE, dd MMM yyyy HH:mm:ss z",
+            "EEE MMM dd HH:mm:ss zzz yyyy"};
 
     /**
      * 常用的时间格式
      */
-    private final static String[] FREQUENTLY_USED_DATE_FORMATS = new String[] { "yyyy-MM-dd HH:mm:ss",
+    private final static String[] FREQUENTLY_USED_DATE_FORMATS = new String[]{"yyyy-MM-dd HH:mm:ss",
             "yyyy/MM/dd HH:mm:ss", "yyyy.MM.dd HH:mm:ss", "yyyy年MM月dd日 HH时mm分ss秒", "yyyy-MM-dd", "yyyy/MM/dd",
-            "yyyy.MM.dd", "HH:mm:ss", "HH时mm分ss秒", "yyyy-MM-dd HH:mm", "yyyy-MM-dd HH:mm:ss.SSS" };
+            "yyyy.MM.dd", "HH:mm:ss", "HH时mm分ss秒", "yyyy-MM-dd HH:mm", "yyyy-MM-dd HH:mm:ss.SSS"};
 
     /**
      * 当前时间，转换为{@link DateTime}对象
@@ -1839,15 +1839,15 @@ public class LocalDateTimeUtils extends CalendarUtils {
                     throw new TaraException("Invalid UTC format: [{}]", dateTimeStr);
                 }
 
-                dateFormats = new String[] { DatePattern.UTC_MS_WITH_XXX_OFFSET_FORMAT.getPattern(),
-                        DatePattern.UTC_WITH_XXX_OFFSET_FORMAT.getPattern() };
+                dateFormats = new String[]{DatePattern.UTC_MS_WITH_XXX_OFFSET_FORMAT.getPattern(),
+                        DatePattern.UTC_WITH_XXX_OFFSET_FORMAT.getPattern()};
             } else {
                 if (length == DatePattern.UTC_SIMPLE_PATTERN.length() - 2) {
                     // 格式类似：2018-09-13T05:34:31
-                    dateFormats = new String[] { DatePattern.UTC_SIMPLE_FORMAT.getPattern() };
+                    dateFormats = new String[]{DatePattern.UTC_SIMPLE_FORMAT.getPattern()};
                 } else if (StringUtils.contains(utcString, CharUtils.DOT)) {
                     // 可能为： 2021-03-17T06:31:33.99
-                    dateFormats = new String[] { DatePattern.UTC_SIMPLE_MS_FORMAT.getPattern() };
+                    dateFormats = new String[]{DatePattern.UTC_SIMPLE_MS_FORMAT.getPattern()};
                 } else {
                     throw new TaraException("Invalid UTC format: [{}]", dateTimeStr);
                 }
@@ -2008,7 +2008,13 @@ public class LocalDateTimeUtils extends CalendarUtils {
         if (null == date) {
             return null;
         }
-        Instant instant = date.toInstant();
+        Instant instant = null;
+        try {
+            instant = date.toInstant();
+        } catch (Exception e) {
+            //UnsupportedOperationException
+            instant = Instant.ofEpochMilli(date.getTime());
+        }
         ZoneId zoneId = ZoneId.systemDefault();
         LocalDateTime localDateTime = instant.atZone(zoneId).toLocalDateTime();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
@@ -2747,7 +2753,7 @@ public class LocalDateTimeUtils extends CalendarUtils {
      * @since 5.7.20
      */
     public static boolean isOverlap(ChronoLocalDateTime<?> realStartTime, ChronoLocalDateTime<?> realEndTime,
-            ChronoLocalDateTime<?> startTime, ChronoLocalDateTime<?> endTime) {
+                                    ChronoLocalDateTime<?> startTime, ChronoLocalDateTime<?> endTime) {
 
         // x>b||a>y 无交集
         // 则有交集的逻辑为 !(x>b||a>y)
@@ -2807,7 +2813,7 @@ public class LocalDateTimeUtils extends CalendarUtils {
      * @since 5.8.5
      */
     public static boolean isIn(ChronoLocalDateTime<?> date, ChronoLocalDateTime<?> beginDate,
-            ChronoLocalDateTime<?> endDate) {
+                               ChronoLocalDateTime<?> endDate) {
         return TemporalAccessorUtils.isIn(date, beginDate, endDate);
     }
 

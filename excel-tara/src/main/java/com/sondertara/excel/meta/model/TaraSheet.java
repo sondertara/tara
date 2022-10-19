@@ -14,11 +14,11 @@ import java.util.function.Consumer;
  * @author huangxiaohu
  */
 @Data
-public class TaraSheet implements Iterable<TaraRow>, Comparable<TaraSheet> {
+public class TaraSheet implements Iterable<TaraRow>{
     public int index;
     protected String name;
 
-    private Map<Integer, String> titles = new LinkedHashMap<>();
+    private Map<Integer,String> titles = new LinkedHashMap<>();
     protected List<TaraRow> rows = new ArrayList<>();
 
     private int rowCount = 0;
@@ -55,10 +55,7 @@ public class TaraSheet implements Iterable<TaraRow>, Comparable<TaraSheet> {
         rows.iterator().forEachRemaining(action);
     }
 
-    @Override
-    public int compareTo(TaraSheet o) {
-        return 0;
-    }
+
 
     public void addRow(TaraRow row) {
         this.rows.add(row);

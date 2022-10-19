@@ -1,7 +1,6 @@
 package com.sondertara.common.bean;
 
 import com.sondertara.common.bean.exception.BeanCopyException;
-import org.apache.commons.beanutils.PropertyUtils;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
@@ -20,7 +19,8 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Created by shengyun on 17/4/7.
+ * @author shengyun
+ * @date 17/4/7
  */
 public class DeepCopyUtils {
 
@@ -35,19 +35,14 @@ public class DeepCopyUtils {
      */
     public static void copyProperties(Object source, Object target) {
 
-        Class actualEditable = target.getClass();
-
+        Class<?> actualEditable = target.getClass();
         PropertyDescriptor[] targetPds = PropertyUtils.getPropertyDescriptors(actualEditable);
 
         for (int i = 0; i < targetPds.length; i++) {
             PropertyDescriptor targetPd = targetPds[i];
             if (targetPd.getWriteMethod() != null) {
                 PropertyDescriptor sourcePd;
-                try {
-                    sourcePd = PropertyUtils.getPropertyDescriptor(source, targetPd.getName());
-                } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                    throw new BeanCopyException(e);
-                }
+                sourcePd = PropertyUtils.getPropertyDescriptor(source, targetPd.getName());
                 if (sourcePd != null && sourcePd.getReadMethod() != null) {
                     try {
                         Method readMethod = sourcePd.getReadMethod();
@@ -92,8 +87,7 @@ public class DeepCopyUtils {
                         if (!sameClass) {
                             // 如果不是基本包装类型和String
                             // 自己保证，基本类型的要对应一致
-                            boolean base = srcValue instanceof String || srcValue instanceof Number
-                                    || srcValue instanceof Boolean;
+                            boolean base = srcValue instanceof String || srcValue instanceof Number || srcValue instanceof Boolean;
                             if (!base) {
 
                                 Object dstValue = targetPd.getPropertyType().getConstructor().newInstance();
@@ -132,8 +126,7 @@ public class DeepCopyUtils {
      * @throws NoSuchFieldException
      */
     @SuppressWarnings("unchecked")
-    private static void copyMap(PropertyDescriptor sourcePd, PropertyDescriptor targetPd, Object source, Object target)
-            throws NoSuchFieldException {
+    private static void copyMap(PropertyDescriptor sourcePd, PropertyDescriptor targetPd, Object source, Object target) throws NoSuchFieldException {
         Field srcField = source.getClass().getDeclaredField(sourcePd.getName());
         Field destField = target.getClass().getDeclaredField(targetPd.getName());
 
@@ -160,9 +153,8 @@ public class DeepCopyUtils {
         }
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    private static void copyCollection(PropertyDescriptor sourcePd, PropertyDescriptor targetPd, Object source,
-            Object target) throws Exception {
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static void copyCollection(PropertyDescriptor sourcePd, PropertyDescriptor targetPd, Object source, Object target) throws Exception {
         Field srcField = source.getClass().getDeclaredField(sourcePd.getName());
         Field destField = target.getClass().getDeclaredField(targetPd.getName());
 
@@ -211,9 +203,8 @@ public class DeepCopyUtils {
 
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public static void copyList(String srcFieldStr, String destFieldStr, Object source, Object target)
-            throws NoSuchFieldException {
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static void copyList(String srcFieldStr, String destFieldStr, Object source, Object target) throws NoSuchFieldException {
         Field srcField = source.getClass().getDeclaredField(srcFieldStr);
         Field destField = target.getClass().getDeclaredField(destFieldStr);
 

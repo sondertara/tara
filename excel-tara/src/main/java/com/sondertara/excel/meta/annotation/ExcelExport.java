@@ -1,5 +1,7 @@
 package com.sondertara.excel.meta.annotation;
 
+import com.sondertara.excel.enums.ExcelColBindType;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -66,6 +68,14 @@ public @interface ExcelExport {
      *
      * @return whether enable colIndex
      */
-    boolean colIndexEnabled() default false;
+    ExcelColBindType bindType() default ExcelColBindType.ORDER;
+
+    /**
+     * 是否自动调整宽度
+     *
+     * @return
+     */
+    boolean autoWidth() default false;
+
 
 }

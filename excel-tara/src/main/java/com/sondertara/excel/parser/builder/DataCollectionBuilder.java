@@ -16,8 +16,12 @@ public class DataCollectionBuilder<T> {
         this.excelWriter.setExcelDataType(ExcelDataType.DIRECT);
     }
 
-    public AbstractExcelWriter<T> addData(List<?>... data) {
+    public DataCollectionBuilder<T> addData(List<?>data) {
         this.excelWriter.addData(data);
+        return this;
+    }
+
+    public AbstractExcelWriter<T> then() {
         return this.excelWriter;
     }
 }

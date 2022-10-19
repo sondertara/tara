@@ -13,6 +13,7 @@ public class ExcelReaderException extends ExcelException {
     private Throwable cause;
 
     public ExcelReaderException(int sheetIndex, int rowIndex, int colIndex, String cellValue, String message) {
+        super(message);
         this.sheetIndex = sheetIndex;
         this.rowIndex = rowIndex;
         this.colIndex = colIndex;
@@ -22,6 +23,7 @@ public class ExcelReaderException extends ExcelException {
 
     public ExcelReaderException(int sheetIndex, int rowIndex, int colIndex, String cellValue, String message,
                                 Throwable cause) {
+        super(message);
         this.sheetIndex = sheetIndex;
         this.rowIndex = rowIndex;
         this.colIndex = colIndex;

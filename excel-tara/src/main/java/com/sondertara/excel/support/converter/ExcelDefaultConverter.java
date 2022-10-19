@@ -13,7 +13,7 @@ public class ExcelDefaultConverter implements AbstractExcelColumnConverter<Annot
     }
 
     @Override
-    public Object convert(String value) {
+    public Object convert(Object value) {
         return value;
     }
 }

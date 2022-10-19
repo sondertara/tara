@@ -6,7 +6,7 @@ import com.sondertara.excel.meta.model.TaraWorkbook;
 
 import java.io.InputStream;
 
-public class RawExcelReaderContext implements ExcelRawReaderContext {
+public class RawExcelReaderContext implements ExcelReaderContext {
 
     private final InputStream inputStream;
     private final TaraExcelExecutor<TaraWorkbook> excelExecutor;

@@ -2,8 +2,9 @@ package com.sondertara.common.util;
 
 import com.sondertara.common.exception.TaraException;
 import com.sondertara.common.lang.Assert;
-import com.sondertara.common.lang.refelect.LookupFactory;
-import com.sondertara.common.lang.refelect.ReflectUtils;
+import com.sondertara.common.lang.reflect.LookupFactory;
+import com.sondertara.common.lang.reflect.ReflectUtils;
+import org.apache.commons.lang3.reflect.MethodUtils;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -21,7 +22,7 @@ import java.lang.reflect.Method;
  * @author huangxiaohu
  * @since 5.7.7
  */
-public class MethodHandleUtil {
+public class MethodHandleUtil extends MethodUtils {
 
     /**
      * jdk8中如果直接调用{@link MethodHandles#lookup()}获取到的{@link MethodHandles.Lookup}在调用findSpecial和unreflectSpecial

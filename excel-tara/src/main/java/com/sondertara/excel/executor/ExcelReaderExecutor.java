@@ -1,6 +1,6 @@
 package com.sondertara.excel.executor;
 
-import com.sondertara.excel.context.ExcelReaderContext;
+import com.sondertara.excel.context.ExcelRawReaderContext;
 import com.sondertara.excel.exception.ExcelReaderException;
 import com.sondertara.excel.meta.model.AnnotationSheet;
 import com.sondertara.excel.meta.model.ExcelRowDef;
@@ -18,7 +18,7 @@ public class ExcelReaderExecutor<T> extends AbstractExcelReaderExecutor<T> imple
 
     private static final Logger logger = LoggerFactory.getLogger(ExcelReaderExecutor.class);
 
-    public ExcelReaderExecutor(ExcelReaderContext readerContext) {
+    public ExcelReaderExecutor(ExcelRawReaderContext<List<T>> readerContext) {
         super(readerContext);
     }
 

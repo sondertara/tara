@@ -1,5 +1,7 @@
 package com.sondertara.excel.meta.annotation;
 
+import com.sondertara.excel.enums.ExcelColBindType;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -25,5 +27,19 @@ public @interface ExcelImport {
      * @return
      */
     int firstDataRow() default 2;
+
+    /**
+     * 是否指定列序号，否则使用属性定义的顺序
+     *
+     * @return
+     */
+    boolean enableColIndex() default false;
+
+    /**
+     * 数据绑定类型
+     *
+     * @return
+     */
+    ExcelColBindType bindType() default ExcelColBindType.ORDER;
 
 }

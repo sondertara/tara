@@ -1,7 +1,7 @@
 package com.sondertara.excel.executor;
 
 import com.sondertara.excel.analysis.RawXlsxAnalysisHandler;
-import com.sondertara.excel.context.ExcelRawReaderContext;
+import com.sondertara.excel.context.ExcelReaderContext;
 import com.sondertara.excel.meta.model.TaraWorkbook;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
@@ -26,10 +26,10 @@ public class RawExcelReaderExecutor implements TaraExcelExecutor<TaraWorkbook> {
 
     protected int curSheetIndex = 0;
 
-    protected ExcelRawReaderContext readerContext;
+    protected ExcelReaderContext readerContext;
     protected TaraWorkbook workbook;
 
-    public RawExcelReaderExecutor(final ExcelRawReaderContext readerContext) {
+    public RawExcelReaderExecutor(final ExcelReaderContext readerContext) {
         this.readerContext = readerContext;
         this.workbook = new TaraWorkbook();
     }
