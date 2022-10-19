@@ -3,10 +3,9 @@ package com.sondertara.notify.dingtalk.util;
 import com.sondertara.common.exception.TaraException;
 import org.apache.commons.codec.binary.Base64;
 
-import java.net.URLEncoder;
-
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import java.net.URLEncoder;
 
 /**
  * 当钉钉开启签名方式的安全设置时，需要签名拼接到url上

@@ -1,6 +1,5 @@
 package com.sondertara.excel.meta.model;
 
-import com.sondertara.excel.exception.ExcelException;
 import com.sondertara.excel.exception.ExcelReaderException;
 import com.sondertara.excel.exception.ExcelValidationException;
 import com.sondertara.excel.meta.annotation.ExcelImportField;

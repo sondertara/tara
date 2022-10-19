@@ -2,7 +2,7 @@ package com.sondertara.common.util;
 
 import com.sondertara.common.exception.TaraException;
 
-import java.awt.Color;
+import java.awt.*;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;

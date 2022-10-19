@@ -17,8 +17,6 @@
 
 package com.sondertara.common.bean.exception;
 
-import com.sondertara.common.bean.exception.BeanAccessLanguageException;
-
 /**
  * Thrown to indicate that the <em>Bean Access Language</em> cannot execute
  * query against given bean since a nested bean referenced is null.

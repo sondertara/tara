@@ -15,7 +15,10 @@
  */
 package com.sondertara.excel.fast.writer;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * Definition of a range of cells.

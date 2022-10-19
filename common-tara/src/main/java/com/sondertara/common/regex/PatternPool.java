@@ -4,10 +4,9 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
+import javax.annotation.Nonnull;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
-
-import javax.annotation.Nonnull;
 
 /**
  * 常用正则表达式集合，更多正则见:https://any86.github.io/any-rule/

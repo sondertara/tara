@@ -1,7 +1,5 @@
 package com.sondertara.common.util;
 
-import com.sondertara.common.util.StringUtils;
-
 import javax.servlet.http.HttpServletRequest;
 import java.net.Inet6Address;
 import java.net.InetAddress;

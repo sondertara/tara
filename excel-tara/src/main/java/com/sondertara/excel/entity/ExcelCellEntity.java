@@ -1,6 +1,5 @@
 package com.sondertara.excel.entity;
 
-import com.sondertara.excel.enums.FieldRangeType;
 import com.sondertara.excel.meta.annotation.ExcelDataFormat;
 import com.sondertara.excel.meta.style.CellStyleBuilder;
 import com.sondertara.excel.support.validator.ValueRangeValidator;

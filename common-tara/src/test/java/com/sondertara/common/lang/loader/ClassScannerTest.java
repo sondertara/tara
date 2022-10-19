@@ -1,6 +1,5 @@
 package com.sondertara.common.lang.loader;
 
-import com.sondertara.common.lang.loader.ClassScanner;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

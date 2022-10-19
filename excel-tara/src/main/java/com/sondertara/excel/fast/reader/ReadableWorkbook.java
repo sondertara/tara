@@ -18,7 +18,10 @@ package com.sondertara.excel.fast.reader;
 import com.sondertara.excel.exception.ExcelReaderException;
 
 import javax.xml.stream.XMLStreamException;
-import java.io.*;
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

@@ -1,6 +1,5 @@
 package com.sondertara.common.bean.copier;
 
-import com.sondertara.common.bean.copier.BeanCopier;
 import com.sondertara.common.lang.Pair;
 import com.sondertara.common.lang.map.WeakConcurrentMap;
 import com.sondertara.common.lang.reflect.ReflectUtils;
