@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/sondertara/tara.svg?branch=master)](https://travis-ci.org/sondertara/tara)
-![Java](https://sondertara.github.io/assets/java8.svg)
+![Java](https://img.shields.io/badge/Java-%5E1.8-brightgreen)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/sondertara/tara)
 ![Maven Central](https://img.shields.io/maven-central/v/com.sondertara/tara)
 
