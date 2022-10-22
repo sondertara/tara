@@ -15,30 +15,36 @@ import java.lang.annotation.Target;
 public @interface ExcelImportField {
 
     /**
+     * the col index,begin is 1
+     * it takes effect only when {@link ExcelImport#bindType()} is {@link com.sondertara.excel.enums.ExcelColBindType#COL_INDEX}
      * 列索引(从1开始)
      *
-     * @return
+     * @return the bind col index
      */
     int colIndex() default -1;
 
     /**
+     * all empty cell
      * 是否允许空值
      *
-     * @return
+     * @return allow empty
      */
     boolean allowBlank() default true;
 
     /**
+     * data format
      * 日期格式
      *
-     * @return
+     * @return the data format
      */
     String dateFormat() default DatePattern.NORM_DATETIME_PATTERN;
 
     /**
+     * the column title
      * 列标题
+     * if {@link ExcelImport#bindType()} is {@link com.sondertara.excel.enums.ExcelColBindType#TITLE} this value must be set to the Excel title row cell
      *
-     * @return
+     * @return the title
      */
     String title() default "";
 }

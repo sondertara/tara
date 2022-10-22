@@ -1,10 +1,11 @@
 package com.sondertara.excel.utils;
 
 import com.sondertara.common.convert.ConvertUtils;
+import com.sondertara.excel.common.constants.Constants;
 import com.sondertara.excel.meta.annotation.ExcelExportField;
 import com.sondertara.excel.meta.model.ExcelCellDef;
 import com.sondertara.excel.meta.model.ExcelRowDef;
-import com.sondertara.excel.parser.ExcelDefaultWriterResolver;
+import com.sondertara.excel.resolver.ExcelDefaultWriterResolver;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -56,6 +57,9 @@ public class ExcelFieldUtils {
         } else {
             throw new UnsupportedOperationException("不支持此数据类型 => [" + field.getType() + "]!");
         }
+        if (Constants.DEFAULT_COL_WIDTH != exportColumn.colWidth()) {
+            resolver.addColumnWidth(cell.getColumnIndex(), exportColumn.colWidth());
+        }
         if (exportColumn.autoWidth()) {
             resolver.calculateColumnWidth(cell, cell.getColumnIndex());
         }
@@ -84,7 +88,7 @@ public class ExcelFieldUtils {
 
         if (field.getType() == String.class) {
             if (!StringUtils.isBlank(dateFormat)) {
-                try{
+                try {
                     field.set(o, DateUtils.parseDate((String) cellValue, dateFormat));
                 } catch (ParseException e) {
                 }

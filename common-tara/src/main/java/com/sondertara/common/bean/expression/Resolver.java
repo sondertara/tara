@@ -16,6 +16,8 @@
  */
 package com.sondertara.common.bean.expression;
 
+import com.sondertara.common.bean.PropertyUtilsBean;
+
 /**
  * Property Name Expression Resolver.
  * <p>
@@ -58,23 +60,23 @@ package com.sondertara.common.bean.expression;
  * BeanUtils/PropertyUtils uses the <code>resolver</code>. The following are the
  * main methods that use it:
  * <ul>
- * <li>{@link eu.qualityontime.commons.QPropertyUtilsBean}
+ * <li>{@link PropertyUtilsBean}
  * <ul>
- * <li>{@link eu.qualityontime.commons.QPropertyUtilsBean#getIndexedProperty(Object, String)}</li>
- * <li>{@link eu.qualityontime.commons.QPropertyUtilsBean#getMappedProperty(Object, String)}</li>
- * <li>{@link eu.qualityontime.commons.QPropertyUtilsBean#getNestedProperty(Object, String)}</li>
- * <li>{@link eu.qualityontime.commons.QPropertyUtilsBean#getPropertyDescriptor(Object, String)}</li>
- * <li>{@link eu.qualityontime.commons.QPropertyUtilsBean#getSimpleProperty(Object, String)}</li>
- * <li>{@link eu.qualityontime.commons.QPropertyUtilsBean#setIndexedProperty(Object, String, Object)}</li>
- * <li>{@link eu.qualityontime.commons.QPropertyUtilsBean#setMappedProperty(Object, String, Object)}</li>
- * <li>{@link eu.qualityontime.commons.QPropertyUtilsBean#setNestedProperty(Object, String, Object)}</li>
- * <li>{@link eu.qualityontime.commons.QPropertyUtilsBean#setSimpleProperty(Object, String, Object)}</li>
+ * <li>{@link PropertyUtilsBean#getIndexedProperty(Object, String)}</li>
+ * <li>{@link PropertyUtilsBean#getMappedProperty(Object, String)}</li>
+ * <li>{@link PropertyUtilsBean#getNestedProperty(Object, String)}</li>
+ * <li>{@link PropertyUtilsBean#getPropertyDescriptor(Object, String)}</li>
+ * <li>{@link PropertyUtilsBean#getSimpleProperty(Object, String)}</li>
+ * <li>{@link PropertyUtilsBean#setIndexedProperty(Object, String, Object)}</li>
+ * <li>{@link PropertyUtilsBean#setMappedProperty(Object, String, Object)}</li>
+ * <li>{@link PropertyUtilsBean#setNestedProperty(Object, String, Object)}</li>
+ * <li>{@link PropertyUtilsBean#setSimpleProperty(Object, String, Object)}</li>
  * </ul>
  * </li>
  * </ul>
  *
  * @version $Id$
- * @see eu.qualityontime.commons.QPropertyUtilsBean#setResolver(Resolver)
+ * @see PropertyUtilsBean#setResolver(Resolver)
  * @since 1.8.0
  */
 public interface Resolver {

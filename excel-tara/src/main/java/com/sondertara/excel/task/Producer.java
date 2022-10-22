@@ -7,8 +7,12 @@ package com.sondertara.excel.task;
 public interface Producer {
     /**
      * 生产任务
+     * @return if the producer is done
      */
     boolean produce();
 
+    /**
+     * init
+     */
     void init();
 }

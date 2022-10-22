@@ -6,7 +6,7 @@ import java.io.Serializable;
 
 /**
  * 类型转换器
- * 
+ *
  * @param <T>
  * @author huangxiaohu
  */
@@ -18,16 +18,15 @@ public abstract class AbstractTypeConverter<T> implements TypeConverter<T>, Seri
             return null;
         }
 
-        // @TODO
         T result = convertInternal(value);
         return ((result == null) ? defaultValue : result);
     }
 
     /**
-     * 内部转化
-     * 
-     * @param value
-     * @return
+     * convert internal
+     *
+     * @param value the source
+     * @return the target
      */
     protected abstract T convertInternal(Object value);
 

@@ -1,0 +1,7 @@
+"Benchmark","Mode","Threads","Samples","Score","Score Error (99.9%)","Unit"
+"benchmark.CopyDifferFieldTest.dozerTest","avgt",1,10,2.576655,0.060304,"ms/op"
+"benchmark.CopyDifferFieldTest.hutoolBeanUtilTest","avgt",1,10,38.969732,0.889226,"ms/op"
+"benchmark.CopyDifferFieldTest.hutoolConvertTest","avgt",1,10,45.431356,1.031201,"ms/op"
+"benchmark.CopyDifferFieldTest.localTest","avgt",1,10,0.047877,0.001080,"ms/op"
+"benchmark.CopyDifferFieldTest.nativeTest","avgt",1,10,0.029069,0.000793,"ms/op"
+"benchmark.CopyDifferFieldTest.springBeanUtilsTest","avgt",1,10,0.029596,0.000385,"ms/op"

@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
- * @author
+ * @author huangxiaohu
  */
 public class AnnotationExcelWriterSheetDefinition<T> extends AnnotationSheet {
 
@@ -41,11 +41,11 @@ public class AnnotationExcelWriterSheetDefinition<T> extends AnnotationSheet {
 
     private Map<Integer, ExcelCellStyleDefinition> columnCellStyles;
 
-    public AnnotationExcelWriterSheetDefinition(Class<T> clazz, List<?> rowDatas) {
+    public AnnotationExcelWriterSheetDefinition(Class<T> clazz, List<?> rows) {
         super(clazz);
-        if (CollectionUtils.isNotEmpty(rowDatas)) {
+        if (CollectionUtils.isNotEmpty(rows)) {
             AtomicInteger i = new AtomicInteger();
-            this.rows = rowDatas.stream().map(o -> {
+            this.rows = rows.stream().map(o -> {
                 i.getAndIncrement();
                 TaraRow row = new TaraRow(i.get(), i.get());
                 row.setRowData(o);
@@ -187,7 +187,7 @@ public class AnnotationExcelWriterSheetDefinition<T> extends AnnotationSheet {
     /**
      * 根据复杂表头，计算出数据起始行号
      *
-     * @return
+     * @return the data row num begin
      */
     private int calFirstDataRow() {
         ExcelComplexHeader complexHeader = this.mappingClass.getAnnotation(ExcelComplexHeader.class);

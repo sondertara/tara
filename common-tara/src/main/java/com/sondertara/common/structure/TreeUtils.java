@@ -120,7 +120,7 @@ public class TreeUtils {
      * @return the row list
      */
     public static <T extends TreeNode<?, T>> List<List<String>> treeValueToRow(List<T> dataList, String... keys) {
-        if (com.sondertara.common.util.CollectionUtils.isEmpty(dataList)) {
+        if (CollectionUtils.isEmpty(dataList)) {
             return Collections.emptyList();
         }
 

@@ -601,7 +601,7 @@ public class HttpUtils {
          */
         @Override
         public boolean retryRequest(HttpResponse response, int executionCount,
-                org.apache.http.protocol.HttpContext context) {
+                HttpContext context) {
             if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK && executionCount <= this.executionCount) {
                 System.out.println(String.format("响应码为:%s,需要重新请求", response.getStatusLine().getStatusCode()));
 

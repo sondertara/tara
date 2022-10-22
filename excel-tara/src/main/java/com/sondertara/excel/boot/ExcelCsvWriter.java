@@ -1,10 +1,10 @@
 package com.sondertara.excel.boot;
 
-import com.sondertara.excel.constants.Constants;
+import com.sondertara.excel.common.constants.Constants;
 import com.sondertara.excel.context.AnnotationCsvWriterContext;
 import com.sondertara.excel.function.ExportFunction;
-import com.sondertara.excel.parser.ExcelReader;
-import com.sondertara.excel.parser.builder.AbstractExcelWriter;
+import com.sondertara.excel.resolver.ExcelReader;
+import com.sondertara.excel.resolver.builder.AbstractExcelWriter;
 import com.sondertara.excel.utils.ExcelResponseUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +12,8 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * excel write
+ * Excel write by csv
+ * It write csv file with huge data
  *
  * @author huangxiaohu
  */
@@ -25,7 +26,7 @@ public class ExcelCsvWriter extends AbstractExcelWriter<String> {
         super(new AnnotationCsvWriterContext());
     }
 
-    public static <R> ExcelCsvWriter mapper(Class<?> excelClass, ExportFunction<R> query) {
+    public static <R> ExcelCsvWriter mapper(Class<R> excelClass, ExportFunction<R> query) {
         ExcelCsvWriter csvWriter = new ExcelCsvWriter();
         csvWriter.getWriterContext().addMapper(excelClass, query);
         return csvWriter;

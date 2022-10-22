@@ -18,11 +18,21 @@ public class ExcelCellDef implements Serializable {
     private Integer rowIndex;
     private Integer colIndex;
     private String colTitle;
+
+    private String abcColIndex;
     private String cellValue;
     private ExcelCellType cellType;
 
     public Integer getSheetIndex() {
         return sheetIndex;
+    }
+
+    public String getAbcColIndex() {
+        return abcColIndex;
+    }
+
+    public void setAbcColIndex(String abcColIndex) {
+        this.abcColIndex = abcColIndex;
     }
 
     public void setSheetIndex(final Integer sheetIndex) {

@@ -883,7 +883,7 @@ public class DateTime extends Date {
 
     /**
      * 设置一周的第一天<br>
-     * JDK的Calendar中默认一周的第一天是周日，Hutool中将此默认值设置为周一<br>
+     * JDK的Calendar中默认一周的第一天是周日，本类中将此默认值设置为周一<br>
      * 设置一周的第一天主要影响{@link #weekOfMonth()}和{@link #weekOfYear()} 两个方法
      *
      * @param firstDayOfWeek 一周的第一天

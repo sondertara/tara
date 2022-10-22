@@ -992,7 +992,6 @@ public class FileUtils {
      *
      * @param dir 待创建的目录
      * @return true表示创建成功，false表示创建失败
-     * @author z8g
      * @since 5.7.21
      */
     public static boolean mkdirsSafely(File dir) {
@@ -1014,7 +1013,7 @@ public class FileUtils {
      * @throws TaraException IO异常
      */
     public static File createTempFile(File dir) throws TaraException {
-        return createTempFile("hutool", null, dir, true);
+        return createTempFile("tara", null, dir, true);
     }
 
     /**
@@ -1029,7 +1028,7 @@ public class FileUtils {
      * @since 5.7.22
      */
     public static File createTempFile() throws TaraException {
-        return createTempFile("hutool", null, null, true);
+        return createTempFile("tara", null, null, true);
     }
 
     /**
@@ -1046,7 +1045,7 @@ public class FileUtils {
      * @since 5.7.22
      */
     public static File createTempFile(String suffix, boolean isReCreat) throws TaraException {
-        return createTempFile("hutool", suffix, null, isReCreat);
+        return createTempFile("tara", suffix, null, isReCreat);
     }
 
     /**
@@ -1077,7 +1076,7 @@ public class FileUtils {
      * @throws TaraException IO异常
      */
     public static File createTempFile(File dir, boolean isReCreat) throws TaraException {
-        return createTempFile("hutool", null, dir, isReCreat);
+        return createTempFile("tara", null, dir, isReCreat);
     }
 
     /**

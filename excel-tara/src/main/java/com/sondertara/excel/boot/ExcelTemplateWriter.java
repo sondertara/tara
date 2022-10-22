@@ -1,7 +1,7 @@
 package com.sondertara.excel.boot;
 
 import com.sondertara.excel.context.AnnotationExcelWriterContext;
-import com.sondertara.excel.parser.builder.AbstractExcelWriter;
+import com.sondertara.excel.resolver.builder.AbstractExcelWriter;
 import org.apache.poi.ss.usermodel.Workbook;
 
 /**

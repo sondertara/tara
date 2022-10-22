@@ -8,7 +8,7 @@ import com.sondertara.excel.exception.ExcelWriterException;
 import com.sondertara.excel.factory.ExcelMappingFactory;
 import com.sondertara.excel.function.ExportFunction;
 import com.sondertara.excel.meta.model.AnnotationSheet;
-import com.sondertara.excel.parser.ExcelCsvWriterResolver;
+import com.sondertara.excel.resolver.ExcelCsvWriterResolver;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;

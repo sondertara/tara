@@ -41,7 +41,7 @@ import java.lang.reflect.Modifier;
  * <p>where {@code <strong>Property</strong>} must be replaced
  * by the name of the property.
  *
- * @see java.beans.PropertyDescriptor
+ * @see PropertyDescriptor
  */
 public class MappedPropertyDescriptor extends PropertyDescriptor {
 

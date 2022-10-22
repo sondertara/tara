@@ -2,7 +2,7 @@ package com.sondertara.excel.executor;
 
 import com.google.common.collect.Lists;
 import com.sondertara.common.model.PageResult;
-import com.sondertara.excel.constants.Constants;
+import com.sondertara.excel.common.constants.Constants;
 import com.sondertara.excel.context.ExcelRawWriterContext;
 import com.sondertara.excel.exception.ExcelAnnotationWriterException;
 import com.sondertara.excel.exception.ExcelException;
@@ -20,7 +20,7 @@ import com.sondertara.excel.meta.model.ExcelCellStyleDefinition;
 import com.sondertara.excel.meta.model.TaraRow;
 import com.sondertara.excel.meta.model.TaraSheet;
 import com.sondertara.excel.meta.style.CellStyleBuilder;
-import com.sondertara.excel.parser.ExcelDefaultWriterResolver;
+import com.sondertara.excel.resolver.ExcelDefaultWriterResolver;
 import com.sondertara.excel.support.converter.AbstractExcelColumnConverter;
 import com.sondertara.excel.support.converter.ExcelDefaultConverter;
 import com.sondertara.excel.support.dataconstraint.ExcelDataValidationConstraint;
@@ -63,7 +63,6 @@ import java.util.stream.Collectors;
 public abstract class AbstractExcelWriterExecutor implements TaraExcelExecutor<Workbook>, ExcelWriterLifecycle {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractExcelWriterExecutor.class);
-
 
     protected int curRowIndex;
 
@@ -202,14 +201,14 @@ public abstract class AbstractExcelWriterExecutor implements TaraExcelExecutor<W
 
             AnnotationExcelWriterSheetDefinition<?> sheetDefinition = (AnnotationExcelWriterSheetDefinition<?>) entry.getValue();
 
-            ExportFunction<?> queryFunction = sheetDefinition.getQueryFunction();
-            int pageNo = 0;
+
+
             Map<Integer, ExcelCellStyleDefinition> columnCellStyles = sheetDefinition.getColumnCellStyles(sxssfWorkbook);
 
             switch (sheetDefinition.getExcelDataType()) {
                 case DIRECT:
-                    if (sheetDefinition.getRows().isEmpty()){
-                        createSheet(sheetDefinition.getName(),sheetIdentity);
+                    if (sheetDefinition.getRows().isEmpty()) {
+                        createSheet(sheetDefinition.getName(), sheetIdentity);
                         break;
                     }
                     List<Object> list = sheetDefinition.getRows().stream().map(TaraRow::getRowData).collect(Collectors.toList());
@@ -220,10 +219,12 @@ public abstract class AbstractExcelWriterExecutor implements TaraExcelExecutor<W
                     }
                     break;
                 case QUERY:
+                    ExportFunction<?> queryFunction = sheetDefinition.getQueryFunction();
+                    int pageNo = 0;
                     while (true) {
                         List<Object> existData = new LinkedList<>();
                         PageResult<?> result = queryFunction.query(pageNo);
-                        if (pageNo > result.endIndex() || result.isEmpty()) {
+                        if (result.isEmpty()) {
                             break;
                         }
                         List<?> data = result.getData();
@@ -243,6 +244,10 @@ public abstract class AbstractExcelWriterExecutor implements TaraExcelExecutor<W
                             SXSSFSheet newSheet = createSheet(sheetDefinition.getName(), sheetIdentity);
                             createBody(newSheet, sheetDefinition, columnCellStyles, sheetData);
                         }
+                        if (pageNo >= result.endIndex()) {
+                            break;
+                        }
+                        pageNo++;
                     }
                     break;
                 default:
@@ -320,10 +325,12 @@ public abstract class AbstractExcelWriterExecutor implements TaraExcelExecutor<W
         // 设置列自动大小
         if (sheet != null) {
             sheet.trackAllColumnsForAutoSizing();
-
             for (final Map.Entry<Integer, Field> columnFieldEntry : columnFields.entrySet()) {
                 final Field field = columnFieldEntry.getValue();
+
                 if (sheetDefinition.isAutoColWidth() || field.getAnnotation(ExcelExportField.class).autoWidth()) {
+                    resolver.sizeColumnWidth(sheet, columnFieldEntry.getKey());
+                } else if (Constants.DEFAULT_COL_WIDTH != field.getAnnotation(ExcelExportField.class).colWidth()) {
                     resolver.sizeColumnWidth(sheet, columnFieldEntry.getKey());
                 }
             }
@@ -399,7 +406,7 @@ public abstract class AbstractExcelWriterExecutor implements TaraExcelExecutor<W
      */
     private SXSSFSheet createSheet(String sheetName, String sheetIdentity) {
         sheetNameMap.put(sheetName, existSheetIndex.incrementAndGet());
-        SXSSFSheet sheet = sxssfWorkbook.createSheet( + existSheetIndex.get()+"_" + sheetName);
+        SXSSFSheet sheet = sxssfWorkbook.createSheet(+existSheetIndex.get() + "_" + sheetName);
         this.handleComplexHeader(sheet, sheetIdentity);
         this.addDataValidation(sheet, sheetIdentity);
         this.initHeadTitle(sheet, sheetIdentity);

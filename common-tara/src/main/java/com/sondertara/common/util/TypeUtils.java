@@ -319,7 +319,7 @@ public class TypeUtils {
      * 获取泛型变量和泛型实际类型的对应关系Map，例如：
      *
      * <pre>
-     *     T    cn.hutool.test.User
+     *     T    com.sondertara.test.User
      *     E    java.lang.Integer
      * </pre>
      *

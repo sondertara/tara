@@ -5,9 +5,9 @@ import com.sondertara.common.lang.Partition;
 import com.sondertara.common.model.PageResult;
 import com.sondertara.excel.base.TaraExcelConfig;
 import com.sondertara.excel.base.TaraExcelWriter;
-import com.sondertara.excel.constants.Constants;
+import com.sondertara.excel.common.constants.Constants;
 import com.sondertara.excel.function.ExportFunction;
-import com.sondertara.excel.parser.ExcelDefaultWriterResolver;
+import com.sondertara.excel.resolver.ExcelDefaultWriterResolver;
 import com.sondertara.excel.task.AbstractExcelGenerateTask;
 import com.sondertara.excel.utils.ExcelResponseUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -89,11 +89,25 @@ public class ExcelSimpleWriter implements TaraExcelWriter {
     }
 
 
+    /**
+     * set the titles of Excel
+     *
+     * @param titles the title list
+     * @return this
+     */
     public ExcelSimpleWriter header(List<String> titles) {
         this.titles = titles;
         return this;
     }
 
+    /**
+     * add data by pagination query
+     * If it takes time to query data or large amount of data,can use query function which is designed by producer-consumer pattern
+     *
+     * @param query the query function
+     * @return this
+     * @see ExportFunction
+     */
     public synchronized ExcelSimpleWriter addData(ExportFunction<Object[]> query) {
         AbstractExcelGenerateTask<Object[]> generateTask = new AbstractExcelGenerateTask<Object[]>(query) {
             @Override
@@ -125,11 +139,21 @@ public class ExcelSimpleWriter implements TaraExcelWriter {
         return this;
     }
 
+    /**
+     * add data list direct
+     *
+     * @param dataList the data list
+     * @return this
+     */
     public synchronized ExcelSimpleWriter addData(List<Object[]> dataList) {
         write(dataList);
         return this;
     }
 
+    /**
+     * (non-javadoc)
+     * @param mapList data list
+     */
     private void write(List<Object[]> mapList) {
         if (log.isDebugEnabled()) {
             log.debug("Write workbook start[{}]", Thread.currentThread().getName());
@@ -158,7 +182,10 @@ public class ExcelSimpleWriter implements TaraExcelWriter {
         }
     }
 
-
+    /**
+     * generate the Excel workbook
+     * @return poi workbook
+     */
     public Workbook generate() {
         peerDataMap.forEach((index, data) -> {
             write(data);

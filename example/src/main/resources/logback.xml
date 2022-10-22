@@ -8,12 +8,16 @@
     <property name="LOG_FILE_LOCATION" value="./logs"/>
     <property name="CONSOLE_LOG_PATTERN"
               value="%green(%date{yyyy-MM-dd HH:mm:ss}) %highlight(%-5level) %red([%thread]) %boldMagenta(%logger{50}:%L) %cyan(%msg%n)"/>
+    <property name="FILE_LOG_PATTERN"
+              value="%date{yyyy-MM-dd HH:mm:ss} %-5level [%thread] %logger{50}:%L %msg%n"/>
+
     <!-- 设置 logger context 名称,一旦设置不可改变，默认为default -->
     <contextName>myAppName</contextName>
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <!-- encoder class为空时, 默认也为 ch.qos.logback.classic.encoder.PatternLayoutEncoder -->
-        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+        <encoder>
             <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
         </encoder>
     </appender>
 
@@ -29,12 +33,13 @@
             <maxHistory>30</maxHistory>
         </rollingPolicy>
         <!--日志文件最大的大小-->
-        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
             <maxFileSize>10MB</maxFileSize>
         </triggeringPolicy>
         <encoder>
             <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符-->
-            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
         </encoder>
     </appender>
     <!-- 日志级别若没显示定义，则继承最近的父 logger（该logger需显示定义level,直到rootLogger）的日志级别-->
@@ -44,7 +49,7 @@
         <appender-ref ref="FILE"/>
     </logger>
     <!-- 至多只能配置一个root -->
-    <root level="debug">
+    <root level="off">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="FILE"/>
     </root>

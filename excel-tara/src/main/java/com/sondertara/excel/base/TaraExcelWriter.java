@@ -18,8 +18,8 @@ public interface TaraExcelWriter {
      * to HttpServletResponse
      *
      * @param httpServletResponse HttpServletResponse
-     * @param fileName            filename
+     * @param filename            filename
      */
-    void to(HttpServletResponse httpServletResponse, String fileName);
+    void to(HttpServletResponse httpServletResponse, String filename);
 
 }

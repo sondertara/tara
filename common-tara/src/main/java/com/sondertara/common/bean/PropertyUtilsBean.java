@@ -90,7 +90,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @since 1.7
  */
 
-class PropertyUtilsBean {
+public class PropertyUtilsBean {
 
     private static final PropertyUtilsBean INSTANCE = new PropertyUtilsBean();
 

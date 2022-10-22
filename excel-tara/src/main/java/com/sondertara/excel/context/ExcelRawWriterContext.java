@@ -40,6 +40,6 @@ public interface ExcelRawWriterContext<T> extends ExcelWriterContext<T> {
      * @param function   the query function
      */
 
-    void addMapper(Class<?> excelClass, ExportFunction<?> function);
+   void addMapper(Class<?> excelClass, ExportFunction<?> function);
 
 }

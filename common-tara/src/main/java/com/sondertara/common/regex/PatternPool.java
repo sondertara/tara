@@ -52,11 +52,10 @@ public class PatternPool {
      */
     public final static Pattern MONEY = Pattern.compile(RegexPool.MONEY);
     /**
-     * 邮件，符合RFC 5322规范，正则来自：http://emailregex.com/
+     * 邮件，符合RFC 5322规范，正则来自：<a href="http://emailregex.com/">...</a>
      * What is the maximum length of a valid email address?
-     * https://stackoverflow.com/questions/386294/what-is-the-maximum-length-of-a-valid-email-address/44317754
-     * 注意email 要宽松一点。比如 jetz.chong@hutool.cn、jetz-chong@
-     * hutool.cn、jetz_chong@hutool.cn、dazhi.duan@hutool.cn 宽松一点把，都算是正常的邮箱
+     * <a href="https://stackoverflow.com/questions/386294/what-is-the-maximum-length-of-a-valid-email-address/44317754">...</a>
+     * 注意email 要宽松一点。比如 jetz.chong@outlook.cn、jetz-chong@outlook.cn、jetz_chong@outlook.com、dazhi.duan@outlook.com 宽松一点把，都算是正常的邮箱
      */
     public final static Pattern EMAIL = Pattern.compile(RegexPool.EMAIL, Pattern.CASE_INSENSITIVE);
     /**

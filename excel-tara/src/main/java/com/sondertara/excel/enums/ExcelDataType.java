@@ -6,9 +6,13 @@ package com.sondertara.excel.enums;
 
 public enum ExcelDataType {
     /**
-     *
+     * from query
      */
-    QUERY, DIRECT;
+    QUERY,
+    /**
+     * direct
+     */
+    DIRECT;
 
     ExcelDataType() {
 

@@ -77,7 +77,7 @@ public class LocalDateTimeUtils extends CalendarUtils {
     /**
      * 常用的UTC时间格式
      */
-    private final static String[] FREQUENTLEY_USED_UTC_WITH_Z_DATE_FORMATS = new String[]{"yyyy-MM-dd'T'HH:mm:ss'Z'",
+    private final static String[] FREQUENTLY_USED_UTC_WITH_Z_DATE_FORMATS = new String[]{"yyyy-MM-dd'T'HH:mm:ss'Z'",
             "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"};
 
     /**
@@ -270,7 +270,7 @@ public class LocalDateTimeUtils extends CalendarUtils {
 
     /**
      * 获得指定日期年份和季节<br>
-     * 格式：[20131]表示2013年第一季度
+     * 格式：[20131]表示2013年的第一季度
      *
      * @param date 日期
      * @return Quarter ，类似于 20132
@@ -484,7 +484,7 @@ public class LocalDateTimeUtils extends CalendarUtils {
 
             final int patternLength = DatePattern.UTC_MS_PATTERN.length();
             // 格式类似：2018-09-13T05:34:31.999Z，-4表示减去4个单引号的长度
-            // -4 ~ -6范围表示匹配毫秒1~3位的情况
+            // -4 ~ -6的范围表示匹配毫秒1~3位的情况
             if (length <= patternLength - 4 && length >= patternLength - 6) {
                 return parse(utcString, DatePattern.UTC_MS_FORMAT);
             }
@@ -1383,8 +1383,6 @@ public class LocalDateTimeUtils extends CalendarUtils {
      * @param format 日期格式，常用格式见： {@link DatePattern}; 允许为空； date1 date2; eg:
      *               yyyy-MM-dd
      * @return 比较结果，如果date1 &lt; date2，返回数小于0，date1==date2返回0，date1 &gt; date2 大于0
-     * @author dazer
-     * @since 5.6.4
      */
     public static int compare(Date date1, Date date2, String format) {
         if (format != null) {
@@ -1661,9 +1659,9 @@ public class LocalDateTimeUtils extends CalendarUtils {
     /**
      * 随机生成日期（startDateInclusive至endDateExclusive）
      *
-     * @param startDateInclusive
-     * @param endDateExclusive
-     * @return
+     * @param startDateInclusive start
+     * @param endDateExclusive   end
+     * @return the date
      */
     public static final Date random(Date startDateInclusive, Date endDateExclusive) {
         int betweenSeconds = (int) ((endDateExclusive.getTime() - startDateInclusive.getTime()) / 1000);
@@ -1677,7 +1675,7 @@ public class LocalDateTimeUtils extends CalendarUtils {
     /**
      * 随机生成日期
      *
-     * @return
+     * @return date
      */
     public static Date random() {
         Calendar instance = Calendar.getInstance();
@@ -1686,47 +1684,6 @@ public class LocalDateTimeUtils extends CalendarUtils {
         return instance.getTime();
     }
 
-    /**
-     * 获取当月的第一天
-     *
-     * @param date
-     * @return
-     */
-    public static Date getFirstDayOfMonth(Date date) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        calendar.set(Calendar.DAY_OF_MONTH, 1);
-        eraseTime(calendar);
-        return calendar.getTime();
-    }
-
-    /**
-     * 获取上个月日期
-     *
-     * @param date
-     * @return
-     */
-    public static Date getLastMonth(Date date) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        calendar.set(Calendar.MONTH, -1);
-        eraseTime(calendar);
-        return calendar.getTime();
-    }
-
-    /**
-     * 获取下个月日期
-     *
-     * @param date
-     * @return
-     */
-    public static Date getNextMonth(Date date) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-        calendar.set(Calendar.MONTH, 1);
-        eraseTime(calendar);
-        return calendar.getTime();
-    }
 
     /**
      * 获取某天的昨天
@@ -1743,7 +1700,7 @@ public class LocalDateTimeUtils extends CalendarUtils {
     /**
      * 获取昨天
      *
-     * @return
+     * @return yesterday
      */
     public static Date getYesterday() {
         return getYesterday(Calendar.getInstance().getTime());
@@ -1753,7 +1710,7 @@ public class LocalDateTimeUtils extends CalendarUtils {
      * 获取某天的明天
      *
      * @param date
-     * @return
+     * @return tomorrow
      */
     public static Date getTomorrow(Date date) {
         LocalDateTime localDateTime = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
@@ -1766,32 +1723,7 @@ public class LocalDateTimeUtils extends CalendarUtils {
         return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
     }
 
-    /**
-     * 获取指定年份的第一天
-     *
-     * @param year
-     * @return
-     */
-    public static Date getFirstDayOfYear(int year) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.clear();
-        calendar.set(Calendar.YEAR, year);
-        return calendar.getTime();
-    }
 
-    /**
-     * 获取指定年份的最后一天
-     *
-     * @param year
-     * @return
-     */
-    public static Date getLastDayOfYear(int year) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.clear();
-        calendar.set(Calendar.YEAR, year);
-        calendar.roll(Calendar.DAY_OF_YEAR, -1);
-        return calendar.getTime();
-    }
 
     /**
      * 判断指定日期是否在某个时间区间内
@@ -1830,7 +1762,7 @@ public class LocalDateTimeUtils extends CalendarUtils {
             String utcString = dateTimeStr;
             int length = utcString.length();
             if (StringUtils.contains(utcString, 'Z')) {
-                dateFormats = FREQUENTLEY_USED_UTC_WITH_Z_DATE_FORMATS;
+                dateFormats = FREQUENTLY_USED_UTC_WITH_Z_DATE_FORMATS;
             } else if (StringUtils.contains(utcString, '+')) {
                 // 去除类似2019-06-01T19:45:43 +08:00加号前的空格
                 utcString = utcString.replace(" +", "+");
@@ -2810,7 +2742,7 @@ public class LocalDateTimeUtils extends CalendarUtils {
      * @param beginDate 起始日期（包含）
      * @param endDate   结束日期（包含）
      * @return 是否在范围内
-     * @since 5.8.5
+
      */
     public static boolean isIn(ChronoLocalDateTime<?> date, ChronoLocalDateTime<?> beginDate,
                                ChronoLocalDateTime<?> endDate) {

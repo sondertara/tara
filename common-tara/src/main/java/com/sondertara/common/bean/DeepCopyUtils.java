@@ -1,10 +1,10 @@
 package com.sondertara.common.bean;
 
 import com.sondertara.common.bean.exception.BeanCopyException;
+import com.sondertara.common.lang.reflect.ReflectUtils;
 
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
@@ -90,7 +90,7 @@ public class DeepCopyUtils {
                             boolean base = srcValue instanceof String || srcValue instanceof Number || srcValue instanceof Boolean;
                             if (!base) {
 
-                                Object dstValue = targetPd.getPropertyType().getConstructor().newInstance();
+                                Object dstValue = ReflectUtils.newInstance(targetPd.getPropertyType());
                                 copyProperties(srcValue, dstValue);
 
                                 Method writeMethod = targetPd.getWriteMethod();
@@ -140,15 +140,13 @@ public class DeepCopyUtils {
             Map<String, Object> destMap = new HashMap<>();
 
             for (Map.Entry<String, Object> entry : srcMap.entrySet()) {
-                Object destObj = destTrueField.getConstructor().newInstance();
+                Object destObj = ReflectUtils.newInstance(destTrueField);
                 copyProperties(entry.getValue(), destObj);
                 destMap.put(entry.getKey(), destObj);
             }
 
             destField.set(target, destMap);
-        } catch (IllegalAccessException | InstantiationException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException | NoSuchMethodException e) {
+        } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
     }
@@ -176,7 +174,7 @@ public class DeepCopyUtils {
             Iterator iterator = srcList.iterator();
             while (iterator.hasNext()) {
                 Object srcObj = iterator.next();
-                Object destObj = destTrueField.getConstructor().newInstance();
+                Object destObj = ReflectUtils.newInstance(destTrueField);
                 copyProperties(srcObj, destObj);
                 destCollec.add(destObj);
             }
@@ -216,14 +214,12 @@ public class DeepCopyUtils {
             List destList = new ArrayList();
             for (int j = 0; j < srcList.size(); j++) {
                 Object srcObj = srcList.get(j);
-                Object destObj = destTrueField.newInstance();
+                Object destObj = ReflectUtils.newInstance(destTrueField);
                 copyProperties(srcObj, destObj);
                 destList.add(destObj);
             }
             destField.set(target, destList);
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
             e.printStackTrace();
         }
 

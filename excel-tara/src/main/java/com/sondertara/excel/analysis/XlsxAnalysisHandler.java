@@ -1,6 +1,6 @@
 package com.sondertara.excel.analysis;
 
-import com.sondertara.excel.constants.ExcelConstants;
+import com.sondertara.excel.common.constants.ExcelConstants;
 import com.sondertara.excel.meta.celltype.ExcelBooleanCellType;
 import com.sondertara.excel.meta.celltype.ExcelCellType;
 import com.sondertara.excel.meta.celltype.ExcelDateCellType;
@@ -90,6 +90,7 @@ public class XlsxAnalysisHandler extends DefaultHandler {
             final String abcColIndex = attributes.getValue(ExcelConstants.CELL_ABC_INDEX_ATTR);
             this.curExcelCell.setColIndex(ExcelXmlCodecUtils.getColIndex(abcColIndex));
             this.curExcelCell.setRowIndex(this.curExcelRow.getRowIndex());
+            this.curExcelCell.setAbcColIndex(abcColIndex);
 
             // 设置单元格处理器
             for (final ExcelCellType excelCellType : this.excelCellTypes) {

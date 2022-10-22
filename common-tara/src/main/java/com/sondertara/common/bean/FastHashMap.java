@@ -344,7 +344,7 @@ public class FastHashMap extends HashMap {
             }
             Iterator i = map.entrySet().iterator();
             while (i.hasNext()) {
-                Map.Entry e = (Map.Entry) i.next();
+                Entry e = (Entry) i.next();
                 Object key = e.getKey();
                 Object value = e.getValue();
                 if (value == null) {
@@ -366,7 +366,7 @@ public class FastHashMap extends HashMap {
                 }
                 Iterator i = map.entrySet().iterator();
                 while (i.hasNext()) {
-                    Map.Entry e = (Map.Entry) i.next();
+                    Entry e = (Entry) i.next();
                     Object key = e.getKey();
                     Object value = e.getValue();
                     if (value == null) {
@@ -468,7 +468,7 @@ public class FastHashMap extends HashMap {
 
         protected abstract Collection get(Map map);
 
-        protected abstract Object iteratorNext(Map.Entry entry);
+        protected abstract Object iteratorNext(Entry entry);
 
 
         public void clear() {
@@ -626,7 +626,7 @@ public class FastHashMap extends HashMap {
         private class CollectionViewIterator implements Iterator {
 
             private Map expected;
-            private Map.Entry lastReturned = null;
+            private Entry lastReturned = null;
             private Iterator iterator;
 
             public CollectionViewIterator() {
@@ -645,7 +645,7 @@ public class FastHashMap extends HashMap {
                 if (expected != map) {
                     throw new ConcurrentModificationException();
                 }
-                lastReturned = (Map.Entry) iterator.next();
+                lastReturned = (Entry) iterator.next();
                 return iteratorNext(lastReturned);
             }
 
@@ -679,7 +679,7 @@ public class FastHashMap extends HashMap {
             return map.keySet();
         }
 
-        protected Object iteratorNext(Map.Entry entry) {
+        protected Object iteratorNext(Entry entry) {
             return entry.getKey();
         }
 
@@ -694,7 +694,7 @@ public class FastHashMap extends HashMap {
             return map.values();
         }
 
-        protected Object iteratorNext(Map.Entry entry) {
+        protected Object iteratorNext(Entry entry) {
             return entry.getValue();
         }
     }
@@ -708,7 +708,7 @@ public class FastHashMap extends HashMap {
             return map.entrySet();
         }
 
-        protected Object iteratorNext(Map.Entry entry) {
+        protected Object iteratorNext(Entry entry) {
             return entry;
         }
 

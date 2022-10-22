@@ -260,13 +260,13 @@ public class FileNameUtils {
      * @since 3.3.1
      */
     public static boolean containsInvalid(String fileName) {
-        return (false == StringUtils.isBlank(fileName)) && RegexUtils.contains(FILE_NAME_INVALID_PATTERN_WIN, fileName);
+        return (!StringUtils.isBlank(fileName)) && RegexUtils.contains(FILE_NAME_INVALID_PATTERN_WIN, fileName);
     }
 
     /**
      * 根据文件名检查文件类型，忽略大小写
      *
-     * @param fileName 文件名，例如hutool.png
+     * @param fileName 文件名，例如tara.png
      * @param extNames 被检查的扩展名数组，同一文件类型可能有多种扩展名，扩展名不带“.”
      * @return 是否是指定扩展名的类型
      * @since 5.5.2

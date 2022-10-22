@@ -2,6 +2,7 @@ package com.sondertara.excel.executor;
 
 import com.sondertara.excel.analysis.XlsxAnalysisHandler;
 import com.sondertara.excel.context.ExcelRawReaderContext;
+import com.sondertara.excel.exception.ExcelAnnotaionReaderException;
 import com.sondertara.excel.exception.ExcelConvertException;
 import com.sondertara.excel.exception.ExcelReaderException;
 import com.sondertara.excel.exception.ExcelValidationException;
@@ -141,7 +142,7 @@ public abstract class AbstractExcelReaderExecutor<T> implements ExcelReaderLifec
             // 非空校验
             final ExcelImportField importColumn = field.getAnnotation(ExcelImportField.class);
             if (!importColumn.allowBlank()) {
-                throw new ExcelReaderException("该字段值为空!");
+                throw new ExcelAnnotaionReaderException(this.curSheetIndex,this.curRowIndex,this.curColIndex,cell.getAbcColIndex(),"该字段为空");
             }
         }
 

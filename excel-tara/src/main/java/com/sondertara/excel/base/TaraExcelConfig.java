@@ -1,6 +1,6 @@
 package com.sondertara.excel.base;
 
-import com.sondertara.excel.constants.Constants;
+import com.sondertara.excel.common.constants.Constants;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;

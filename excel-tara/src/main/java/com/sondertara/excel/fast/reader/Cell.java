@@ -108,10 +108,12 @@ public class Cell {
         long millisecondsInDay = (long) (((value - wholeDays) * DAY_MILLISECONDS) + 0.5D);
 
         int startYear = 1900;
-        int dayAdjust = -1; // Excel thinks 2/29/1900 is a valid date, which it isn't
+        // Excel thinks 2/29/1900 is a valid date, which it isn't
+        int dayAdjust = -1;
         if (workbook.isDate1904()) {
             startYear = 1904;
-            dayAdjust = 1; // 1904 date windowing uses 1/2/1904 as the first day
+            // 1904 date windowing uses 1/2/1904 as the first day
+            dayAdjust = 1;
         } else if (wholeDays < 61) {
             // Date is prior to 3/1/1900, so adjust because Excel thinks 2/29/1900 exists
             // If Excel date == 2/29/1900, will become 3/1/1900 in Java representation
@@ -168,13 +170,13 @@ public class Cell {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append('[').append(type).append(' ');
+        sb.append('<').append(type).append(' ');
         if (value == null) {
             sb.append("null");
         } else {
             sb.append('"').append(value).append('"');
         }
-        return sb.append(']').toString();
+        return sb.append('>').toString();
     }
 
 }
