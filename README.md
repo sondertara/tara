@@ -60,7 +60,7 @@ Tara是一个纯java项目,包括常用util工具类和excel处理两个模块�
 
 **Tara BeanUtils**: 和原生操作同一个量级
 
-所有基准测试源码存放于[JMH Test](example/src/main/java/benchmark),测试结果存放于[JMH Result](example/result),
+所有基准测试源码存放于 [JMH Test](example/src/main/java/benchmark)，测试结果存放于 [JMH Result](example/result)
 
 # ***excel-tara***
 
@@ -93,6 +93,8 @@ Tara是一个纯java项目,包括常用util工具类和excel处理两个模块�
 - [X] 导入支持注解导入和直接读取Excel中的数据
 - [X] 注解导入支持值转换和数据校验
 - [X] 直接导入支持流式读取
+
+所有使用样例存放于[Excel-Test example](example/src/main/java/com/sondertara/excel)
 
 ### ***Excel Writer***
 
@@ -279,7 +281,7 @@ public @interface ExcelExportField {
 
 1) 使用样例
 
-为对象添加`ExportField`注解，导出列添加`ExcelExportField`注解,例如导出假期和用户数据到同一个Excel
+为对象添加`ExportField`注解，导出列添加`ExcelExportField`注解，例如导出假期和用户数据到同一个Excel
 
 - 假期数据对应的JavaBean:
 ```java
@@ -369,7 +371,7 @@ public class ExcelBeanWriteTest {
 }
 
 ```
-详情请参考[ExcelBeanWriteTest](example/src/main/java/com/sondertara/excel/ExcelBeanWriteTest.java)
+详情请参考 [ExcelBeanWriteTest](example/src/main/java/com/sondertara/excel/ExcelBeanWriteTest.java)
 
 #### **2.快捷导出**
 
@@ -380,7 +382,7 @@ ExcelSimpleWriter.create().sheetName("Sheet").header(titles).addData(List<Object
 ExcelSimpleWriter.create().sheetName("Sheet").header(titles).addData(ExportFunction function).to();
 ```
 
-详情请参考[ExcelSimpleWriteTest](example/src/main/java/com/sondertara/excel/ExcelSimpleWriteTest.java)
+详情请参考 [ExcelSimpleWriteTest](example/src/main/java/com/sondertara/excel/ExcelSimpleWriteTest.java)
 
 
 
