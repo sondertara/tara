@@ -617,6 +617,6 @@ of IntelliJ IDEA for developing **Friendly**.
 </a>
 
 ### *Users*
-- [dhatim](https://github.com/dhatim): Excel简单读取基于此项目开发 <a href="https://github.com/dhatim/fastexcel">fastexcel</a>.
+- [dhatim](https://github.com/dhatim?from=sondertara): Excel简单读取基于此项目开发 <a href="https://github.com/dhatim/fastexcel?from=sondertara">fastexcel</a>.
 
 

@@ -627,5 +627,6 @@ of IntelliJ IDEA for developing **Friendly**.
 </a>
 
 ### *Users*
-- [dhatim](https://github.com/dhatim): Simple-Direct Reader is based on his awesome project <a href="https://github.com/dhatim/fastexcel">fastexcel</a>.
+
+- [dhatim](https://github.com/dhatim?from=sondertara): Excel简单读取基于此项目开发 <a href="https://github.com/dhatim/fastexcel?from=sondertara">fastexcel</a>.
 
