@@ -1,5 +1,8 @@
 package com.sondertara.excel.antlr;
 
+import com.sondertara.common.bean.PropertyUtils;
+import com.sondertara.common.lang.reflect.ReflectUtils;
+import com.sondertara.common.util.ClassUtils;
 import com.sondertara.excel.antlr.parser.DataVariableParserVisitor;
 import com.sondertara.excel.antlr.parser.VariableParserLexer;
 import com.sondertara.excel.antlr.parser.VariableParserParser;
@@ -435,7 +438,7 @@ public class ExcelHelper {
         }
 
         try {
-            PropertyDescriptor pd = new PropertyDescriptor(declaredField.getName(), obj.getClass());
+            PropertyDescriptor pd = PropertyUtils.getPropertyDescriptor(obj, declaredField.getName());
             Method method = pd.getReadMethod();
             return method.invoke(obj);
         } catch (Exception e) {
