@@ -11,6 +11,9 @@ import com.sondertara.excel.meta.annotation.datavalidation.ExcelStringList;
 
 import java.util.Date;
 
+/**
+ * {@link ExcelColBindType#COL_INDEX}
+ */
 @ExcelImport(sheetIndex = 1, firstDataRow = 2,bindType = ExcelColBindType.TITLE)
 @ExcelExport(sheetName = "节假日")
 public class HolidayCfg {
