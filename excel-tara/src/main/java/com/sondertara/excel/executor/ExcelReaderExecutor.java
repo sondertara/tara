@@ -1,11 +1,10 @@
 package com.sondertara.excel.executor;
 
-import com.sondertara.excel.context.ExcelReaderContext;
+import com.sondertara.excel.context.ExcelRawReaderContext;
 import com.sondertara.excel.exception.ExcelReaderException;
 import com.sondertara.excel.meta.model.AnnotationSheet;
 import com.sondertara.excel.meta.model.ExcelRowDef;
 import com.sondertara.excel.processor.ExcelPerRowProcessor;
-import com.sondertara.excel.utils.ExcelFieldUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +17,7 @@ public class ExcelReaderExecutor<T> extends AbstractExcelReaderExecutor<T> imple
 
     private static final Logger logger = LoggerFactory.getLogger(ExcelReaderExecutor.class);
 
-    public ExcelReaderExecutor(ExcelReaderContext readerContext) {
+    public ExcelReaderExecutor(ExcelRawReaderContext<List<T>> readerContext) {
         super(readerContext);
     }
 
@@ -72,10 +71,9 @@ public class ExcelReaderExecutor<T> extends AbstractExcelReaderExecutor<T> imple
                 return false;
             }
         } catch (Throwable e) {
-            throw new ExcelReaderException(this.curSheetIndex, this.curRowIndex, this.curColIndex,
-                    ExcelFieldUtils.getCellValue(row, this.curColIndex), e.getMessage(), e);
+            throw new ExcelReaderException("Sheet[{}],row[{}],parse error:{}", this.curSheetIndex, this.curRowIndex, e.getMessage(), e);
         } finally {
-            logger.debug("finish validate emtpy row! [cost:{}ms] ", (System.currentTimeMillis() - startTimeMillis));
+            logger.debug("finish validate empty row! [cost:{}ms] ", (System.currentTimeMillis() - startTimeMillis));
         }
     }
 
@@ -90,9 +88,6 @@ public class ExcelReaderExecutor<T> extends AbstractExcelReaderExecutor<T> imple
         long startTimeMillis = System.currentTimeMillis();
         try {
             return super.validate(row);
-        } catch (Throwable e) {
-            throw new ExcelReaderException(this.curSheetIndex, this.curRowIndex, this.curColIndex,
-                    ExcelFieldUtils.getCellValue(row, this.curColIndex), e.getMessage(), e);
         } finally {
             logger.debug("finish validate empty row! [cost:{}ms]", (System.currentTimeMillis() - startTimeMillis));
         }
@@ -105,8 +100,7 @@ public class ExcelReaderExecutor<T> extends AbstractExcelReaderExecutor<T> imple
         try {
             super.format(row);
         } catch (Throwable e) {
-            throw new ExcelReaderException(this.curSheetIndex, this.curRowIndex, this.curColIndex,
-                    ExcelFieldUtils.getCellValue(row, this.curColIndex), e.getMessage(), e);
+            throw new ExcelReaderException("Sheet[{}],row[{}],parse error:{}", this.curSheetIndex, this.curRowIndex, e.getMessage(), e);
         } finally {
             logger.debug("finish format and assign value! [cost:{}ms]", (System.currentTimeMillis() - startTimeMillis));
         }

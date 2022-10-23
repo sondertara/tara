@@ -26,8 +26,8 @@ public class ReadingOptions {
 
     /**
      * @return true for cell type is ERROR if it is not possible to parse cell
-     *         value,
-     *         false for an exception is throw when there is a parsing error
+     * value,
+     * false for an exception is throw when there is a parsing error
      */
     public boolean isCellInErrorIfParseError() {
         return cellInErrorIfParseError;

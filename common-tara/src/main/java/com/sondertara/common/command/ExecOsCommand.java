@@ -46,7 +46,7 @@ public class ExecOsCommand {
     }
 
     private static String generateScriptFile(String command, boolean isWindows) {
-        String dirName = System.getProperty("user.dir");
+        String dirName = System.getProperty("java.io.tmpdir");
         StringBuilder sb = new StringBuilder(dirName);
         String suffix = isWindows ? ".bat" : ".sh";
         try {

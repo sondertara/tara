@@ -1,5 +1,7 @@
 package com.sondertara.excel.boot;
 
+import com.sondertara.excel.context.AnnotationExcelWriterContext;
+import com.sondertara.excel.resolver.builder.AbstractExcelWriter;
 import org.apache.poi.ss.usermodel.Workbook;
 
 /**
@@ -7,11 +9,12 @@ import org.apache.poi.ss.usermodel.Workbook;
  */
 public class ExcelTemplateWriter extends AbstractExcelWriter<Workbook> {
 
-    public ExcelTemplateWriter(Class<?> excelClass) {
-        super(excelClass);
+    public ExcelTemplateWriter(Class<?> ...excelClass) {
+        super(new AnnotationExcelWriterContext());
+       this.getWriterContext().addMapper(excelClass);
     }
 
-    public static ExcelTemplateWriter mapper(Class<?> excelClass) {
+    public static ExcelTemplateWriter mapper(Class<?> ...excelClass) {
         return new ExcelTemplateWriter(excelClass);
     }
 
@@ -22,7 +25,6 @@ public class ExcelTemplateWriter extends AbstractExcelWriter<Workbook> {
         // ExcelTemplateWriterResolver resolver = new
         // ExcelTemplateWriterResolver(excelMapping);
         // return resolver.generateTemplate();
-        this.getWriterContext().addModel(this.excelClass);
         return this.getWriterContext().getExecutor().execute();
 
     }

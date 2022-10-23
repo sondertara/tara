@@ -3,6 +3,7 @@ package com.sondertara.common.crypto;
 import com.sondertara.common.exception.TaraException;
 import org.apache.commons.codec.binary.Base64;
 
+import javax.crypto.Cipher;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.security.KeyFactory;
@@ -16,8 +17,6 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.crypto.Cipher;
 
 /**
  * RSA: 既能用于数据加密也能用于数字签名的算法

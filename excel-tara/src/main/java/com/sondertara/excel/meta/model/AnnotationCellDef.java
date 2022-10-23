@@ -1,7 +1,8 @@
 package com.sondertara.excel.meta.model;
 
-import com.sondertara.excel.exception.ExcelException;
-import com.sondertara.excel.meta.annotation.ExcelImportColumn;
+import com.sondertara.excel.exception.ExcelReaderException;
+import com.sondertara.excel.exception.ExcelValidationException;
+import com.sondertara.excel.meta.annotation.ExcelImportField;
 import com.sondertara.excel.meta.annotation.validation.ConstraintValidator;
 import com.sondertara.excel.support.validator.AbstractExcelColumnValidator;
 import com.sondertara.excel.support.validator.ExcelDefaultValidator;
@@ -36,9 +37,9 @@ public class AnnotationCellDef extends ExcelCellDef {
         // 空值
         if (StringUtils.isBlank(this.getCellValue())) {
             // 非空校验
-            final ExcelImportColumn importColumn = field.getAnnotation(ExcelImportColumn.class);
+            final ExcelImportField importColumn = field.getAnnotation(ExcelImportField.class);
             if (!importColumn.allowBlank()) {
-                throw new ExcelException("该字段值为空!");
+                throw new ExcelReaderException("该字段值为空!");
             }
         }
 
@@ -52,7 +53,7 @@ public class AnnotationCellDef extends ExcelCellDef {
 
         for (final AbstractExcelColumnValidator columnValidator : columnValidators) {
             if (!columnValidator.validate(this.getCellValue())) {
-                throw new ExcelException("该字段数据校验不通过!");
+                throw new ExcelReaderException("该字段数据校验不通过!");
             }
         }
         return true;
@@ -72,7 +73,7 @@ public class AnnotationCellDef extends ExcelCellDef {
                     columnValidator.initialize(annotation);
                     columnValidators.add(columnValidator);
                 } catch (final InstantiationException | IllegalAccessException e) {
-                    throw new ExcelException("实例化校验器[" + constraintValidator.validator() + "]时失败!", e);
+                    throw new ExcelValidationException("实例化校验器[" + constraintValidator.validator() + "]时失败!", e);
                 }
             }
         }

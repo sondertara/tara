@@ -6,7 +6,7 @@ import com.sondertara.common.lang.Assert;
 import com.sondertara.common.lang.BasicType;
 import com.sondertara.common.lang.Singleton;
 import com.sondertara.common.lang.loader.ClassScanner;
-import com.sondertara.common.lang.refelect.ReflectUtils;
+import com.sondertara.common.lang.reflect.ReflectUtils;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -92,8 +92,8 @@ public class ClassUtils {
      * 例如：ClassUtil这个类<br>
      *
      * <pre>
-     * isSimple为false: "com.xiaoleilu.hutool.util.ClassUtil"
-     * isSimple为true: "ClassUtil"
+     * isSimple为false: "com.sondertara.common.util.ClassUtils"
+     * isSimple为true: "ClassUtils"
      * </pre>
      *
      * @param clazz    类
@@ -110,7 +110,7 @@ public class ClassUtils {
 
     /**
      * 获取完整类名的短格式如：<br>
-     * cn.hutool.core.util.StrUtil -》c.h.c.u.StrUtil
+     * [com.sondertara.common.util.ClassUtils]  to [c.s.c.u.ClassUtils]
      *
      * @param className 类名
      * @return 短格式类名
@@ -183,8 +183,7 @@ public class ClassUtils {
      * @return 类集合
      * @see ClassScanner#scanPackageByAnnotation(String, Class)
      */
-    public static Set<Class<?>> scanPackageByAnnotation(String packageName,
-            final Class<? extends Annotation> annotationClass) {
+    public static Set<Class<?>> scanPackageByAnnotation(String packageName, final Class<? extends Annotation> annotationClass) {
         return ClassScanner.scanPackageByAnnotation(packageName, annotationClass);
     }
 
@@ -303,8 +302,7 @@ public class ClassUtils {
      * @return 方法
      * @throws SecurityException 无权访问抛出异常
      */
-    public static Method getPublicMethod(Class<?> clazz, String methodName, Class<?>... paramTypes)
-            throws SecurityException {
+    public static Method getPublicMethod(Class<?> clazz, String methodName, Class<?>... paramTypes) throws SecurityException {
         return ReflectUtils.getPublicMethod(clazz, methodName, paramTypes);
     }
 
@@ -338,8 +336,7 @@ public class ClassUtils {
      * @return 方法
      * @throws SecurityException 无访问权限抛出异常
      */
-    public static Method getDeclaredMethodOfObj(Object obj, String methodName, Object... args)
-            throws SecurityException {
+    public static Method getDeclaredMethodOfObj(Object obj, String methodName, Object... args) throws SecurityException {
         return getDeclaredMethod(obj.getClass(), methodName, getClasses(args));
     }
 
@@ -352,8 +349,7 @@ public class ClassUtils {
      * @return 方法
      * @throws SecurityException 无访问权限抛出异常
      */
-    public static Method getDeclaredMethod(Class<?> clazz, String methodName, Class<?>... parameterTypes)
-            throws SecurityException {
+    public static Method getDeclaredMethod(Class<?> clazz, String methodName, Class<?>... parameterTypes) throws SecurityException {
         return ReflectUtils.getMethod(clazz, methodName, parameterTypes);
     }
 
@@ -630,8 +626,8 @@ public class ClassUtils {
      *
      * @param <T>                     对象类型
      * @param classNameWithMethodName 类名和方法名表达式，类名与方法名用{@code .}或{@code #}连接
-     *                                例如：com.xiaoleilu.hutool.StrUtil.isEmpty 或
-     *                                com.xiaoleilu.hutool.StrUtil#isEmpty
+     *                                例如：com.sondertara.common.util.StringUtils.isEmpty 或
+     *                               com.sondertara.common.util.StringUtils#isEmpty
      * @param args                    参数，必须严格对应指定方法的参数类型和数量
      * @return 返回结果
      */
@@ -645,7 +641,7 @@ public class ClassUtils {
      * 执行非static方法时，必须满足对象有默认构造方法<br>
      *
      * @param <T>                     对象类型
-     * @param classNameWithMethodName 类名和方法名表达式，例如：com.xiaoleilu.hutool.StrUtil#isEmpty或com.xiaoleilu.hutool.StrUtil.isEmpty
+     * @param classNameWithMethodName 类名和方法名表达式，例如：com.sondertara.common.util.StringUtils#isEmpty或com.sondertara.common.util.StringUtils.isEmpty
      * @param isSingleton             是否为单例对象，如果此参数为false，每次执行方法时创建一个新对象
      * @param args                    参数，必须严格对应指定方法的参数类型和数量
      * @return 返回结果
@@ -707,8 +703,7 @@ public class ClassUtils {
             if (isStatic(method)) {
                 return ReflectUtils.invoke(null, method, args);
             } else {
-                return ReflectUtils.invoke(isSingleton ? Singleton.from(() -> ReflectUtils.newInstanceIfPossible(clazz))
-                        : clazz.newInstance(), method, args);
+                return ReflectUtils.invoke(isSingleton ? Singleton.from(() -> ReflectUtils.newInstanceIfPossible(clazz)) : ReflectUtils.newInstanceIfPossible(clazz), method, args);
             }
         } catch (Exception e) {
             throw new TaraException(e);
@@ -762,7 +757,7 @@ public class ClassUtils {
     /**
      * 是否为简单值类型<br>
      * 包括：
-     * 
+     *
      * <pre>
      *     原始类型
      *     String、other CharSequence
@@ -886,7 +881,7 @@ public class ClassUtils {
      * @return 方法
      */
     public static Method setAccessible(Method method) {
-        if (null != method && false == method.isAccessible()) {
+        if (null != method && !method.isAccessible()) {
             method.setAccessible(true);
         }
         return method;
@@ -966,7 +961,7 @@ public class ClassUtils {
     /**
      * 获得给定类所在包的名称<br>
      * 例如：<br>
-     * com.xiaoleilu.hutool.util.ClassUtil =》 com.xiaoleilu.hutool.util
+     * [com.sondertara.common.util.StringUtils]  output [com.sondertara.common.util]
      *
      * @param clazz 类
      * @return 包名
@@ -986,7 +981,7 @@ public class ClassUtils {
     /**
      * 获得给定类所在包的路径<br>
      * 例如：<br>
-     * com.xiaoleilu.hutool.util.ClassUtil =》 com/xiaoleilu/hutool/util
+     * [com.sondertara.common.util.StringUtils] output is [com.sondertara.common.util]
      *
      * @param clazz 类
      * @return 包名

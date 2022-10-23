@@ -1,6 +1,6 @@
 package com.sondertara.excel.meta.celltype;
 
-import com.sondertara.excel.constants.ExcelConstants;
+import com.sondertara.excel.common.constants.ExcelConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.xml.sax.Attributes;

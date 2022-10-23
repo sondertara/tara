@@ -1,9 +1,11 @@
 package com.sondertara.excel.utils;
 
 import com.sondertara.common.convert.ConvertUtils;
+import com.sondertara.excel.common.constants.Constants;
 import com.sondertara.excel.meta.annotation.ExcelExportField;
 import com.sondertara.excel.meta.model.ExcelCellDef;
 import com.sondertara.excel.meta.model.ExcelRowDef;
+import com.sondertara.excel.resolver.ExcelDefaultWriterResolver;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -18,15 +20,11 @@ import java.util.Date;
  */
 public class ExcelFieldUtils {
 
-    private static final String[] TRY_DATE_FORMAT_LIST = new String[] { "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd",
-            "yyyy/MM/dd", "yyyy/MM/dd HH:mm:ss" };
+    private static final String[] TRY_DATE_FORMAT_LIST = new String[]{"yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd",
+            "yyyy/MM/dd", "yyyy/MM/dd HH:mm:ss"};
 
-    public static void setCellValue(Cell cell, Object o, Field field, ExcelExportField exportColumn)
+    public static void setCellValue(Cell cell, Object value, Field field, ExcelExportField exportColumn, ExcelDefaultWriterResolver resolver)
             throws IllegalAccessException {
-        Object value = field.get(o);
-        if (null == value) {
-            value = exportColumn.defaultCellValue();
-        }
         if (null == value) {
             return;
         }
@@ -58,6 +56,12 @@ public class ExcelFieldUtils {
             cell.setCellValue((Double) value);
         } else {
             throw new UnsupportedOperationException("不支持此数据类型 => [" + field.getType() + "]!");
+        }
+        if (Constants.DEFAULT_COL_WIDTH != exportColumn.colWidth()) {
+            resolver.addColumnWidth(cell.getColumnIndex(), exportColumn.colWidth());
+        }
+        if (exportColumn.autoWidth()) {
+            resolver.calculateColumnWidth(cell, cell.getColumnIndex());
         }
     }
 

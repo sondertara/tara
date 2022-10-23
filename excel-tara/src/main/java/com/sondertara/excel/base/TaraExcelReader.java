@@ -10,6 +10,6 @@ public interface TaraExcelReader<T> {
      * @return read target
      */
 
-     T read();
+    T read();
 
 }

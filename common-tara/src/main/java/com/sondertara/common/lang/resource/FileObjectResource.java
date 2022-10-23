@@ -2,12 +2,11 @@ package com.sondertara.common.lang.resource;
 
 import com.sondertara.common.exception.TaraException;
 
+import javax.tools.FileObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-
-import javax.tools.FileObject;
 
 /**
  * {@link FileObject} 资源包装

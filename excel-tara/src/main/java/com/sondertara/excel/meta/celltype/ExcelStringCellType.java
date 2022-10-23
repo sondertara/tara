@@ -1,6 +1,6 @@
 package com.sondertara.excel.meta.celltype;
 
-import com.sondertara.excel.constants.ExcelConstants;
+import com.sondertara.excel.common.constants.ExcelConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xssf.model.SharedStrings;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
@@ -14,7 +14,7 @@ public class ExcelStringCellType implements ExcelCellType {
 
     private static final long serialVersionUID = 1368517956940674679L;
 
-    private SharedStrings sst;
+    private final SharedStrings sst;
 
     public ExcelStringCellType(final SharedStrings sst) {
         this.sst = sst;

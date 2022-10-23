@@ -1,8 +1,8 @@
 package com.sondertara.common.util;
 
-import com.sondertara.common.lang.refelect.ActualTypeMapperPool;
-import com.sondertara.common.lang.refelect.ParameterizedTypeImpl;
-import com.sondertara.common.lang.refelect.ReflectUtils;
+import com.sondertara.common.lang.reflect.ActualTypeMapperPool;
+import com.sondertara.common.lang.reflect.ParameterizedTypeImpl;
+import com.sondertara.common.lang.reflect.ReflectUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -319,7 +319,7 @@ public class TypeUtils {
      * 获取泛型变量和泛型实际类型的对应关系Map，例如：
      *
      * <pre>
-     *     T    cn.hutool.test.User
+     *     T    com.sondertara.test.User
      *     E    java.lang.Integer
      * </pre>
      *

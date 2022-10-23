@@ -2,10 +2,9 @@ package com.sondertara.excel.utils;
 
 import org.apache.commons.lang3.StringUtils;
 
-import java.awt.Color;
+import java.awt.*;
 
 /**
- *
  * 颜色工具类
  *
  * @author
@@ -16,11 +15,11 @@ public final class ColorUtils {
 
     /**
      * 将十六进制颜色转RGB格式
-     * 
+     *
      * @param hexColor
      * @return
      */
-    public final static Color hexToRgb(String hexColor) {
+    public static Color hexToRgb(String hexColor) {
 
         if (StringUtils.isBlank(hexColor)) {
             throw new IllegalArgumentException("hex color is null!");

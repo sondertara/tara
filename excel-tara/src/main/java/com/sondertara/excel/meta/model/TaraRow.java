@@ -2,6 +2,7 @@ package com.sondertara.excel.meta.model;
 
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.stream.Stream;
  * @author huangxiaohu
  */
 @Data
-public class TaraRow implements Iterable<TaraCell> {
+public class TaraRow implements Iterable<TaraCell>, Serializable {
 
     private long rowIndex;
 

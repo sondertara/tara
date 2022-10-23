@@ -1,263 +1,622 @@
+# **Tara**
+
 [![Build Status](https://travis-ci.org/sondertara/tara.svg?branch=master)](https://travis-ci.org/sondertara/tara)
 ![Java](https://img.shields.io/badge/Java-%5E1.8-brightgreen)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/sondertara/tara)
 ![Maven Central](https://img.shields.io/maven-central/v/com.sondertara/tara)
 
-## Tara
+中文 | [English](README_en.md)
 
-Tara是一个纯java项目,包括常用util工具类和excel处理两个模块
+Tara是一个纯java工具包，包括常用util工具类和excel处理两个模块。
 
-## System Requirements
+> **System Requirements:** Language: Java 8+
 
-- Language: Java 8+
+## 💎**common-tara**
 
-## Quick Start
+通用工具包,包括常用的工具类,比如Bean 拷贝、时间处理、集合处理、IO操作、反射处理等常用工具
 
-### [common-tara]
+### 🍵**Import to project**
 
-通用工具包
-
-- 常用数据处理Utils
-- 树形结构生成器
+- Maven Project
 
 ```xml
 
 <dependency>
     <groupId>com.sondertara</groupId>
     <artifactId>common-tara</artifactId>
-    <version>${version}</version>
+    <version>1.0.2</version>
 </dependency>
 ```
 
-### [excel-tara]
+- Gradle project
 
-高性能excel处理工具
+```groovy
+implementation 'com.sondertara:common-tara:1.0.2
+```
 
-- 支持导入大批量数据处理
-- 异步多线程导出数据
-- 生成导入模板
+### :eight_spoked_asterisk:**Features Induction**
 
-#### 引入maven依赖,version为上方maven仓库中版本
+- [X] 轻量且高性能Bean Copier
+- [x] 常用集合处理工具，反射和时间处理工具等
+- [x] ID生成器
+- [X] 加密工具包
+- [X] 正则表达式工具
+
+#### :triangular_flag_on_post:***BeanUtils***
+
+`BeanUtils` 是一个轻量级且高性能的JavaBean复制框架，支持拷贝不同类型和嵌套属性的自动拷贝
+
+##### 1.属性类型一致对象拷贝
+
+属性类型对象间拷贝,性能和`Spring BeanUtils`相当(稍微快一点点~),循环多次拷贝，同其他框架对比的基准测试如下:
+
+![""](example/result/same-benchmark.png)
+
+##### 2.属性类型不同嵌套对象拷贝
+
+属性类型不一致时,有些框架不支持该特性，但是`Tara BeanUtils`完全支持，并且有较好的性能表现。 基准测试如下:
+
+![""](example/result/differ-benchmark.png)
+
+**Apache BeanUtils**: 运行异常
+
+**Spring BeanUtils**: 属性类型不同时值会丢失,当访问嵌套属性时,抛出`ClassCaseException`
+
+**Hutool**: 性能较弱
+
+**Dozer**: 性能稍好
+
+**Tara BeanUtils**: 和原生操作同一个量级
+
+所有基准测试源码存放于 [JMH Test](example/src/main/java/benchmark)，测试结果存放于 [JMH Result](example/result)
+
+## 💎**excel-tara**
+
+灵活且高性能Excel处理框架,支多种方式导入和导出Excel
+
+### 🍵Import to project
+
+- Maven Project
 
 ```xml
 
 <dependency>
     <groupId>com.sondertara</groupId>
     <artifactId>excel-tara</artifactId>
-    <version>${version}</version>
+    <version>1.0.2</version>
 </dependency>
 ```
 
-#### 1.导出示例
+- Gradle project
 
-##### 1)添加导出注解 `@ExportField`
+```groovy
 
-```java
-
-@Data
-public class ExportVO {
-
-    @ExcelExportField(columnName = "姓名")
-    private String name;
-    @ExcelExportField(columnName = "年龄")
-    private Integer age;
-    @ExcelExportField(columnName = "住址")
-    private String address;
-}
 ```
 
-##### 2)同步导出
+### :eight_spoked_asterisk:**Features Induction**
 
-🌈🌈当数据量过大时，会长时间阻塞,推荐使用异步导出方案
+- [X] 导出支持注解导出、简易导出和读取模板导出
+- [x] 导出支持自动分Sheet,列宽自适应
+- [x] 注解导出支持自定义样式,间隙条纹,自定义宽高
+- [X] 导入支持注解导入和直接读取Excel中的数据
+- [X] 注解导入支持值转换和数据校验
+- [X] 直接导入支持流式读取
 
-``` java
- /**
-     * 导出Demo
+所有使用样例存放于[Excel-Test example](example/src/main/java/com/sondertara/excel)
+
+#### :triangular_flag_on_post:**Excel Writer**
+
+`Tara Excel` 支持注解导出、快捷导出和模板导出三种方式
+
+##### **1.注解导出(ExcelBeanWriter)**
+
+注解导出支持直接传入导出对象List和实现导出对象分页查询接口两个方式
+
+- `@ExcelExport`: 对应Excel中的Sheet,支持导出多个不同数据的Sheet
+
+```java
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ExcelExport {
+
+    /**
+     * the multiple sheet order, smaller is parsed earlier
+     * 顺序（值越小，越靠前）
      *
-     * @ExportField写在 ExportVO的属性字段上
-     * <p>
-     * <p>
-     * ExportVO是标注注解的类,Excel映射的导出类，需要自己定义
-     * ParamEntity是查询的参数对象，继承PageQueryParam 需要自己定义,设置起止页和分页大小
-     * ResultEntity是分页查询到的结果List内部元素，需要自己定义
-     * <p>
-     * ExportVO可以和ResultEntity使用同一个对象,即直接在查询的结果对象上标注注解(建议使用两个对象, 实现解耦)
-     * <p>
-     * pageQuery方法需要自行实现, 即导出Excel的数据来源, 根据查询条件和当前页数和每页条数进行数据层查询, 当返回List的条数为NULL或者小于DEFAULT_PAGE_SIZE(每页条数)时, 将视为查询结束, 反之则会发生死循环
-     * <p>
-     * convert方法需要自行实现, 参数就是查询出来的list中的每个元素引用, 可以对对象属性的转换或者对象的转换, 但是必须返回标注注解的对象
+     * @return order
      */
-    @RequestMapping("/exportDemo")
-    public void exportResponse(@RequestParam(value = "fieldValues") String fieldValues, HttpServletResponse httpServletResponse) {
-        ParamEntity param = JSON.parseObject(fieldValues, ParamEntity.class);
-        ExcelExpoerTara.of(ExportVO.class).query(param,  new ExportFunction<ParamEntity, ResultEntity>() {
-                    /**
-                     * @param queryQaram 查询条件对象
-                     * @param pageNum    当前页数,从1开始
-                     * @param pageSize   每页条数,默认2000
-                     * @return
-                     */
-                    @Override
-                    public List<ResultEntity> pageQuery(ParamEntity queryQaram, int pageNum) {
+    int order() default 0;
 
-                        //1.将pageNum和pageSize传入使用本组件的开发者自己项目的分页逻辑中
-                        //2.调用自定义的分页查询方法
-                        List<ResultEntity> result = null；
-                        return result;
-                    }
+    /**
+     * The sheet name
+     * Sheet名称
+     *
+     * @return sheet name
+     */
+    String sheetName() default "数据";
 
-                    /**
-                     * 将查询出来的每条数据进行转换
-                     *
-                     * @param o
-                     */
-                    @Override
-                    public ExportVO convert(ResultEntity o) {
-                        //自定义的转换逻辑
-                        return new ExportVO();
-                    }
-                }).export("测试文件",httpServletResponse);
-    }
+    /**
+     * the max row of one sheet,excluding the title row
+     * 每个Sheet页允许的最大条数（用于分页）
+     *
+     * @return the max row of one sheet
+     */
+    int maxRowsPerSheet() default 60000;
+
+    /**
+     * is open the row strip
+     * 是否开启条纹
+     *
+     * @return is open the row strip
+     */
+    boolean rowStriped() default true;
+
+    /**
+     * the row strip color
+     * 条纹颜色
+     *
+     * @return the color
+     */
+    String rowStripeColor() default "E2EFDA";
+
+    /**
+     * the title row height
+     * 标题行高度
+     *
+     * @return the title row height
+     */
+    int titleRowHeight() default 20;
+
+    /**
+     * the data row height
+     * 数据行高度
+     *
+     * @return the data row height
+     */
+    int dataRowHeight() default 20;
+
+    /**
+     * the bind type
+     * If {@link ExcelColBindType#COL_INDEX} the value {@link ExcelExportField#colIndex()} must be set.
+     * If {@link ExcelColBindType#ORDER} the colIndex is the order field definition order.
+     *
+     * @return whether enable colIndex
+     * @see ExcelColBindType
+     */
+    ExcelColBindType bindType() default ExcelColBindType.ORDER;
+
+    /**
+     * is open column auto width
+     * this is higher priority than {@link ExcelExportField#autoWidth()}
+     * 是否自动调整宽度
+     *
+     * @return is open all column auto width
+     */
+    boolean autoWidth() default false;
+    
+}
 ```
 
-#### 3)异步导出
-
-该方案会异步多线程生成csv格式的Excel文件，并返回文件所在的路径.
+- `@ExcelExportField`: 对应Sheet中的列,支持每一列灵活定义
 
 ```java
-public class ExceExportDemo {
-    private static final Logger logger = LoggerFactory.getLogger(ExceExportDemo.class);
+@Target(ElementType.FIELD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ExcelExportField {
+    /**
+     * column name  alias
+     *
+     * @return column name
+     */
+    @AliasFor("colName")
+    String value() default "";
 
-    public void exportCsvDemo() {
-        PageQueryParam query = PageQueryParam.builder().build();
-        String path = ExcelExportTara.of(UserInfoVo.class).query(query, pageNo -> {
-            // query list data from db
-            List<UserDTO> list = new ArrayList<>(200);
-            for (int i = 0; i < 200; i++) {
-                UserDTO userDTO = new UserDTO();
+    /**
+     * 标题
+     * column name
+     *
+     * @return column name
+     */
+    @AliasFor("value")
+    String colName() default "";
 
-                userDTO.setA(i);
-                userDTO.setN(pageNo + "测试姓名" + i);
-                userDTO.setD("测试地址" + i);
-                list.add(userDTO);
+    /**
+     * the colIndex ,begin is 1
+     * 列索引（从1开始）
+     *
+     * @return the colIndex
+     */
+    int colIndex() default -1;
 
-                if (pageNo == 5 && i == 150) {
-                    break;
-                }
-            }
-            atomicInteger.getAndAdd(list.size());
+    /**
+     * default cell value
+     * 默认单元格值
+     */
+    String defaultCellValue() default "";
 
-            // convert to target data list
-            return list.stream().map(u -> {
-                UserInfoVo userInfoVo = new UserInfoVo();
-                userInfoVo.setAddress(u.getD());
-                userInfoVo.setAge(u.getA());
-                userInfoVo.setName(u.getN());
-                return userInfoVo;
-            }).collect(Collectors.toList());
+    /**
+     * 列类型
+     * the cell type
+     *
+     * @return the CellType
+     * @see com.sondertara.excel.utils.ExcelFieldUtils#setCellValue(Cell, Object, Field, ExcelExportField, ExcelDefaultWriterResolver)
+     */
+    CellType cellType() default CellType.STRING;
 
-        }).exportCsv("Excel-Test");
-        logger.info("path:{}", path);
-        logger.info("data list size:{}", atomicInteger.get());
-        //FileUtils.remove(path);
+    /**
+     * custom data format
+     * 数据格式
+     * <p>
+     * eg: @ExcelDataFormat("yyyy/MM/dd")
+     *
+     * @return the data format
+     */
+    ExcelDataFormat dataFormat() default @ExcelDataFormat;
+
+    /**
+     * data cell style
+     * 数据样式
+     *
+     * @return the style class {@link CellStyleBuilder} subclass
+     */
+    Class<?> dataCellStyleBuilder() default DefaultDataCellStyleBuilder.class;
+
+    /**
+     * the title cell style
+     * 标题样式
+     *
+     * @return the style class {@link CellStyleBuilder} subclass
+     */
+    Class<?> titleCellStyleBuilder() default DefaultTitleCellStyleBuilder.class;
+
+    /**
+     * is open auto width
+     * 是否自动调整宽度
+     *
+     * @return
+     */
+    boolean autoWidth() default false;
+
+    /**
+     * the custom column width,default is 16
+     * 自定义cell宽度
+     *
+     * @return the custom column width
+     */
+    int colWidth() default Constants.DEFAULT_COL_WIDTH;
+}
+```
+
+:balloon:**使用样例**
+
+为对象添加`ExportField`注解，导出列添加`ExcelExportField`注解，例如导出假期和用户数据到同一个Excel
+
+- 假期数据对应的JavaBean:
+  
+```java
+/**
+ * The colindex of the export column is not effective because the bindType()  default is the order of properties definition,
+ */
+@ExcelExport(sheetName = "节假日")
+public class HolidayCfg {
+    /**
+     * ExcelDataFormat will display the value with the specified format.
+     */
+    @ExcelExportField(colName = "节假日日期", colIndex = 1, dataFormat = @ExcelDataFormat("yyyy-MM-dd HH:mm:ss"))
+    private Date holidayDate;
+
+    @ExcelExportField(colName = "节假日名称", colIndex = 2)
+    private String holidayName;
+
+    /**
+     * ExcelKVConvert will convert the the property value to the map value when this property value equals the map key
+     */
+    @ExcelKVConvert(kvMap = {"0=是", "1=否"})
+    @ExcelExportField(colName = "是否上班", colIndex = 3)
+    private String isWork;
+
+    @ExcelExportField(colName = "备注", colIndex = 4)
+    private String remark;
+}
+```
+
+- 用户数据对应的JavaBean:
+
+```java
+
+@ExcelExport(sheetName = "用户数据")
+public class User {
+    @ExcelExportField(colIndex = 2, colName = "年龄")
+    private Integer age;
+    
+    @ExcelExportField(colIndex = 1, colName = "姓名")
+    private String name;
+    
+    @ExcelExportField(colIndex = 3, colName = "生日", dataFormat = @ExcelDataFormat("yyyy-MM-dd"))
+    private Date birth;
+    
+    @ExcelExportField(colIndex = 4, colName = "体重", dataFormat = @ExcelDataFormat("0.00"))
+    private Double height;
+}
+```
+
+使用`ExcelBeanWriter`导出Excel文件
+
+```java
+import java.util.ArrayList;
+
+public class ExcelBeanWriteTest {
+    /**
+     * 通过查询的list导出
+     * Export by list directly
+     */
+    @Test
+    public void testWriteMultipleSheetByData() {
+        //Query data to list
+        List<HolidayCfg> holidayCfgList = new ArrayList<>();
+        List<User> users = new ArrayList<>();
+        // Export to OutputStream
+        try (FileOutputStream fos = new FileOutputStream(new File(DEFAULT_TARGET_EXCEL_DIR + "export_multiple_sheet_data.xlsx"))) {
+            ExcelBeanWriter.fromData().addData(holidayCfgList).addData(users).then().to(fos);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        HttpServletResponse response = null;
+        // Export to HttpServletResponse
+        ExcelBeanWriter.fromData().addData(holidayCfgList).addData(users).then().to(response, "Export_data");
+    }
+
+    /**
+     * 通过分页查询导出
+     * Export by pagination query function which is based on  Producer-Consumer design pattern.
+     */
+    @Test
+    public void testSheetByQuery() {
+
+        // Export to OutputStream
+        try (FileOutputStream fos = new FileOutputStream(new File(DEFAULT_TARGET_EXCEL_DIR + "export_multiple_sheet_data.xlsx"))) {
+            ExcelBeanWriter.fromData().addData(index -> {
+                // query data start index 0,page size is 1000,total number is 10000
+                Lis<HolidayCfg> holidayCfgList = new ArrayList<>();
+                return PageResult.of(holidayCfgList).pagination(index, 1000).total(10000L);
+            }).then().to(fos);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        HttpServletResponse response = null;
+        // Export to HttpServletResponse
+        ExcelBeanWriter.fromData().addData(holidayCfgList).addData(users).then().to(response, "Export_data");
     }
 }
 ```
 
-#### 2.导入示例
+详情请参考 [ExcelBeanWriteTest](example/src/main/java/com/sondertara/excel/ExcelBeanWriteTest.java)
 
-##### 1)添加导入注解 `@ImportField`
+##### **2.快捷导出(ExcelSimpleWriter)**
+
+快捷导出支持传入List对象和分页查询接口导出,样例
 
 ```java
+ExcelSimpleWriter.create().sheetName("Sheet").header(titles).addData(List<Object[]> dataList).to();
+ExcelSimpleWriter.create().sheetName("Sheet").header(titles).addData(ExportFunction function).to();
+```
 
+详情请参考 [ExcelSimpleWriteTest](example/src/main/java/com/sondertara/excel/ExcelSimpleWriteTest.java)
+
+#### 🚩**Excel Reader**
+
+`Tara Excel` 支持注解读取和简单读取两种方式
+
+##### **1.注解读取(ExcelBeanReader)**
+
+- `@ExcelImport`: 对应Excel中的Sheet,可以读取指定Sheet页
+
+```java
+/**
+ * @author huangxiaohu
+ */
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ExcelImport {
+
+    /**
+     * bind the sheet index of Excel,begin is  1
+     * 绑定的sheet页（可多个, 从1开始）
+     *
+     * @return sheets
+     */
+    int[] sheetIndex() default {1};
+
+    /**
+     * point the data row num start,begin is 1
+     * 起始数据行(从1开始)
+     *
+     * @return the data row index
+     */
+    int firstDataRow() default 2;
+
+
+    /**
+     * 数据绑定类型
+     * data bind type,default order is the field definition order is class
+     * If {@link ExcelColBindType#COL_INDEX} the value {@link ExcelImportField#colIndex()} must be set.
+     * If {@link ExcelColBindType#ORDER} the colIndex is the order field definition order.
+     * If {@link ExcelColBindType#TITLE} the value {@link ExcelImportField#title()} must be set,and colIndex will calculate by the title in Excel
+     *
+     * @return the type of data bind
+     * @see ExcelColBindType
+     */
+    ExcelColBindType bindType() default ExcelColBindType.ORDER;
+
+}
+```
+
+- `@ExcelImportField`: 对应Sheet中的列，可绑定指定列和为空校验
+
+```java
+/**
+ * @author huangxiaohu
+ */
+@Target(ElementType.FIELD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface ExcelImportField {
+
+    /**
+     * the col index,begin is 1
+     * it takes effect only when {@link ExcelImport#bindType()} is {@link com.sondertara.excel.enums.ExcelColBindType#COL_INDEX}
+     * 列索引(从1开始)
+     *
+     * @return the bind col index
+     */
+    int colIndex() default -1;
+
+    /**
+     * all empty cell
+     * 是否允许空值
+     *
+     * @return allow empty
+     */
+    boolean allowBlank() default true;
+
+    /**
+     * date format
+     * 日期格式
+     *
+     * @return the data format pattern
+     */
+    String dateFormat() default DatePattern.NORM_DATETIME_PATTERN;
+
+    /**
+     * the column title
+     * 列标题
+     * if {@link ExcelImport#bindType()} is {@link com.sondertara.excel.enums.ExcelColBindType#TITLE} this value must be set to the Excel title row cell
+     *
+     * @return the title
+     */
+    String title() default "";
+}
+```
+
+:balloon:**使用样例**
+
+为对象添加`ExcelImport`注解，导出列添加`ExcelImportField`注解，例如导入假期数据JavaBean:
+
+```java
+import com.sondertara.excel.enums.ExcelColBindType;
+/**
+ * bindType is title means auto-association column of sheet with title,the colIndex is not effective unless set bindType to {@link ExcelColBindType#COL_INDEX}
+ */
 @Data
-public class ImportParam implements Serializable {
-    @ImportField(index = 1)
-    private String userName;
+@ExcelImport(sheetIndex = 1, firstDataRow = 2, bindType = ExcelColBindType.TITLE)
+public class HolidayCfg {
 
-    @ImportField(index = 3)
-    private Date orderTime;
+    @ExcelImportField(colIndex = 1, dateFormat = "yyyy-MM-dd", allowBlank = false, title = "节假日日期")
+    private Date holidayDate;
 
-    @ImportField(index = 6, required = true)
-    private String userPhone;
+    @ExcelImportField(colIndex = 2, allowBlank = false, title = "节假日名称")
+    private String holidayName;
 
-    @ImportField(index = 8)
-    private Date commitTime;
+    @ExcelKVConvert(kvMap = {"是=0", "否=1"})
+    @ExcelImportField(colIndex = 3, allowBlank = false, title = "是否上班")
+    private String isWork;
 
-    @ImportField(index = 9, range = {"100", "500"})
-    private BigDecimal amount;
+    @ExcelImportField(colIndex = 4, title = "备注")
+    private String remark;
 }
 ```
 
-##### 2)导入demo
+`ExcelBeanReader`读取数据:
 
 ```java
+public class ExcelReaderTest {
 
-public class ExcelmportDemo {
-    private static final Logger logger = LoggerFactory.getLogger(ExcelmportDemo.class);
+    private static final String EXCEL_TEMPLATE_DIR = "excel-template/";// "excel-template/";
 
-    public void importTest(String filePath) throws Exception {
+    /**
+     * test the import annotation {@link com.sondertara.excel.meta.annotation.ExcelImport}
+     *
+     * @see ExcelKVConvert
+     */
+    @Test
+    public void testAnnotation() {
+        final InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(EXCEL_TEMPLATE_DIR + "multi_sheet_data.xlsx");
 
-        File file = new File(filePath);
-        final FileInputStream inputStream = new FileInputStream(file);
+        List<HolidayCfg> list = ExcelBeanReader.load(is).read(HolidayCfg.class);
 
-        ExcelTara.builder(inputStream, ImportParam.class)
-                .importExcel(true, new ImportFunction<ImportParam>() {
+        Assertions.assertEquals(1000, list.size());
+        //test the ExcelKVConvert.
+        boolean isConvert = "0".equals(list.get(0).getIsWork()) || "1".equals(list.get(0).getIsWork());
+        Assertions.assertTrue(isConvert);
+    }
+}
+```
 
-                    /**
-                     * @param sheetIndex 当前执行的Sheet的索引, 从1开始
-                     * @param rowIndex   当前执行的行数, 从1开始
-                     * @param param      Excel行数据的实体
-                     */
-                    @Override
-                    public void onProcess(int sheetIndex, int rowIndex, ImportParam param) {
-                        logger.info("sheet[{}],第{}行，解析数据为:{}", sheetIndex, rowIndex, JSON.toJSONString(param));
-                        try {
-                            //  handleImportData(param);
-                        } catch (Exception e) {
-                            logger.error(" handle record error", e);
+##### **2.简单读取(ExcelSimpleReader)**
+
+实现xml解析器，支持流式读取Excel中的数据
+
+:balloon:**使用样例**
+
+```java
+public class ExcelReaderTest {
+    /**
+     * Raw Excel parser, this is very faster
+     *
+     * @see ExcelSimpleReader
+     */
+    @Test
+    public void testRaw() {
+        final InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(EXCEL_TEMPLATE_DIR + "duty_vacation.xlsx");
+        try (ReadableWorkbook read = ExcelSimpleReader.load(is).read()) {
+            //can use stream api too
+            read.getSheets().forEach(sheet -> {
+                try {
+                    List<Row> rows = sheet.read();
+
+                    for (int i = 1; i < rows.size(); i++) {
+
+                        Row cells = rows.get(i);
+                        Cell cell = cells.getCell(2);
+                        if (i == 1) {
+                            Assertions.assertEquals("2019-10-10", LocalDateTimeUtils.format(cell.asDate(), DatePattern.NORM_DATE_PATTERN));
                         }
                     }
-
-                    /**
-                     * @param errorEntity 错误信息实体
-                     */
-                    @Override
-                    public void onError(ErrorEntity errorEntity) {
-                        //将每条数据非空和正则校验后的错误信息errorEntity进行自定义处理
-
-                        logger.info(errorEntity.toString());
-                        ExcelTaraTool.addErrorEntity(errorEntity);
+                    for (Row row : rows) {
+                        System.out.println(row);
                     }
-                });
-        //获取导入错误数据
-        List<List<String>> records = ExcelTaraTool.getErrorEntityRecords();
-        //生成cvs
-        ExcelTaraTool.writeRecords("import_error.csv", records);
-        //获取file对象
-        File workFile = ExcelTaraTool.getWorkFile("import_error.csv");
+                    Assertions.assertEquals(10, rows.size());
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+            });
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 }
-
 ```
 
-### TODO
+详情请参考 [ExcelReaderTest](example/src/main/java/com/sondertara/excel/ExcelReaderTest.java)
 
-- [x] `ExcelExportField` 注解支持样式
-- [ ] 模板导出Excel
-- [ ] 简易导入导出数据,不使用注解
-- [ ] 代码注释和性能优化
-
-## Contact
+## ☎️**联系方式**
 
 My email :814494432@qq.com / xhhuangchn@outlook.com
 
-## JetBrains support
+## 💓**鸣谢**
+
+### *JetBrains Support*
 
 We graciously acknowledge the support of [JetBrains](https://www.jetbrains.com/community/opensource/#support?from=tara)
 which enables us to use the professional version
 of IntelliJ IDEA for developing **Friendly**.
 
 <a href='https://www.jetbrains.com/community/opensource/#support?from=tara'>
-   <img alt='' src='https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png' width=200 height=200 />
+   <img alt='' src='https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png' width=150 height=150 />
 </a>
+
+### *Users*
+- [dhatim](https://github.com/dhatim): Excel简单读取基于此项目开发 <a href="https://github.com/dhatim/fastexcel">fastexcel</a>.
+
+

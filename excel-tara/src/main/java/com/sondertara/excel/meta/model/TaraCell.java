@@ -1,10 +1,10 @@
 package com.sondertara.excel.meta.model;
 
+import com.sondertara.excel.antlr.ExcelHelper;
 import com.sondertara.excel.meta.celltype.ExcelCellType;
-import com.sondertara.excel.tablemodel.BorderPositionEnum;
-import com.sondertara.excel.tablemodel.CellStyle;
-import com.sondertara.excel.tablemodel.MergedRegion;
-import com.sondertara.excel.utils.ExcelHelper;
+import com.sondertara.excel.antlr.tablemodel.BorderPositionEnum;
+import com.sondertara.excel.antlr.tablemodel.CellStyle;
+import com.sondertara.excel.antlr.tablemodel.MergedRegion;
 import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.CellType;
@@ -15,10 +15,12 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFHyperlink;
 
+import java.io.Serializable;
+
 /**
  * @author huangxiaohu
  */
-public class TaraCell {
+public class TaraCell implements Serializable {
 
     private Object value;
     private String formula;
@@ -31,7 +33,7 @@ public class TaraCell {
     private int row;
     private String col;
     private CellStyle cellStyle;
-    private org.apache.poi.ss.usermodel.CellType cellType;
+    private CellType cellType;
     private MergedRegion mergedRegion;
     private String hyperlink;
     private HyperlinkType hyperlinkType;

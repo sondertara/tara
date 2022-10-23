@@ -135,19 +135,19 @@ public final class CellAddress implements Comparable<CellAddress> {
         return new String(colRef, pos, (MAX_COL_CHARS - pos), StandardCharsets.ISO_8859_1);
     }
 
-    private static final boolean isAsciiLowerCase(char c) {
+    private static boolean isAsciiLowerCase(char c) {
         return 'a' <= c && c <= 'z';
     }
 
-    private static final boolean isAsciiUpperCase(char c) {
+    private static boolean isAsciiUpperCase(char c) {
         return 'A' <= c && c <= 'Z';
     }
 
-    private static final boolean isAsciiDigit(char c) {
+    private static boolean isAsciiDigit(char c) {
         return '0' <= c && c <= '9';
     }
 
-    private final static char toUpperCase(char c) {
+    private static char toUpperCase(char c) {
         if (isAsciiUpperCase(c)) {
             return c;
         }

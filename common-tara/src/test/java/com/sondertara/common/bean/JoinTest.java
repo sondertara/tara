@@ -1,8 +1,8 @@
 package com.sondertara.common.bean;
 
-import com.sondertara.common.bean.Join;
-import com.sondertara.common.bean.JoinFunction;
-import com.sondertara.common.bean.KeyExtractor;
+import com.sondertara.common.function.JoinFunction;
+import com.sondertara.common.function.KeyExtractor;
+import com.sondertara.common.lang.Join;
 import com.sondertara.common.lang.Pair;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

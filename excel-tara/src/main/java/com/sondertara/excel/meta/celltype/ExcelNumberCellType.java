@@ -1,7 +1,7 @@
 package com.sondertara.excel.meta.celltype;
 
 import com.sondertara.common.util.StringUtils;
-import com.sondertara.excel.constants.ExcelConstants;
+import com.sondertara.excel.common.constants.ExcelConstants;
 import com.sondertara.excel.utils.ExcelXmlCodecUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xssf.model.StylesTable;
@@ -14,7 +14,7 @@ import org.xml.sax.Attributes;
 public class ExcelNumberCellType implements ExcelCellType {
 
     private static final long serialVersionUID = -3254659667807688559L;
-    private StylesTable stylesTable;
+    private final StylesTable stylesTable;
 
     public ExcelNumberCellType(final StylesTable stylesTable) {
         this.stylesTable = stylesTable;

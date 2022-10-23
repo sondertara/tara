@@ -7,11 +7,11 @@
     <parent>
         <groupId>com.sondertara</groupId>
         <artifactId>tara</artifactId>
-        <version>1.0.1</version>
+        <version>1.0.2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>excel-tara</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2-SNAPSHOT</version>
     <name>excel-tara</name>
     <description>High performance Excel kit.</description>
     <properties>
@@ -84,8 +84,8 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
+            <scope>provided</scope>
         </dependency>
-
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
@@ -94,7 +94,12 @@
         <dependency>
             <groupId>com.sondertara</groupId>
             <artifactId>common-tara</artifactId>
-            <version>1.0.1</version>
+            <version>1.0.2-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.rzymek</groupId>
+            <artifactId>opczip</artifactId>
+            <version>1.2.0</version>
         </dependency>
     </dependencies>
 </project>

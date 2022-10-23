@@ -1,9 +1,8 @@
-
 package com.sondertara.excel.entity;
 
-import com.sondertara.excel.enums.FieldRangeType;
 import com.sondertara.excel.meta.annotation.ExcelDataFormat;
 import com.sondertara.excel.meta.style.CellStyleBuilder;
+import com.sondertara.excel.support.validator.ValueRangeValidator;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -67,18 +66,6 @@ public class ExcelCellEntity {
      * 是否必填
      */
     private Boolean required;
-    /**
-     * range
-     * <p>
-     * number eg:{"2",""}(2, ),{"2","5"},{"","5"}
-     * date eg:{"2019-08-01 12:00:00",""},{"2019-08-01 12:00:00","2019-10-01
-     * 12:00:00"}
-     * </p>
-     */
-    private String[] range;
-    /**
-     * range type {@link FieldRangeType} ,default is
-     * {@link FieldRangeType#RANGE_CLOSE}
-     */
-    private FieldRangeType rangeType;
+
+    private ValueRangeValidator rangeValidator;
 }

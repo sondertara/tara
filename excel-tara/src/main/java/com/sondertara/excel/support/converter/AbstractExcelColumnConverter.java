@@ -13,5 +13,5 @@ public interface AbstractExcelColumnConverter<A extends Annotation, T> {
 
     void initialize(A annotation);
 
-    T convert(String value);
+    T convert(Object value);
 }

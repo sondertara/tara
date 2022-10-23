@@ -1,12 +1,35 @@
 package com.sondertara.excel.context;
 
-import java.io.InputStream;
+import com.sondertara.excel.meta.model.TaraSheet;
+import com.sondertara.excel.support.callback.CellReadExCallback;
+import com.sondertara.excel.support.callback.RowReadExCallback;
 
-public interface ExcelRawReaderContext extends ExcelContext {
+import java.util.Map;
+
+/**
+ * @author huangxiaohu
+ */
+public interface ExcelRawReaderContext<T> extends ExcelReaderContext<T> {
+
     /**
-     * get the InputStream
+     * 获取sheet 定义
      *
-     * @return InputStream
+     * @return the map
      */
-    InputStream getInputStream();
+    Map<Integer, ? extends TaraSheet> getSheetDefinitions();
+
+    /**
+     * read row error callback
+     *
+     * @return callback
+     */
+    RowReadExCallback getExcelRowReadExCallback();
+
+    /**
+     * read cell error callback
+     *
+     * @return callback
+     */
+    CellReadExCallback getExcelCellReadExCallback();
+
 }

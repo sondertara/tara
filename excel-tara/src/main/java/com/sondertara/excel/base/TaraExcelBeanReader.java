@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * @author huangxiaohu
  */
-public interface TaraExcelBeanReader  {
+public interface TaraExcelBeanReader {
     /**
      * reade excel to bean
      *

@@ -1,6 +1,6 @@
 package com.sondertara.excel.analysis;
 
-import com.sondertara.excel.constants.ExcelConstants;
+import com.sondertara.excel.common.constants.ExcelConstants;
 import com.sondertara.excel.meta.celltype.ExcelBooleanCellType;
 import com.sondertara.excel.meta.celltype.ExcelCellType;
 import com.sondertara.excel.meta.celltype.ExcelDateCellType;
@@ -34,23 +34,23 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 
 @Slf4j
-public class RawXlsxAnalysisHandler extends DefaultHandler implements LifecycleSupport {
-    private StylesTable stylesTable;
-    private SharedStrings sst;
-    private TaraWorkbook workbook;
+public class RawXlsxAnalysisHandler extends DefaultHandler implements ExcelReadLifecycleSupport {
+    private final StylesTable stylesTable;
+    private final SharedStrings sst;
+    private final TaraWorkbook workbook;
     private int totalRow = 0;
     private String tagValue;
 
     private int rowIndex;
 
-    private Map<Integer, String> sheetNames = new LinkedHashMap<>();
+    private final Map<Integer, String> sheetNames = new LinkedHashMap<>();
     private TaraRow curExcelRow;
     private TaraCell curExcelCell;
 
     private TaraSheet curExcelSheet;
 
-    private AtomicInteger sheetIndex = new AtomicInteger(0);
-    private List<ExcelCellType> excelCellTypes = new ArrayList<>();
+    private final AtomicInteger sheetIndex = new AtomicInteger(0);
+    private final List<ExcelCellType> excelCellTypes = new ArrayList<>();
 
     public RawXlsxAnalysisHandler(final StylesTable stylesTable, final SharedStrings sst, TaraWorkbook workbook) {
         this.sst = sst;

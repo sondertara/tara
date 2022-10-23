@@ -6,6 +6,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * complex header of Excel
+ * 复杂的列标题
+ *
  * @author huangxiaohu
  */
 @Target(ElementType.TYPE)

@@ -4,7 +4,7 @@ import java.lang.annotation.Annotation;
 
 /**
  * 默认校验器
- * 
+ *
  * @author huangxiaohu
  */
 public class ExcelDefaultValidator<T extends Annotation> implements AbstractExcelColumnValidator<T> {

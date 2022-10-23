@@ -1,4 +1,3 @@
-
 package com.sondertara.excel.entity;
 
 import lombok.Builder;

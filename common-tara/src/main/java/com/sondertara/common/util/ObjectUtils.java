@@ -30,6 +30,7 @@ public class ObjectUtils extends org.apache.commons.lang3.ObjectUtils {
      * @return 是否相等
      * @since 5.4.3
      */
+    @SuppressWarnings("deprecation")
     public static boolean equals(Object obj1, Object obj2) {
         if (obj1 instanceof BigDecimal && obj2 instanceof BigDecimal) {
             return NumberUtils.equals((BigDecimal) obj1, (BigDecimal) obj2);
