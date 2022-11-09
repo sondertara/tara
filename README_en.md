@@ -561,7 +561,7 @@ public class ExcelReaderTest {
 }
 ```
 
-##### **2.Simple-Direct(ExcelSimpleReader)**
+##### **2.Simple-Direct()**
 
 Implement an XML parser that supports streaming reading of data in Excel.
 
@@ -620,7 +620,7 @@ My email :814494432@qq.com / xhhuangchn@outlook.com
 
 We graciously acknowledge the support of [JetBrains](https://www.jetbrains.com/community/opensource/#support?from=tara)
 which enables us to use the professional version
-of IntelliJ IDEA for developing **Friendly**.
+of IntelliJ IDEA for developing this project.
 
 <a href='https://www.jetbrains.com/community/opensource/#support?from=tara'>
    <img alt='' src='https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png' width=150 height=150 />
@@ -628,5 +628,5 @@ of IntelliJ IDEA for developing **Friendly**.
 
 ### *Users*
 
-- [dhatim](https://github.com/dhatim?from=sondertara): Excel简单读取基于此项目开发 <a href="https://github.com/dhatim/fastexcel?from=sondertara">fastexcel</a>.
+- [dhatim](https://github.com/dhatim?from=sondertara): Excel simple reader is based on this awesome project.<a href="https://github.com/dhatim/fastexcel?from=sondertara">fastexcel</a>.
 
