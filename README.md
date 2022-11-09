@@ -610,7 +610,7 @@ My email :814494432@qq.com / xhhuangchn@outlook.com
 
 We graciously acknowledge the support of [JetBrains](https://www.jetbrains.com/community/opensource/#support?from=tara)
 which enables us to use the professional version
-of IntelliJ IDEA for developing **Friendly**.
+of IntelliJ IDEA for developing this project.
 
 <a href='https://www.jetbrains.com/community/opensource/#support?from=tara'>
    <img alt='' src='https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png' width=150 height=150 />
