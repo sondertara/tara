@@ -53,6 +53,10 @@ When the property type is same, it is even a little faster than `Spring BeanUtil
 
 ![""](example/result/same-benchmark.png)
 
+The Throughput test result:
+
+![""](example/result/same-benchmark-thrpt.png)
+
 ##### 2.Different property type copy
 
 When the property type is different,some frameworks do not support this feature,but `Tara BeanUtils` does,and it is in the same order of magnitude as native operations.
@@ -60,7 +64,7 @@ Here is the benchmark results:
 
 ![""](example/result/differ-benchmark.png)
 
-With the above test,we get the following conclusions
+With the above test,we get the following conclusions:
 
 **Apache BeanUtils**: Get exception when running.
 

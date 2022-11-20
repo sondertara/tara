@@ -52,6 +52,10 @@ implementation 'com.sondertara:common-tara:1.0.2
 
 ![""](example/result/same-benchmark.png)
 
+吞吐量测试结果:
+
+![""](example/result/same-benchmark-thrpt.png)
+
 ##### 2.属性类型不同嵌套对象拷贝
 
 属性类型不一致时,有些框架不支持该特性，但是`Tara BeanUtils`完全支持，并且有较好的性能表现。 基准测试如下:
