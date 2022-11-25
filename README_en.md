@@ -53,6 +53,10 @@ When the property type is same, it is even a little faster than `Spring BeanUtil
 
 ![""](example/result/same-benchmark.png)
 
+The Throughput test result:
+
+![""](example/result/same-benchmark-thrpt.png)
+
 ##### 2.Different property type copy
 
 When the property type is different,some frameworks do not support this feature,but `Tara BeanUtils` does,and it is in the same order of magnitude as native operations.
@@ -60,7 +64,7 @@ Here is the benchmark results:
 
 ![""](example/result/differ-benchmark.png)
 
-With the above test,we get the following conclusions
+With the above test,we get the following conclusions:
 
 **Apache BeanUtils**: Get exception when running.
 
@@ -561,7 +565,7 @@ public class ExcelReaderTest {
 }
 ```
 
-##### **2.Simple-Direct(ExcelSimpleReader)**
+##### **2.Simple-Direct()**
 
 Implement an XML parser that supports streaming reading of data in Excel.
 
@@ -620,12 +624,13 @@ My email :814494432@qq.com / xhhuangchn@outlook.com
 
 We graciously acknowledge the support of [JetBrains](https://www.jetbrains.com/community/opensource/#support?from=tara)
 which enables us to use the professional version
-of IntelliJ IDEA for developing **Friendly**.
+of IntelliJ IDEA for developing this project.
 
 <a href='https://www.jetbrains.com/community/opensource/#support?from=tara'>
    <img alt='' src='https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png' width=150 height=150 />
 </a>
 
 ### *Users*
-- [dhatim](https://github.com/dhatim): Simple-Direct Reader is based on his awesome project <a href="https://github.com/dhatim/fastexcel">fastexcel</a>.
+
+- [dhatim](https://github.com/dhatim?from=sondertara): Excel simple reader is based on this awesome project.<a href="https://github.com/dhatim/fastexcel?from=sondertara">fastexcel</a>.
 

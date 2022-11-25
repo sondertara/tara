@@ -1,0 +1,8 @@
+"Benchmark","Mode","Threads","Samples","Score","Score Error (99.9%)","Unit"
+"benchmark.CopySameFieldThroughputTest.apacheBeanUtilsTest","thrpt",1,5,298.886731,1.364265,"ops/ms"
+"benchmark.CopySameFieldThroughputTest.dozerTest","thrpt",1,5,192.007548,1.125401,"ops/ms"
+"benchmark.CopySameFieldThroughputTest.hutoolBeanUtilTest","thrpt",1,5,306.595730,7.748467,"ops/ms"
+"benchmark.CopySameFieldThroughputTest.hutoolConvertTest","thrpt",1,5,8.656877,0.394789,"ops/ms"
+"benchmark.CopySameFieldThroughputTest.localTest","thrpt",1,5,5319.979594,56.869764,"ops/ms"
+"benchmark.CopySameFieldThroughputTest.nativeTest","thrpt",1,5,123390.313220,682.554080,"ops/ms"
+"benchmark.CopySameFieldThroughputTest.springBeanUtilsTest","thrpt",1,5,4749.691064,201.297445,"ops/ms"
