@@ -1,9 +1,9 @@
 package com.sondertara.excel.meta.celltype;
 
+import com.sondertara.common.util.LocalDateTimeUtils;
 import com.sondertara.common.util.StringUtils;
 import com.sondertara.excel.common.constants.ExcelConstants;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.xssf.model.StylesTable;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
@@ -48,6 +48,6 @@ public class ExcelDateCellType implements ExcelCellType {
     @Override
     public String getValue(final String value) {
         final Date date = DateUtil.getJavaDate(Double.parseDouble(value));
-        return DateFormatUtils.format(date, "yyyy-MM-dd HH:mm:ss");
+        return LocalDateTimeUtils.format(date, "yyyy-MM-dd HH:mm:ss");
     }
 }

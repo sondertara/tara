@@ -1,6 +1,7 @@
 package com.sondertara.excel.executor;
 
 import com.sondertara.common.exception.TaraException;
+import com.sondertara.common.lang.reflect.ReflectUtils;
 import com.sondertara.excel.exception.ExcelAnnotationWriterException;
 import com.sondertara.excel.meta.style.CellStyleBuilder;
 
@@ -41,7 +42,7 @@ public class CellStyleCache {
         return this.cellStyleCacheMap.computeIfAbsent(clazz.getName(), key -> {
             try {
                 if (CellStyleBuilder.class.isAssignableFrom(clazz)) {
-                    return (CellStyleBuilder) clazz.newInstance();
+                    return (CellStyleBuilder) ReflectUtils.newInstance(clazz);
                 } else {
                     throw new ExcelAnnotationWriterException(
                             "CellStyle [" + clazz + "] not assignable from CellStyleBuilder.class");

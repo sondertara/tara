@@ -1,5 +1,7 @@
 package com.sondertara.excel.resolver;
 
+import com.sondertara.common.lang.reflect.ReflectUtils;
+import com.sondertara.common.util.ClassUtils;
 import com.sondertara.common.util.LocalDateTimeUtils;
 import com.sondertara.common.util.NumberUtils;
 import com.sondertara.common.util.RegexUtils;
@@ -404,7 +406,7 @@ public class ExcelReader extends DefaultHandler {
                 throw new AllEmptyRowException("The row[{}] is all empty,the sheet[{}] import exit!",
                         currentRowIndex + 1, currentSheetIndex + 1);
             }
-            Object entity = excelClass.newInstance();
+            Object entity = ReflectUtils.newInstance(excelClass);
             ErrorEntity errorEntity = null;
             for (int i = 0; i < propertyList.size(); i++) {
                 ExcelCellEntity property = propertyList.get(i);

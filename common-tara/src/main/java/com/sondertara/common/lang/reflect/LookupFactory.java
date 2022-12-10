@@ -8,8 +8,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
- * {@link MethodHandles.Lookup}工厂，用于创建{@link MethodHandles.Lookup}对象<br>
- * jdk8中如果直接调用{@link MethodHandles#lookup()}获取到的{@link MethodHandles.Lookup}在调用findSpecial和unreflectSpecial
+ * {@link java.lang.invoke.MethodHandles.Lookup}工厂，用于创建{@link java.lang.invoke.MethodHandles.Lookup}对象<br>
+ * jdk8中如果直接调用{@link MethodHandles#lookup()}获取到的{@link java.lang.invoke.MethodHandles.Lookup}在调用findSpecial和unreflectSpecial
  * 时会出现权限不够问题，抛出"no private access for
  * invokespecial"异常，因此针对JDK8及JDK9+分别封装lookup方法。
  *
@@ -57,12 +57,12 @@ public class LookupFactory {
 	}
 
 	/**
-	 * jdk8中如果直接调用{@link MethodHandles#lookup()}获取到的{@link MethodHandles.Lookup}在调用findSpecial和unreflectSpecial
+	 * jdk8中如果直接调用{@link MethodHandles#lookup()}获取到的{@link java.lang.invoke.MethodHandles.Lookup}在调用findSpecial和unreflectSpecial
 	 * 时会出现权限不够问题，抛出"no private access for
 	 * invokespecial"异常，因此针对JDK8及JDK9+分别封装lookup方法。
 	 *
 	 * @param callerClass 被调用的类或接口
-	 * @return {@link MethodHandles.Lookup}
+	 * @return {@link java.lang.invoke.MethodHandles.Lookup}
 	 */
 	public static MethodHandles.Lookup lookup(Class<?> callerClass) {
 		// 使用反射,因为当前jdk可能不是java9或以上版本

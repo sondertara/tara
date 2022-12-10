@@ -11,9 +11,12 @@ import com.sondertara.common.bean.model.UserView;
 import com.sondertara.common.bean.model.WrongMapB;
 import com.sondertara.common.convert.TypeConverter;
 import com.sondertara.common.bean.model.WrongMapA;
+import com.sondertara.common.util.ClassLoaderUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -88,6 +91,7 @@ public class BeanCopyTest {
 
             Mono mono = (Mono) value;
             if (mono.get().getClass().equals(Integer.class)) {
+                System.out.println("convert");
                 return new Mono<>("num:" + mono.get());
             } else {
                 return null;
@@ -106,6 +110,7 @@ public class BeanCopyTest {
 
         Mono<Integer> monoInt = new Mono<>(42);
         Mono<String> monoStr = BeanCopy.copy(monoInt, Mono.class);
+        System.out.println(monoStr.toString());
         Assertions.assertEquals("Mono{t=num:42}", monoStr.toString());
 
         BeanCopierRegistry.clear();
@@ -113,7 +118,9 @@ public class BeanCopyTest {
     }
 
     @Test
-    public void testEnumConverter() {
+    public void testEnumConverter() throws MalformedURLException {
+
+        ClassLoaderUtils.buildURLClassLoader(new File("E:\\workspace\\java\\tara\\excel-tara\\target\\excel-tara-1.0.2-SNAPSHOT.jar").toURI().toURL());
         ConverterRegistry.put(Gender.class.getName(), Integer.class.getName(), new TypeConverter<Integer>() {
             @Override
             public Integer convert(Object value, Integer defaultValue) {

@@ -13,4 +13,6 @@ public interface Consumer {
      *
      */
     void consume();
+
+    void exit();
 }

@@ -16,7 +16,9 @@
 package com.sondertara.excel.fast.writer;
 
 
-import com.github.rzymek.opczip.OpcOutputStream;
+
+
+import com.sondertara.excel.fast.opczip.OpcOutputStream;
 
 import java.io.IOException;
 import java.io.OutputStream;

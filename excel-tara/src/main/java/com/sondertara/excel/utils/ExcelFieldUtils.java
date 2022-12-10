@@ -1,13 +1,14 @@
 package com.sondertara.excel.utils;
 
 import com.sondertara.common.convert.ConvertUtils;
+import com.sondertara.common.util.LocalDateTimeUtils;
+import com.sondertara.common.util.StringUtils;
 import com.sondertara.excel.common.constants.Constants;
 import com.sondertara.excel.meta.annotation.ExcelExportField;
 import com.sondertara.excel.meta.model.ExcelCellDef;
 import com.sondertara.excel.meta.model.ExcelRowDef;
 import com.sondertara.excel.resolver.ExcelDefaultWriterResolver;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateUtils;
+
 import org.apache.poi.ss.usermodel.Cell;
 
 import java.lang.reflect.Field;
@@ -88,10 +89,7 @@ public class ExcelFieldUtils {
 
         if (field.getType() == String.class) {
             if (!StringUtils.isBlank(dateFormat)) {
-                try {
-                    field.set(o, DateUtils.parseDate((String) cellValue, dateFormat));
-                } catch (ParseException e) {
-                }
+                field.set(o, LocalDateTimeUtils.parse((String) cellValue, dateFormat));
             }
         }
         field.set(o, ConvertUtils.convert(field.getType(), cellValue));

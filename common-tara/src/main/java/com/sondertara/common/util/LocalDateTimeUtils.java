@@ -1663,7 +1663,7 @@ public class LocalDateTimeUtils extends CalendarUtils {
      * @param endDateExclusive   end
      * @return the date
      */
-    public static final Date random(Date startDateInclusive, Date endDateExclusive) {
+    public static Date random(Date startDateInclusive, Date endDateExclusive) {
         int betweenSeconds = (int) ((endDateExclusive.getTime() - startDateInclusive.getTime()) / 1000);
 
         Calendar instance = Calendar.getInstance();
@@ -1688,8 +1688,8 @@ public class LocalDateTimeUtils extends CalendarUtils {
     /**
      * 获取某天的昨天
      *
-     * @param date
-     * @return
+     * @param date current date
+     * @return yesterday date
      */
     public static Date getYesterday(Date date) {
         LocalDateTime localDateTime = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
@@ -1724,14 +1724,13 @@ public class LocalDateTimeUtils extends CalendarUtils {
     }
 
 
-
     /**
      * 判断指定日期是否在某个时间区间内
      *
-     * @param date
-     * @param startDateInclusive
-     * @param endDateInclusive
-     * @return
+     * @param date               current
+     * @param startDateInclusive start date
+     * @param endDateInclusive   end date
+     * @return is in
      */
     public static boolean isDayBetween(Date date, Date startDateInclusive, Date endDateInclusive) {
         if (date == null) {
@@ -1744,8 +1743,8 @@ public class LocalDateTimeUtils extends CalendarUtils {
     /**
      * 自动解析日期
      *
-     * @param dateTimeStr
-     * @return
+     * @param dateTimeStr date time string
+     * @return localDateTime
      */
     public static LocalDateTime parseLocalDateTime(String dateTimeStr) {
         if (StringUtils.isEmpty(dateTimeStr)) {
@@ -1807,9 +1806,8 @@ public class LocalDateTimeUtils extends CalendarUtils {
     /**
      * 抹除时间，只保留日期
      *
-     * @param date
-     * @return
-     * @since 1.0.3
+     * @param date the date
+     * @return date erase time
      */
     public static Date eraseTime(Date date) {
         Calendar calendar = Calendar.getInstance();
@@ -1821,9 +1819,8 @@ public class LocalDateTimeUtils extends CalendarUtils {
     /**
      * 抹除时间，只保留日期
      *
-     * @param calendar
-     * @return
-     * @since 1.0.3
+     * @param calendar calendar
+     * @return date erase time
      */
     public static Date eraseTime(Calendar calendar) {
         calendar.set(Calendar.HOUR_OF_DAY, 0);
@@ -1836,30 +1833,29 @@ public class LocalDateTimeUtils extends CalendarUtils {
     /**
      * 获取格式化时长
      *
-     * @param timeLength
-     * @param timeUnit
-     * @return
-     * @since 1.0.3
+     * @param timeLength time length
+     * @param timeUnit   unit
+     * @return string
      */
     public static String getGapTime(long timeLength, TimeUnit timeUnit) {
-        String SEPARATOR_CHAR = ":";
+        String separator = ":";
         StringBuilder gapTime = new StringBuilder();
         long days = timeUnit.toDays(timeLength);
         if (days > 0) {
             gapTime.append(StringUtils.leftPad(String.valueOf(days % 365), 2, "0"));
-            gapTime.append(SEPARATOR_CHAR);
+            gapTime.append(separator);
         }
 
         long hours = timeUnit.toHours(timeLength);
         if (hours > 0) {
             gapTime.append(StringUtils.leftPad(String.valueOf(hours % 24), 2, "0"));
-            gapTime.append(SEPARATOR_CHAR);
+            gapTime.append(separator);
         }
 
         long minutes = timeUnit.toMinutes(timeLength);
         if (minutes > 0) {
             gapTime.append(StringUtils.leftPad(String.valueOf(minutes % 60), 2, "0"));
-            gapTime.append(SEPARATOR_CHAR);
+            gapTime.append(separator);
         }
 
         long seconds = timeUnit.toSeconds(timeLength);
@@ -2021,7 +2017,7 @@ public class LocalDateTimeUtils extends CalendarUtils {
      * @param endDate   结束日期
      * @return the two date delay
      */
-    public static Integer getDelay(String startDate, String endDate) {
+    public static int getDayDelay(String startDate, String endDate) {
 
         final LocalDate start = parseLocalDate(startDate);
         final LocalDate end = parseLocalDate(endDate);
@@ -2029,8 +2025,10 @@ public class LocalDateTimeUtils extends CalendarUtils {
             final long l = end.toEpochDay() - start.toEpochDay();
             return (int) l;
         }
-        return null;
+        return -1;
     }
+
+
 
     /**
      * 获取某一天零点
@@ -2742,7 +2740,6 @@ public class LocalDateTimeUtils extends CalendarUtils {
      * @param beginDate 起始日期（包含）
      * @param endDate   结束日期（包含）
      * @return 是否在范围内
-
      */
     public static boolean isIn(ChronoLocalDateTime<?> date, ChronoLocalDateTime<?> beginDate,
                                ChronoLocalDateTime<?> endDate) {

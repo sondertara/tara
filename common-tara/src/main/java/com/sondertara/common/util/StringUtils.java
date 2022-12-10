@@ -2,6 +2,7 @@ package com.sondertara.common.util;
 
 import com.sondertara.common.io.CharacterReader;
 import com.sondertara.common.lang.Assert;
+import com.sondertara.common.lang.Pair;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -452,7 +453,7 @@ public class StringUtils {
      *
      * @param str 要处理的字符串
      * @return 除去空白的字符串，如果原字串为<code>null</code>或结果字符串为<code>""</code>，则返回
-     *         <code>null</code>
+     * <code>null</code>
      */
     public static String trimStart(CharSequence str) {
         return trim(str, -1);
@@ -476,7 +477,7 @@ public class StringUtils {
      *
      * @param str 要处理的字符串
      * @return 除去空白的字符串，如果原字串为<code>null</code>或结果字符串为<code>""</code>，则返回
-     *         <code>null</code>
+     * <code>null</code>
      */
     public static String trimEnd(CharSequence str) {
         return trim(str, 1);
@@ -1671,7 +1672,7 @@ public class StringUtils {
      */
     public static String[] splitToArray(CharSequence str, char separator, int limit) {
         if (null == str) {
-            return new String[] {};
+            return new String[]{};
         }
         return StringSplitUtils.splitToArray(str.toString(), separator, limit, false, false);
     }
@@ -1781,8 +1782,7 @@ public class StringUtils {
      * @return 切分后的集合
      * @since 3.2.0
      */
-    public static List<String> split(CharSequence str, CharSequence separator, int limit, boolean isTrim,
-            boolean ignoreEmpty) {
+    public static List<String> split(CharSequence str, CharSequence separator, int limit, boolean isTrim, boolean ignoreEmpty) {
         if (null == str) {
             return new ArrayList<>(0);
         }
@@ -1799,7 +1799,7 @@ public class StringUtils {
      */
     public static String[] split(CharSequence str, CharSequence separator) {
         if (str == null) {
-            return new String[] {};
+            return new String[]{};
         }
 
         final String separatorStr = (null == separator) ? null : separator.toString();
@@ -1816,7 +1816,7 @@ public class StringUtils {
      */
     public static String[] split(CharSequence str, int len) {
         if (null == str) {
-            return new String[] {};
+            return new String[]{};
         }
         return StringSplitUtils.splitByLength(str.toString(), len);
     }
@@ -2378,8 +2378,7 @@ public class StringUtils {
             if (Character.isUpperCase(nc) && Character.isLowerCase(lastChar)) {
                 buf.append(" ");
                 nc = Character.toLowerCase(c);
-            } else if (Character.isDigit(lastChar) && Character.isLetter(c)
-                    || Character.isDigit(c) && Character.isLetter(lastChar)) {
+            } else if (Character.isDigit(lastChar) && Character.isLetter(c) || Character.isDigit(c) && Character.isLetter(lastChar)) {
                 if (lastChar != ' ') {
                     buf.append(" ");
                 }
@@ -2468,7 +2467,7 @@ public class StringUtils {
 
         } else {
             if (delimiters == null) {
-                delimiterHashSet.add(Character.codePointAt(new char[] { ' ' }, 0));
+                delimiterHashSet.add(Character.codePointAt(new char[]{' '}, 0));
             }
 
         }
@@ -2599,8 +2598,7 @@ public class StringUtils {
 
         char lastChar = 'a';
         for (char c : s.toCharArray()) {
-            if (Character.isWhitespace(lastChar) && (!Character.isWhitespace(c) && '_' != c) && buf.length() > 0
-                    && buf.charAt(buf.length() - 1) != '_') {
+            if (Character.isWhitespace(lastChar) && (!Character.isWhitespace(c) && '_' != c) && buf.length() > 0 && buf.charAt(buf.length() - 1) != '_') {
                 buf.append("_");
             }
             if (!Character.isWhitespace(c)) {
@@ -2626,18 +2624,15 @@ public class StringUtils {
             char c = chars[i];
             boolean isUpperCaseAndPreviousIsUpperCase = Character.isUpperCase(previousChar) && Character.isUpperCase(c);
             boolean isUpperCaseAndPreviousIsLowerCase = Character.isLowerCase(previousChar) && Character.isUpperCase(c);
-            if (Character.isLetter(c) && Character.isLetter(previousChar)
-                    && (isUpperCaseAndPreviousIsLowerCase || isUpperCaseAndPreviousIsUpperCase)) {
+            if (Character.isLetter(c) && Character.isLetter(previousChar) && (isUpperCaseAndPreviousIsLowerCase || isUpperCaseAndPreviousIsUpperCase)) {
                 buf.append("_");
                 // extra _ after number
-            } else if (Character.isDigit(previousChar) && Character.isLetter(c)
-                    || Character.isDigit(c) && Character.isLetter(previousChar)) {
+            } else if (Character.isDigit(previousChar) && Character.isLetter(c) || Character.isDigit(c) && Character.isLetter(previousChar)) {
                 buf.append('_');
             }
 
             // replace separators by _
-            if ((isSeparator(c) || Character.isWhitespace(c)) && Character.isLetterOrDigit(previousChar)
-                    && nextIsLetterOrDigit(s, i)) {
+            if ((isSeparator(c) || Character.isWhitespace(c)) && Character.isLetterOrDigit(previousChar) && nextIsLetterOrDigit(s, i)) {
                 buf.append('_');
             } else {
                 buf.append(Character.toUpperCase(c));
@@ -2702,8 +2697,7 @@ public class StringUtils {
             boolean lastOneIsNotUnderscore = buf.length() > 0 && buf.charAt(buf.length() - 1) != '.';
             if (lastOneIsNotUnderscore && (isUpperCaseAndPreviousIsLowerCase || previousIsWhitespace)) {
                 buf.append(".");
-            } else if (Character.isDigit(lastChar) && Character.isLetter(c)
-                    || Character.isDigit(c) && Character.isLetter(lastChar)) {
+            } else if (Character.isDigit(lastChar) && Character.isLetter(c) || Character.isDigit(c) && Character.isLetter(lastChar)) {
                 buf.append(".");
             }
 
@@ -2802,7 +2796,7 @@ public class StringUtils {
      * has just one element, namely the input sequence in string form.
      * <p/>
      * <p/>
-     * 
+     *
      * <pre>
      * splitPreserveAllTokens("boo:and:foo", ":") =  { "boo", ":", "and", ":", "foo"}
      * splitPreserveAllTokens("boo:and:foo", "o") =  { "b", "o", "o", ":and:f", "o", "o"}
@@ -2810,7 +2804,7 @@ public class StringUtils {
      *
      * @param input The character sequence to be split
      * @return The array of strings computed by splitting the input around matches
-     *         of this pattern
+     * of this pattern
      */
     public static String[] splitPreserveAllTokens(String input, String regex) {
         int index = 0;
@@ -2832,7 +2826,7 @@ public class StringUtils {
 
         // If no match was found, return this
         if (index == 0) {
-            return new String[] { input };
+            return new String[]{input};
         }
 
         final String remaining = input.subSequence(index, input.length()).toString();
@@ -2874,8 +2868,7 @@ public class StringUtils {
         StringBuilder buf = new StringBuilder();
         char lastChar = 'a';
         for (char c : s.toCharArray()) {
-            if (Character.isWhitespace(lastChar) && (!Character.isWhitespace(c) && '-' != c) && buf.length() > 0
-                    && buf.charAt(buf.length() - 1) != '-') {
+            if (Character.isWhitespace(lastChar) && (!Character.isWhitespace(c) && '-' != c) && buf.length() > 0 && buf.charAt(buf.length() - 1) != '-') {
                 buf.append("-");
             }
             if ('_' == c) {
@@ -2922,8 +2915,7 @@ public class StringUtils {
         char[] charArray = s.toCharArray();
         for (int i = 0; i < charArray.length; i++) {
             char c = charArray[i];
-            if (!Character.isLetterOrDigit(c) && !Character.isWhitespace(c) && !isSeparator(c)
-                    && firstLetterOrDigitOrSeparator != -1) {
+            if (!Character.isLetterOrDigit(c) && !Character.isWhitespace(c) && !isSeparator(c) && firstLetterOrDigitOrSeparator != -1) {
                 return s.substring(firstLetterOrDigitOrSeparator, i);
             }
             if (Character.isLetterOrDigit(c) || Character.isWhitespace(c) || isSeparator(c)) {
@@ -2965,8 +2957,7 @@ public class StringUtils {
     }
 
     public static boolean isQuoted(String selectedText) {
-        return selectedText != null && selectedText.length() > 2
-                && (isBorderChar(selectedText, "\"") || isBorderChar(selectedText, "'"));
+        return selectedText != null && selectedText.length() > 2 && (isBorderChar(selectedText, "\"") || isBorderChar(selectedText, "'"));
     }
 
     public static boolean isBorderChar(String s, String borderChar) {
@@ -3007,7 +2998,7 @@ public class StringUtils {
         if (str.length() == 0) {
             return false;
         }
-        Set<Integer> delimiterSet = generateDelimiterSet(new char[] { ' ' });
+        Set<Integer> delimiterSet = generateDelimiterSet(new char[]{' '});
         int strLen = str.length();
         int index = 0;
 
@@ -3120,8 +3111,7 @@ public class StringUtils {
     }
 
     public static String toSpringEnvVariable(String s) {
-        return Arrays.stream(split(s, ".")).map(StringUtils::trim).map(str -> StringUtils.replaceChars(str, "-", ""))
-                .map(str -> StringUtils.replaceChars(str, "_", "")).collect(Collectors.joining("_")).toUpperCase();
+        return Arrays.stream(split(s, ".")).map(StringUtils::trim).map(str -> StringUtils.replaceChars(str, "-", "")).map(str -> StringUtils.replaceChars(str, "_", "")).collect(Collectors.joining("_")).toUpperCase();
     }
 
     /**
@@ -3635,6 +3625,42 @@ public class StringUtils {
     }
 
     /**
+     * 统计指定内容中包含指定字符串的数量<br>
+     * 参数为 {@code null} 或者 "" 返回 {@code 0}.
+     *
+     * <pre>
+     * StringUtils.count(null, *)       = 0
+     * StringUtils.count("", *)         = 0
+     * StringUtils.count("abba", null)  = 0
+     * StringUtils.count("abba", "")    = 0
+     * StringUtils.count("abba", "a")   = 2
+     * StringUtils.count("abba", "ab")  = 1
+     * StringUtils.count("abba", "xxx") = 0
+     * </pre>
+     *
+     * @param content      被查找的字符串
+     * @param strForSearch 需要查找的字符串
+     * @return 查找到的个数
+     */
+    public static Pair<Integer, Integer> countAndIndex(CharSequence content, CharSequence strForSearch) {
+        if (hasEmpty(content, strForSearch) || strForSearch.length() > content.length()) {
+            return Pair.of(0, -1);
+        }
+
+        int count = 0;
+        int idx = 0;
+        int lastIdx = -1;
+        final String content2 = content.toString();
+        final String strForSearch2 = strForSearch.toString();
+        while ((idx = content2.indexOf(strForSearch2, idx)) > -1) {
+            count++;
+            idx += strForSearch.length();
+            lastIdx = idx;
+        }
+        return Pair.of(count, lastIdx);
+    }
+
+    /**
      * 统计指定内容中包含指定字符的数量
      *
      * @param content       内容
@@ -3927,8 +3953,7 @@ public class StringUtils {
      * @return 位置
      * @since 3.2.1
      */
-    public static int lastIndexOf(final CharSequence str, final CharSequence searchStr, int fromIndex,
-            boolean ignoreCase) {
+    public static int lastIndexOf(final CharSequence str, final CharSequence searchStr, int fromIndex, boolean ignoreCase) {
         if (str == null || searchStr == null) {
             return INDEX_NOT_FOUND;
         }
@@ -4013,8 +4038,7 @@ public class StringUtils {
      * @return 如果已经结尾，返回原字符串，否则返回添加结尾的字符串
      * @since 3.0.7
      */
-    public static String appendIfMissing(final CharSequence str, final CharSequence suffix,
-            final CharSequence... suffixes) {
+    public static String appendIfMissing(final CharSequence str, final CharSequence suffix, final CharSequence... suffixes) {
         return appendIfMissing(str, suffix, false, suffixes);
     }
 
@@ -4028,8 +4052,7 @@ public class StringUtils {
      * @return 如果已经结尾，返回原字符串，否则返回添加结尾的字符串
      * @since 3.0.7
      */
-    public static String appendIfMissingIgnoreCase(final CharSequence str, final CharSequence suffix,
-            final CharSequence... suffixes) {
+    public static String appendIfMissingIgnoreCase(final CharSequence str, final CharSequence suffix, final CharSequence... suffixes) {
         return appendIfMissing(str, suffix, true, suffixes);
     }
 
@@ -4043,8 +4066,7 @@ public class StringUtils {
      * @return 如果已经结尾，返回原字符串，否则返回添加结尾的字符串
      * @since 3.0.7
      */
-    public static String appendIfMissing(final CharSequence str, final CharSequence suffix, final boolean ignoreCase,
-            final CharSequence... suffixes) {
+    public static String appendIfMissing(final CharSequence str, final CharSequence suffix, final boolean ignoreCase, final CharSequence... suffixes) {
         if (str == null || isEmpty(suffix) || endWith(str, suffix, ignoreCase)) {
             return str(str);
         }
@@ -4068,8 +4090,7 @@ public class StringUtils {
      * @return 如果已经结尾，返回原字符串，否则返回添加结尾的字符串
      * @since 3.0.7
      */
-    public static String prependIfMissing(final CharSequence str, final CharSequence prefix,
-            final CharSequence... prefixes) {
+    public static String prependIfMissing(final CharSequence str, final CharSequence prefix, final CharSequence... prefixes) {
         return prependIfMissing(str, prefix, false, prefixes);
     }
 
@@ -4083,8 +4104,7 @@ public class StringUtils {
      * @return 如果已经结尾，返回原字符串，否则返回添加结尾的字符串
      * @since 3.0.7
      */
-    public static String prependIfMissingIgnoreCase(final CharSequence str, final CharSequence prefix,
-            final CharSequence... prefixes) {
+    public static String prependIfMissingIgnoreCase(final CharSequence str, final CharSequence prefix, final CharSequence... prefixes) {
         return prependIfMissing(str, prefix, true, prefixes);
     }
 
@@ -4098,8 +4118,7 @@ public class StringUtils {
      * @return 如果已经结尾，返回原字符串，否则返回添加结尾的字符串
      * @since 3.0.7
      */
-    public static String prependIfMissing(final CharSequence str, final CharSequence prefix, final boolean ignoreCase,
-            final CharSequence... prefixes) {
+    public static String prependIfMissing(final CharSequence str, final CharSequence prefix, final boolean ignoreCase, final CharSequence... prefixes) {
         if (str == null || isEmpty(prefix) || startWith(str, prefix, ignoreCase)) {
             return str(str);
         }
@@ -4174,8 +4193,7 @@ public class StringUtils {
      * @return 子串是否相同
      * @since 3.2.1
      */
-    public static boolean isSubEquals(CharSequence str1, int start1, CharSequence str2, int start2, int length,
-            boolean ignoreCase) {
+    public static boolean isSubEquals(CharSequence str1, int start1, CharSequence str2, int start2, int length, boolean ignoreCase) {
         if (null == str1 || null == str2) {
             return false;
         }
@@ -4705,7 +4723,7 @@ public class StringUtils {
      *
      * @param str 要处理的字符串
      * @return 除去空白的字符串，如果原字串为<code>null</code>或结果字符串为<code>""</code>，则返回
-     *         <code>null</code>
+     * <code>null</code>
      */
     public static String trimStart(String str) {
         return trim(str, null, -1);
@@ -4728,7 +4746,7 @@ public class StringUtils {
      *
      * @param str 要处理的字符串
      * @return 除去空白的字符串，如果原字串为<code>null</code>或结果字符串为<code>""</code>，则返回
-     *         <code>null</code>
+     * <code>null</code>
      */
     public static String trimEnd(String str) {
         return trim(str, null, 1);
@@ -4755,7 +4773,7 @@ public class StringUtils {
      *
      * @param str 要处理的字符串
      * @return 除去空白的字符串，如果原字串为<code>null</code>或结果字符串为<code>""</code>，则返回
-     *         <code>null</code>
+     * <code>null</code>
      */
     public static String trimToNull(String str) {
         return trimToNull(str, null);
@@ -4771,7 +4789,7 @@ public class StringUtils {
      * @param str        要处理的字符串
      * @param stripChars 要除去的字符，如果为<code>null</code>表示除去空白字符
      * @return 除去空白的字符串，如果原字串为<code>null</code>或结果字符串为<code>""</code>，则返回
-     *         <code>null</code>
+     * <code>null</code>
      */
     public static String trimToNull(String str, String stripChars) {
         String result = trim(str, stripChars);
@@ -4793,7 +4811,7 @@ public class StringUtils {
      *
      * @param str 要处理的字符串
      * @return 除去空白的字符串，如果原字串为<code>null</code>或结果字符串为<code>""</code>，则返回
-     *         <code>null</code>
+     * <code>null</code>
      */
     public static String trimToEmpty(String str) {
         return trimToEmpty(str, null);
@@ -4809,7 +4827,7 @@ public class StringUtils {
      *
      * @param str 要处理的字符串
      * @return 除去空白的字符串，如果原字串为<code>null</code>或结果字符串为<code>""</code>，则返回
-     *         <code>null</code>
+     * <code>null</code>
      */
     public static String trimToEmpty(String str, String stripChars) {
         String result = trim(str, stripChars);
@@ -4896,7 +4914,7 @@ public class StringUtils {
      *
      * @param str the String to check, may be <code>null</code>
      * @return <code>true</code> if the String is not null, length > 0, and not
-     *         whitespace only
+     * whitespace only
      * @see Character#isWhitespace
      */
     public static boolean hasText(String str) {
@@ -4921,7 +4939,7 @@ public class StringUtils {
      *
      * @param str the String to check, may be <code>null</code>
      * @return <code>true</code> if the String is not null, length > 0, and not
-     *         whitespace only
+     * whitespace only
      * @see Character#isWhitespace
      */
     public static boolean hasText(StringBuffer str) {
@@ -4966,7 +4984,7 @@ public class StringUtils {
             return new String[0];
         }
         if (delimiter == null) {
-            return new String[] { str };
+            return new String[]{str};
         }
 
         List<String> result = new ArrayList<>();
@@ -4995,7 +5013,7 @@ public class StringUtils {
      *
      * @param collection the Collection to copy
      * @return the String array (<code>null</code> if the Collection was
-     *         <code>null</code> as well)
+     * <code>null</code> as well)
      */
     public static String[] toStringArray(Collection<String> collection) {
         if (collection == null) {
@@ -5358,9 +5376,7 @@ public class StringUtils {
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
             // These characters are part of the query syntax and must be escaped
-            if (c == '\\' || c == '+' || c == '-' || c == '!' || c == '(' || c == ')' || c == ':' || c == '^'
-                    || c == '[' || c == ']' || c == '\"' || c == '{' || c == '}' || c == '~' || c == '*' || c == '?'
-                    || c == '|' || c == '&' || c == ';' || c == '/' || Character.isWhitespace(c)) {
+            if (c == '\\' || c == '+' || c == '-' || c == '!' || c == '(' || c == ')' || c == ':' || c == '^' || c == '[' || c == ']' || c == '\"' || c == '{' || c == '}' || c == '~' || c == '*' || c == '?' || c == '|' || c == '&' || c == ';' || c == '/' || Character.isWhitespace(c)) {
                 sb.append('\\');
             }
             sb.append(c);

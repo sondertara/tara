@@ -19,6 +19,9 @@ package com.sondertara.excel.fast.writer;
  * Predefined header/footer positions.
  */
 public enum Position {
+    /**
+     * Position
+     */
     LEFT, CENTER, RIGHT;
 
     public String getPos() {

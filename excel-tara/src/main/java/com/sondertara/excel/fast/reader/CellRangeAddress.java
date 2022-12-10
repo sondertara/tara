@@ -80,8 +80,7 @@ public final class CellRangeAddress {
             return false;
         }
         CellRangeAddress other = (CellRangeAddress) obj;
-        return firstRow == other.firstRow && firstCol == other.firstCol && lastRow == other.lastRow
-                && lastCol == other.lastCol;
+        return firstRow == other.firstRow && firstCol == other.firstCol && lastRow == other.lastRow && lastCol == other.lastCol;
     }
 
     @Override

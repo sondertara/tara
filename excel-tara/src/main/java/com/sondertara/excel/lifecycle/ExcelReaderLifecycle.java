@@ -10,7 +10,7 @@ public interface ExcelReaderLifecycle {
     /**
      * 是否空行
      *
-     * @param row
+     * @param row row def
      * @return
      */
     boolean isEmptyRow(ExcelRowDef row);
@@ -18,7 +18,7 @@ public interface ExcelReaderLifecycle {
     /**
      * 前置设置
      *
-     * @return
+     * @param row row
      * @since 1.0.5
      */
     void preSet(ExcelRowDef row);
@@ -26,16 +26,15 @@ public interface ExcelReaderLifecycle {
     /**
      * 数据校验
      *
-     * @param row
-     * @return
+     * @param row the row
+     * @return pass validation
      */
     boolean validate(ExcelRowDef row);
 
     /**
      * 格式转换
      *
-     * @param row
-     * @return
+     * @param row row
      */
     void format(ExcelRowDef row);
 

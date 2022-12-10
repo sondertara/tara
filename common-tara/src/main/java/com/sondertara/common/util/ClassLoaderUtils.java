@@ -8,8 +8,12 @@ import com.sondertara.common.lang.map.WeakConcurrentMap;
 
 import java.io.File;
 import java.lang.reflect.Array;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
+import java.security.SecureClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -87,6 +91,7 @@ public class ClassLoaderUtils {
         if (System.getSecurityManager() == null) {
             return Thread.currentThread().getContextClassLoader();
         } else {
+
             // 绕开权限检查
             return AccessController
                     .doPrivileged((PrivilegedAction<ClassLoader>) () -> Thread.currentThread().getContextClassLoader());
@@ -100,7 +105,9 @@ public class ClassLoaderUtils {
      * @see ClassLoader#getSystemClassLoader()
      * @since 5.7.0
      */
+    @SuppressWarnings("removal")
     public static ClassLoader getSystemClassLoader() {
+
         if (System.getSecurityManager() == null) {
             return ClassLoader.getSystemClassLoader();
         } else {
@@ -130,6 +137,14 @@ public class ClassLoaderUtils {
             }
         }
         return classLoader;
+    }
+
+    public static URLClassLoader buildURLClassLoader(URL url) {
+        try {
+            return new URLClassLoader(new URL[]{url}, ClassLoader.getSystemClassLoader());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     // -----------------------------------------------------------------------------------

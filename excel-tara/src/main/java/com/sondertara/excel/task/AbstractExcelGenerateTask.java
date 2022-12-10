@@ -1,13 +1,16 @@
 package com.sondertara.excel.task;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.sondertara.common.exception.TaraException;
 import com.sondertara.common.model.PageResult;
 import com.sondertara.excel.function.ExportFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -35,6 +38,7 @@ public abstract class AbstractExcelGenerateTask<R> implements TaskRegiser {
 
     public AtomicBoolean producerFinish = new AtomicBoolean(false);
 
+    public static final ThreadPoolExecutor SHUTDOWN = new ThreadPoolExecutor(Runtime.getRuntime().availableProcessors(), Runtime.getRuntime().availableProcessors(), 5, TimeUnit.SECONDS, new ArrayBlockingQueue<>(50), new ThreadFactoryBuilder().setNameFormat("te-st%d").build());
 
     public AbstractExcelGenerateTask(ExportFunction<R> exportFunction) {
         this.exportFunction = exportFunction;
@@ -42,14 +46,20 @@ public abstract class AbstractExcelGenerateTask<R> implements TaskRegiser {
     }
 
     public void start() {
-        new ExcelQueryDataConsumer(consumers).init();
-        new ExcelQueryDataProducer(producers).init();
+        ExcelQueryDataConsumer consumer = new ExcelQueryDataConsumer(consumers);
+        consumer.init();
+        ExcelQueryDataProducer producer = new ExcelQueryDataProducer(producers);
+        producer.init();
         try {
             countDownLatch.await();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
+        } finally {
+            SHUTDOWN.execute(() -> {
+                consumer.exit();
+                producer.exit();
+            });
         }
-
     }
 
     /**
@@ -124,6 +134,7 @@ public abstract class AbstractExcelGenerateTask<R> implements TaskRegiser {
             super(countDownLatch, threadNum);
         }
 
+
         @Override
         public void consume() {
             while (true) {
@@ -145,7 +156,7 @@ public abstract class AbstractExcelGenerateTask<R> implements TaskRegiser {
                         }
                         return;
                     }
-                    Thread.sleep(5);
+                    Thread.sleep(3);
                 } catch (InterruptedException e) {
                     logger.error("Consumer[{}]: get queue error", Thread.currentThread().getName(), e);
                     throw new RuntimeException(e);

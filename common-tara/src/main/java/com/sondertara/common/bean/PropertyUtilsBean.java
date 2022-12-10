@@ -22,8 +22,9 @@ import com.sondertara.common.bean.expression.DefaultResolver;
 import com.sondertara.common.bean.expression.Resolver;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.commons.lang3.reflect.MethodUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 import java.beans.IndexedPropertyDescriptor;
 import java.beans.IntrospectionException;
@@ -113,7 +114,7 @@ public class PropertyUtilsBean {
     /**
      * Log instance
      */
-    private final Log log = LogFactory.getLog(PropertyUtils.class);
+    private final Logger log = LoggerFactory.getLogger(PropertyUtils.class);
 
     /**
      * The list with BeanIntrospector objects.
@@ -491,7 +492,7 @@ public class PropertyUtilsBean {
             readMethod = MethodUtils.getAccessibleMethod(readMethod);
             if (readMethod != null) {
                 final Object[] subscript = new Object[1];
-                subscript[0] = new Integer(index);
+                subscript[0] = index;
                 try {
                     return invokeMethod(readMethod, bean, subscript);
                 } catch (final InvocationTargetException e) {
@@ -1542,7 +1543,7 @@ public class PropertyUtilsBean {
             writeMethod = MethodUtils.getAccessibleMethod(writeMethod);
             if (writeMethod != null) {
                 final Object[] subscript = new Object[2];
-                subscript[0] = new Integer(index);
+                subscript[0] = index;
                 subscript[1] = value;
                 try {
                     if (log.isTraceEnabled()) {
@@ -2147,13 +2148,13 @@ public class PropertyUtilsBean {
             final Class<?>[] paramsClasses = new Class<?>[]{Throwable.class};
             return Throwable.class.getMethod("initCause", paramsClasses);
         } catch (final NoSuchMethodException e) {
-            final Log log = LogFactory.getLog(PropertyUtils.class);
+            final Logger log = LoggerFactory.getLogger(PropertyUtils.class);
             if (log.isWarnEnabled()) {
                 log.warn("Throwable does not have initCause() method in JDK 1.3");
             }
             return null;
         } catch (final Throwable e) {
-            final Log log = LogFactory.getLog(PropertyUtils.class);
+            final Logger log = LoggerFactory.getLogger(PropertyUtils.class);
             if (log.isWarnEnabled()) {
                 log.warn("Error getting the Throwable initCause() method", e);
             }

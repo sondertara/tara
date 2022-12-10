@@ -97,6 +97,14 @@ public @interface ExcelExportField {
     boolean autoWidth() default false;
 
     /**
+     * is auto merge same cell value
+     * 是否自动合并相同值的单元格
+     *
+     * @return  is auto merge same cell value
+     */
+    boolean autoMerge() default false;
+
+    /**
      * the custom column width,default is 16
      * 自定义cell宽度
      *

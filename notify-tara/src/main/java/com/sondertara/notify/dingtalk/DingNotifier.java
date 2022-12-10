@@ -3,15 +3,15 @@ package com.sondertara.notify.dingtalk;
 import com.alibaba.fastjson2.JSONObject;
 import com.sondertara.common.model.ResultDTO;
 import com.sondertara.common.util.CollectionUtils;
-import com.sondertara.common.util.HttpUtils;
+import com.sondertara.common.util.StringUtils;
 import com.sondertara.notify.Notifier;
 import com.sondertara.notify.common.NotifyPlatform;
 import com.sondertara.notify.common.NotifyPlatformEnum;
 import com.sondertara.notify.dingtalk.message.AtNode;
 import com.sondertara.notify.dingtalk.message.MarkdownMessage;
 import com.sondertara.notify.dingtalk.util.DingTalkSignUtil;
+import kong.unirest.Unirest;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
@@ -54,7 +54,7 @@ public class DingNotifier implements Notifier {
 
         String hookUrl = getTargetUrl(platform.getSecret(), platform.getUrlKey());
         try {
-            String result = HttpUtils.sendPostJson(hookUrl, markdown.toJsonString());
+            String result = Unirest.post(hookUrl).body(markdown.toJsonString()).asString().getBody();
 
             if (com.sondertara.common.util.StringUtils.isEmpty(result)) {
                 return ResultDTO.fail("request error!");

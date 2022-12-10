@@ -7,8 +7,7 @@ import com.sondertara.excel.common.constants.Constants;
 import com.sondertara.excel.entity.ExcelCellEntity;
 import com.sondertara.excel.entity.ExcelWriteSheetEntity;
 import com.sondertara.excel.function.ExportFunction;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVPrinter;
+import de.siegmar.fastcsv.writer.CsvWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,17 +60,15 @@ public class CsvGenerateTask<R> extends AbstractExcelGenerateTask<R> {
                     throw new IOException("Create directory:" + file.getAbsolutePath() + " error");
                 }
             }
-            Appendable printWriter = new PrintWriter(workPath + excelQueryEntity.getPage() + ".csv", Constants.CHARSET);
-            CSVPrinter csvPrinter = CSVFormat.EXCEL.print(printWriter);
+            PrintWriter printWriter = new PrintWriter(workPath + excelQueryEntity.getPage() + ".csv", Constants.CHARSET);
 
-            final List<R> list = excelQueryEntity.getData();
-            for (R data : list) {
-                List<String> row = buildRow(data, excelEntity);
-                csvPrinter.printRecord(row);
+            try (CsvWriter csv = CsvWriter.builder().build(printWriter)) {
+                final List<R> list = excelQueryEntity.getData();
+                for (R data : list) {
+                    List<String> row = buildRow(data, excelEntity);
+                    csv.writeRow(row);
+                }
             }
-
-            csvPrinter.flush();
-            csvPrinter.close();
             if (logger.isDebugEnabled()) {
                 logger.debug("Data of page[{}] processing has been completed...", excelQueryEntity.getPage());
             }

@@ -9,9 +9,6 @@ import com.sondertara.excel.common.constants.Constants;
 import com.sondertara.excel.entity.ExcelCellEntity;
 import com.sondertara.excel.entity.ExcelWriteSheetEntity;
 import com.sondertara.excel.function.ExportFunction;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVPrinter;
-import org.apache.commons.io.FileUtils;
 import org.apache.poi.xssf.streaming.SXSSFCell;
 import org.apache.poi.xssf.streaming.SXSSFRow;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
@@ -19,19 +16,12 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * excel write
@@ -50,54 +40,6 @@ public class ExcelWriterResolver extends ExcelTemplateWriterResolver {
     }
 
 
-    public void generateCsv(String fileName) {
-        try {
-            final String workPath = Constants.FILE_PATH + File.separator + fileName + File.separator;
-            File path = new File(workPath);
-
-            List<File> fileList = new ArrayList<File>();
-            if (path.exists()) {
-                File[] files = path.listFiles();
-                assert files != null;
-                if (files.length == 0) {
-                    return;
-                }
-                Collections.addAll(fileList, files);
-                final List<File> collect = fileList.stream().sorted(Comparator.comparing(File::getName)).collect(Collectors.toList());
-                File csvFile = new File(workPath + fileName + ".csv");
-
-                if (csvFile.exists()) {
-                    boolean delete = csvFile.delete();
-                    if (!delete) {
-                        throw new IOException("Delete file:" + csvFile.getAbsolutePath() + " failed");
-                    }
-                } else {
-                    boolean newFile = csvFile.createNewFile();
-                    if (!newFile) {
-                        throw new IOException("Create file:" + csvFile.getAbsolutePath() + " failed");
-                    }
-                }
-                Appendable printWriter = new PrintWriter(csvFile, Constants.CHARSET);
-                CSVPrinter csvPrinter = CSVFormat.EXCEL.builder().setHeader(excelEntity.getPropertyList().stream().map(ExcelCellEntity::getColumnName).toArray(String[]::new)).build().print(printWriter);
-
-                csvPrinter.flush();
-                csvPrinter.close();
-                for (File file : collect) {
-                    if (file.getName().endsWith("csv")) {
-                        byte[] bytes = FileUtils.readFileToByteArray(file);
-                        FileUtils.writeByteArrayToFile(csvFile, bytes, true);
-                    }
-                    if (!file.getName().contains(fileName)) {
-                        file.delete();
-                    }
-                }
-            }
-
-        } catch (Exception e) {
-            logger.error("write into file error:{}", e.toString());
-        }
-
-    }
 
     /**
      * @param exportFunction export function

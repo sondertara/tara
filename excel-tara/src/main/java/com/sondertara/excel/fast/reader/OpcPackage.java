@@ -61,8 +61,7 @@ class OpcPackage implements AutoCloseable {
         return filenameRegex.matcher(entryName).replaceFirst("$1_rels/$2.rels");
     }
 
-    private Map<String, String> readWorkbookPartsIds(String workbookRelsEntryName)
-            throws IOException, XMLStreamException {
+    private Map<String, String> readWorkbookPartsIds(String workbookRelsEntryName) throws IOException, XMLStreamException {
         String xlFolder = workbookRelsEntryName.substring(0, workbookRelsEntryName.indexOf("_rel"));
         Map<String, String> partsIdById = new HashMap<>();
         SimpleXmlReader rels = new SimpleXmlReader(DefaultXMLInputFactory.factory, getRequiredEntryContent(workbookRelsEntryName));
@@ -98,9 +97,7 @@ class OpcPackage implements AutoCloseable {
             }
             if (entries.workbook == null) {
                 // in case of a default workbook path, we got this
-                // <Default Extension="xml"
-                // ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"
-                // />
+                // <Default Extension="xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml" />
                 entries.workbook = "/xl/workbook.xml";
             }
         }
@@ -113,8 +110,8 @@ class OpcPackage implements AutoCloseable {
         try (SimpleXmlReader reader = new SimpleXmlReader(DefaultXMLInputFactory.factory, getRequiredEntryContent(styleXml))) {
             AtomicBoolean insideCellXfs = new AtomicBoolean(false);
             while (reader.goTo(() -> reader.isStartElement("numFmt") ||
-                    reader.isStartElement("cellXfs") || reader.isEndElement("cellXfs") ||
-                    insideCellXfs.get())) {
+                reader.isStartElement("cellXfs") || reader.isEndElement("cellXfs") ||
+                insideCellXfs.get())) {
                 if (reader.isStartElement("cellXfs")) {
                     insideCellXfs.set(true);
                 } else if (reader.isEndElement("cellXfs")) {
@@ -124,7 +121,7 @@ class OpcPackage implements AutoCloseable {
                     String formatCode = reader.getAttributeRequired("formatCode");
                     fmtIdToFmtString.put(reader.getAttributeRequired("numFmtId"), formatCode);
                 } else if (insideCellXfs.get() && reader.isStartElement("xf")) {
-                    fmtIdList.add(reader.getAttribute("numFmtId"));
+                    fmtIdList.add(reader.getAttribute ("numFmtId"));
                 }
             }
         }
@@ -133,7 +130,7 @@ class OpcPackage implements AutoCloseable {
 
     private InputStream getRequiredEntryContent(String name) throws IOException {
         return Optional.ofNullable(getEntryContent(name))
-                .orElseThrow(() -> new ExcelReaderException(name + " not found"));
+            .orElseThrow(() -> new ExcelReaderException(name + " not found"));
     }
 
     static OpcPackage open(File inputFile) throws IOException {

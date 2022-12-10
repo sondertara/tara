@@ -60,7 +60,7 @@ public class IpUtils {
     /**
      * 获得本机的机器名称，用来从配置文件中排除本机
      *
-     * @author zhangfeng
+     * @return the host name
      */
     public static String getLocalHostName() {
         try {
@@ -74,8 +74,6 @@ public class IpUtils {
 
     /**
      * #func 返回主机名的全限定域名<br>
-     *
-     * @author v_dongguoshuang
      */
     public static String getFullyLocalHostName() {
         String hostName = null;
@@ -91,7 +89,6 @@ public class IpUtils {
     /**
      * #func 返回本机IP<br>
      *
-     * @author v_dongguoshuang
      */
     public static String getLocalHostAddress() {
         try {
