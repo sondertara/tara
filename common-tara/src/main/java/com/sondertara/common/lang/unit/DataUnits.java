@@ -64,7 +64,7 @@ public enum DataUnits {
      * 通过后缀返回对应的 DataUnit
      *
      * @param suffix 单位后缀
-     * @return 匹配到的{@link DataUnit}
+     * @return DataUnits
      * @throws IllegalArgumentException 后缀无法识别报错
      */
     public static DataUnits fromSuffix(String suffix) {

@@ -24,14 +24,14 @@ Tara是一个纯java工具包，包括常用util工具类和excel处理两个模
 <dependency>
     <groupId>com.sondertara</groupId>
     <artifactId>common-tara</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
 </dependency>
 ```
 
 - Gradle project
 
 ```groovy
-implementation 'com.sondertara:common-tara:1.0.2
+implementation 'com.sondertara:common-tara:1.0.3
 ```
 
 ### :eight_spoked_asterisk:**Features Induction**
@@ -87,7 +87,7 @@ implementation 'com.sondertara:common-tara:1.0.2
 <dependency>
     <groupId>com.sondertara</groupId>
     <artifactId>excel-tara</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
 </dependency>
 ```
 

@@ -15,8 +15,8 @@
  */
 package com.sondertara.excel.fast.reader;
 
+import com.sondertara.common.util.StringUtils;
 import com.sondertara.excel.exception.ExcelReaderException;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DateUtil;
 

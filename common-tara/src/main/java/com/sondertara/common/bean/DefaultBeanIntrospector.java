@@ -17,8 +17,9 @@
 package com.sondertara.common.bean;
 
 import org.apache.commons.lang3.reflect.MethodUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 import java.beans.BeanInfo;
 import java.beans.IndexedPropertyDescriptor;
@@ -61,7 +62,9 @@ public class DefaultBeanIntrospector implements BeanIntrospector {
 	private static final Class<?>[] LIST_CLASS_PARAMETER = new Class[] { List.class };
 
 	/** Log instance */
-	private final Log log = LogFactory.getLog(getClass());
+
+
+	private final Logger log = 	LoggerFactory.getLogger(getClass());
 
 	/**
 	 * Private constructor so that no instances can be created.

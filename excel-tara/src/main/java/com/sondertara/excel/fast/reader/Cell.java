@@ -89,7 +89,6 @@ public class Cell {
 
     /**
      * Returns a date-time interpretation of a numerical cell.
-     *
      * @return LocalDateTime or null if the cell is empty
      * @throws ExcelReaderException is the cell if not of numerical type or empty
      */
@@ -108,12 +107,10 @@ public class Cell {
         long millisecondsInDay = (long) (((value - wholeDays) * DAY_MILLISECONDS) + 0.5D);
 
         int startYear = 1900;
-        // Excel thinks 2/29/1900 is a valid date, which it isn't
-        int dayAdjust = -1;
+        int dayAdjust = -1; // Excel thinks 2/29/1900 is a valid date, which it isn't
         if (workbook.isDate1904()) {
             startYear = 1904;
-            // 1904 date windowing uses 1/2/1904 as the first day
-            dayAdjust = 1;
+            dayAdjust = 1; // 1904 date windowing uses 1/2/1904 as the first day
         } else if (wholeDays < 61) {
             // Date is prior to 3/1/1900, so adjust because Excel thinks 2/29/1900 exists
             // If Excel date == 2/29/1900, will become 3/1/1900 in Java representation

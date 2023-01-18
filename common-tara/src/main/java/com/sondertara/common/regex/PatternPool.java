@@ -4,7 +4,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
-import javax.annotation.Nonnull;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Pattern;
 
@@ -179,7 +178,7 @@ public class PatternPool {
     private final static LoadingCache<RegexWithFlag, Pattern> POOL = CacheBuilder.newBuilder().maximumSize(30)
             .build(new CacheLoader<RegexWithFlag, Pattern>() {
                 @Override
-                public Pattern load(@Nonnull RegexWithFlag regexWithFlag) {
+                public Pattern load(RegexWithFlag regexWithFlag) {
                     return Pattern.compile(regexWithFlag.regex);
                 }
 

@@ -16,8 +16,8 @@ public interface AbstractExcelColumnValidator<T extends Annotation> {
     /**
      * validate the value
      *
-     * @param value
-     * @return
+     * @param value the value
+     * @return is pass
      */
     boolean validate(String value);
 }

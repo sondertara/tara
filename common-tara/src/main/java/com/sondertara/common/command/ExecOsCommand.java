@@ -1,8 +1,9 @@
 package com.sondertara.common.command;
 
+import com.sondertara.common.io.FileUtils;
 import com.sondertara.common.model.ResultDTO;
 import com.sondertara.common.util.StringFormatter;
-import org.apache.commons.io.FileUtils;
+
 
 import java.io.File;
 import java.io.IOException;
@@ -37,7 +38,7 @@ public class ExecOsCommand {
             return ResultDTO.fail(StringFormatter.format("Exec command failed:{}", e1.getMessage()));
         } finally {
             if (null != scriptFile) {
-                FileUtils.deleteQuietly(new File(scriptFile));
+               FileUtils.del(new File(scriptFile));
             }
         }
         // 处理Process返回结果
@@ -50,10 +51,10 @@ public class ExecOsCommand {
         StringBuilder sb = new StringBuilder(dirName);
         String suffix = isWindows ? ".bat" : ".sh";
         try {
-            File file = new File(sb.append("_").append(UUID.randomUUID()).append(suffix).toString());
-            FileUtils.writeStringToFile(file, command, StandardCharsets.UTF_8);
+            File file = new File(sb.append(File.separator).append("tara_").append(UUID.randomUUID()).append(suffix).toString());
+            FileUtils.writeString(command,file, StandardCharsets.UTF_8);
 
-            FileUtils.writeStringToFile(file, cleanupScript(command), StandardCharsets.UTF_8);
+            FileUtils.writeString(cleanupScript(command),file, StandardCharsets.UTF_8);
             String path = file.getAbsolutePath();
             if (!isWindows) {
                 executeCommand("chmod", "u+x", path);
@@ -68,10 +69,9 @@ public class ExecOsCommand {
         return Paths.get(workingDirectory, scriptFileName);
     }
 
-    private void createScript(String workingDirectory, String scriptFileName, Boolean isWindows, String scriptValue)
-            throws IOException, InterruptedException {
+    private void createScript(String workingDirectory, String scriptFileName, Boolean isWindows, String scriptValue) throws IOException, InterruptedException {
         Path scriptPath = getScriptPath(workingDirectory, scriptFileName);
-        FileUtils.writeStringToFile(scriptPath.toFile(), cleanupScript(scriptValue), StandardCharsets.UTF_8);
+        FileUtils.writeString( cleanupScript(scriptValue), scriptPath.toFile(),StandardCharsets.UTF_8);
 
         if (!isWindows) {
             executeCommand(workingDirectory, null, "chmod", "u+x", scriptFileName);

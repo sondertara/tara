@@ -27,12 +27,24 @@ abstract public class AbstractConsumer implements Consumer {
     private final Phaser phaser = new Phaser();
 
 
-    private static final ThreadPoolExecutor TASK_POOL = new ThreadPoolExecutor(Runtime.getRuntime().availableProcessors(), Runtime.getRuntime().availableProcessors() * 2 + 16, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<>(30), new ThreadFactoryBuilder().setDaemon(true).setNameFormat("Excel-worker-%d").build(), new ThreadPoolExecutor.CallerRunsPolicy());
-
+    private ThreadPoolExecutor poolExecutor;
 
     protected AbstractConsumer(CountDownLatch countDownLatch, int threadNum) {
         this.threadNum = threadNum;
         this.countDownLatch = countDownLatch;
+        this.poolExecutor = new ThreadPoolExecutor(threadNum, Math.max(Runtime.getRuntime().availableProcessors() * 2 + 1, threadNum), 10, TimeUnit.SECONDS, new LinkedBlockingQueue<>(10), new ThreadFactoryBuilder().setDaemon(true).setNameFormat("Excel-worker-%d").build(), new ThreadPoolExecutor.AbortPolicy());
+
+    }
+
+    @Override
+    public void exit() {
+        if (null != poolExecutor) {
+            try {
+                this.poolExecutor.shutdown();
+            } catch (Exception ignore) {
+
+            }
+        }
     }
 
     @Override
@@ -40,7 +52,7 @@ abstract public class AbstractConsumer implements Consumer {
         phaser.register();
         for (int i = 0; i < threadNum; i++) {
             phaser.register();
-            TASK_POOL.execute(() -> {
+            poolExecutor.execute(() -> {
                 try {
                     consume();
                     Thread.sleep(5);
@@ -51,7 +63,7 @@ abstract public class AbstractConsumer implements Consumer {
                 phaser.arrive();
             });
         }
-        TASK_POOL.execute(() -> {
+        poolExecutor.execute(() -> {
             phaser.arriveAndAwaitAdvance();
             this.isDone = true;
             logger.info("All Consumers is finish");
@@ -60,7 +72,4 @@ abstract public class AbstractConsumer implements Consumer {
 
     }
 
-    public boolean isDone() {
-        return isDone;
-    }
 }

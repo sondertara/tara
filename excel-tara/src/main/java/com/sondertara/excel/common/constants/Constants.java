@@ -74,6 +74,8 @@ public final class Constants {
 
     public static final String CHARSET_UTF_8 = "UTF-8";
 
+    public static final String[] Excel_FILE_SUFFIX = new String[]{".xlsx", ".xls"};
 
-    public static final int DEFAULT_COL_WIDTH=16;
+
+    public static final int DEFAULT_COL_WIDTH = 16;
 }

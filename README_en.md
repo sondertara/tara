@@ -25,14 +25,14 @@ library,etc.
 <dependency>
     <groupId>com.sondertara</groupId>
     <artifactId>common-tara</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
 </dependency>
 ```
 
 - Gradle project
 
 ```groovy
-implementation 'com.sondertara:common-tara:1.0.2'
+implementation 'com.sondertara:common-tara:1.0.3'
 ```
 
 ### :eight_spoked_asterisk:**Features Induction**
@@ -91,7 +91,7 @@ Flexible Excel library based on `Apache POI`,provides convenient Excel reading-w
 <dependency>
     <groupId>com.sondertara</groupId>
     <artifactId>excel-tara</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
 </dependency>
 ```
 

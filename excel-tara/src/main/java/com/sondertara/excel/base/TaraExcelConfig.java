@@ -23,6 +23,8 @@ public class TaraExcelConfig {
 
     boolean openAutoColWidth = Constants.OPEN_AUTO_COLUMN_WIDTH;
 
+    boolean useLegacy = false;
+
 
     private TaraExcelConfig() {
 
@@ -40,6 +42,7 @@ public class TaraExcelConfig {
         CONFIG.csvProducerThread = config.getCsvProducerThread();
         CONFIG.openAutoColWidth = config.isOpenAutoColWidth();
         CONFIG.defaultRowPeerSheet = config.getDefaultRowPeerSheet();
+        CONFIG.useLegacy = config.isUseLegacy();
     }
 
 

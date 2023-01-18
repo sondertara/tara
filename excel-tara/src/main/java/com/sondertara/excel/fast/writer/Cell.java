@@ -78,7 +78,7 @@ class Cell {
         }
     }
 
-    void setValue(Workbook wb, String v) {
+    void setValue(FastWorkbook wb, String v) {
         value = v == null ? null : wb.cacheString(v);
     }
 
