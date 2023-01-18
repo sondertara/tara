@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.sondertara</groupId>
         <artifactId>tara</artifactId>
-        <version>1.0.3-SNAPSHOT</version>
+        <version>1.0.3</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>excel-tara</artifactId>
@@ -84,7 +84,7 @@
         <dependency>
             <groupId>com.sondertara</groupId>
             <artifactId>common-tara</artifactId>
-            <version>1.0.3-SNAPSHOT</version>
+            <version>1.0.3</version>
         </dependency>
         <dependency>
             <groupId>de.siegmar</groupId>

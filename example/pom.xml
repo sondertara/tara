@@ -6,7 +6,7 @@
 
     <groupId>com.sondertara</groupId>
     <artifactId>example-tara</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.3</version>
 
     <properties>
         <java.version>8</java.version>
@@ -18,7 +18,7 @@
         <dependency>
             <groupId>com.sondertara</groupId>
             <artifactId>excel-tara</artifactId>
-            <version>1.0.3-SNAPSHOT</version>
+            <version>1.0.3</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
