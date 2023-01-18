@@ -3,7 +3,6 @@ package com.sondertara.excel.boot;
 import com.sondertara.excel.common.constants.Constants;
 import com.sondertara.excel.context.AnnotationCsvWriterContext;
 import com.sondertara.excel.function.ExportFunction;
-import com.sondertara.excel.resolver.ExcelReader;
 import com.sondertara.excel.resolver.builder.AbstractExcelWriter;
 import com.sondertara.excel.utils.ExcelResponseUtils;
 import org.slf4j.Logger;
@@ -19,7 +18,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class ExcelCsvWriter extends AbstractExcelWriter<String> {
 
-    private static final Logger logger = LoggerFactory.getLogger(ExcelReader.class);
+    private static final Logger logger = LoggerFactory.getLogger(ExcelCsvWriter.class);
 
 
     public ExcelCsvWriter() {

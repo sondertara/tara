@@ -336,7 +336,7 @@ public abstract class AbstractExcelWriterExecutor implements TaraExcelExecutor<W
         if (CollectionUtils.isEmpty(rows)) {
             return;
         }
-        List<Integer> rowKeys = Stream.iterate(sheetDefinition.getFirstDataRow() + 1, item -> item + 1).limit(rows.size() + sheetDefinition.getFirstDataRow() + 1).toList();
+        List<Integer> rowKeys = Stream.iterate(sheetDefinition.getFirstDataRow() + 1, item -> item + 1).limit(rows.size() + sheetDefinition.getFirstDataRow() + 1).collect(Collectors.toList());
         final Map<Integer, Field> columnFields = sheetDefinition.getColFields();
         Set<Integer> columnKeys = columnFields.keySet();
         ArrayTable<Integer, Integer, Integer> table = ArrayTable.create(rowKeys, columnKeys);

@@ -78,23 +78,6 @@
                 <artifactId>commons-lang3</artifactId>
                 <version>3.12.0</version>
             </dependency>
-            <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpclient</artifactId>
-                <version>4.5.13</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpmime</artifactId>
-                <version>4.5.13</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpasyncclient</artifactId>
-                <scope>compile</scope>
-                <version>4.1.5</version>
-            </dependency>
 
             <dependency>
                 <groupId>commons-io</groupId>
@@ -137,7 +120,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>3.3.0</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -146,7 +129,6 @@
                 <configuration>
                     <compilerArgument>-Xlint:unchecked,deprecation</compilerArgument>
                 </configuration>
-
             </plugin>
             <!-- Source -->
             <plugin>
@@ -257,7 +239,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-release-plugin</artifactId>
-                        <version>2.5.3</version>
+                        <version>3.0.0-M7</version>
                         <configuration>
                             <autoVersionSubmodules>true</autoVersionSubmodules>
                             <useReleaseProfile>false</useReleaseProfile>

@@ -25,16 +25,16 @@ public abstract class AbstractExcelGenerateTask<R> implements TaskRegiser {
     private static final Logger logger = LoggerFactory.getLogger(AbstractExcelGenerateTask.class);
     private final AtomicInteger page = new AtomicInteger(0);
 
+    private final AtomicInteger maxIndex = new AtomicInteger(Integer.MAX_VALUE);
     private final ExportFunction<R> exportFunction;
 
     private final LinkedBlockingQueue<PageResult<R>> queue;
 
     private final CountDownLatch countDownLatch = new CountDownLatch(2);
 
-    private int consumers = 2;
+    private int consumers = 3;
     private int producers = Runtime.getRuntime().availableProcessors();
 
-    private final AtomicInteger maxIndex = new AtomicInteger(0);
 
     public AtomicBoolean producerFinish = new AtomicBoolean(false);
 
@@ -101,15 +101,16 @@ public abstract class AbstractExcelGenerateTask<R> implements TaskRegiser {
                 logger.debug("start query page[{}]...", queryPage);
             }
             final PageResult<R> result = exportFunction.query(queryPage);
-            maxIndex.compareAndSet(0, result.endIndex());
+            maxIndex.compareAndSet(Integer.MAX_VALUE, result.endIndex());
+            logger.debug(" producer maxIndex:"+maxIndex);
             if (logger.isDebugEnabled()) {
                 logger.debug("end query page[{}]...", queryPage);
             }
 
-//            if (result.isEmpty()) {
-//                logger.debug("query data is empty,query exit !");
-//                return false;
-//            }
+            if (result.isEmpty()) {
+                logger.debug("query data is empty,query exit[{}] !",queryPage);
+                return false;
+            }
             try {
                 queue.put(result);
                 logger.debug("Producer[{}]:current data[index={}]", Thread.currentThread().getName(), queryPage);
@@ -141,10 +142,10 @@ public abstract class AbstractExcelGenerateTask<R> implements TaskRegiser {
                 try {
                     if (!producerFinish.get() || !queue.isEmpty()) {
                         PageResult<R> result = queue.poll(500, TimeUnit.MILLISECONDS);
-                        if (logger.isDebugEnabled()) {
-                            logger.debug("Consumer[{}] parse data start", Thread.currentThread().getName());
-                        }
                         if (null != result) {
+                            if (logger.isDebugEnabled()) {
+                                logger.debug("Consumer[{}] parse data start[{}]", Thread.currentThread().getName(),result.getPage());
+                            }
                             parse(result);
                             if (logger.isDebugEnabled()) {
                                 logger.debug("Consumer[{}] parse data end[{}]", Thread.currentThread().getName(), result.getPage());

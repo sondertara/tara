@@ -16,8 +16,6 @@
 package com.sondertara.excel.fast.writer;
 
 
-
-
 import com.sondertara.excel.fast.opczip.OpcOutputStream;
 
 import java.io.IOException;
@@ -38,9 +36,9 @@ import java.util.zip.ZipEntry;
 
 
 /**
- * A {@link Workbook} contains one or more {@link Worksheet} objects.
+ * A {@link FastWorkbook} contains one or more {@link Worksheet} objects.
  */
-public class Workbook {
+public class FastWorkbook {
 
     private int activeTab = 0;
     private final String applicationName;
@@ -54,15 +52,15 @@ public class Workbook {
     /**
      * Constructor.
      *
-     * @param os Output stream eventually holding the serialized workbook.
-     * @param applicationName Name of the application which generated this
-     * workbook.
+     * @param os                 Output stream eventually holding the serialized workbook.
+     * @param applicationName    Name of the application which generated this
+     *                           workbook.
      * @param applicationVersion Version of the application. Ignored if
-     * {@code null}. Refer to
-     * <a href="https://msdn.microsoft.com/en-us/library/documentformat.openxml.extendedproperties.applicationversion(v=office.14).aspx">this
-     * page</a> for details.
+     *                           {@code null}. Refer to
+     *                           <a href="https://msdn.microsoft.com/en-us/library/documentformat.openxml.extendedproperties.applicationversion(v=office.14).aspx">this
+     *                           page</a> for details.
      */
-    public Workbook(OutputStream os, String applicationName, String applicationVersion) {
+    public FastWorkbook(OutputStream os, String applicationName, String applicationVersion) {
         this.os = new OpcOutputStream(os);
         /* Tests showed that:
          * The default (-1) is level 6
@@ -79,6 +77,10 @@ public class Workbook {
             throw new IllegalArgumentException("Application version must be of the form XX.YYYY");
         }
         this.applicationVersion = applicationVersion;
+    }
+
+    public int getNumberOfSheets() {
+        return this.worksheets.size();
     }
 
     /**
@@ -123,14 +125,14 @@ public class Workbook {
 
         writeFile("[Content_Types].xml", w -> {
             w.append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><Types xmlns=\"http://schemas.openxmlformats.org/package/2006/content-types\"><Default Extension=\"rels\" ContentType=\"application/vnd.openxmlformats-package.relationships+xml\"/><Default Extension=\"xml\" ContentType=\"application/xml\"/>");
-            if(hasComments()){
+            if (hasComments()) {
                 w.append("<Default ContentType=\"application/vnd.openxmlformats-officedocument.vmlDrawing\" Extension=\"vml\"/>");
             }
             w.append("<Override PartName=\"/xl/sharedStrings.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml\"/><Override PartName=\"/xl/styles.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml\"/><Override PartName=\"/xl/workbook.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml\"/>");
             for (Worksheet ws : worksheets) {
                 int index = getIndex(ws);
                 w.append("<Override PartName=\"/xl/worksheets/sheet").append(index).append(".xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml\"/>");
-                if(!ws.comments.isEmpty()) {
+                if (!ws.comments.isEmpty()) {
                     w.append("<Override ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.comments+xml\" PartName=\"/xl/comments").append(index).append(".xml\"/>");
                     w.append("<Override ContentType=\"application/vnd.openxmlformats-officedocument.drawing+xml\" PartName=\"/xl/drawings/drawing").append(index).append(".xml\"/>");
                 }
@@ -191,19 +193,20 @@ public class Workbook {
 
     /**
      * Writes the {@code xl/workbook.xml} file to the zip.
+     *
      * @throws IOException If an I/O error occurs.
      */
     private void writeWorkbookFile() throws IOException {
         writeFile("xl/workbook.xml", w -> {
             w.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
                     "<workbook " +
-                            "xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" " +
-                            "xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\">" +
+                    "xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" " +
+                    "xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\">" +
                     "<workbookPr date1904=\"false\"/>" +
-                        "<bookViews>" +
-                            "<workbookView activeTab=\"" + activeTab + "\"/>" +
-                        "</bookViews>" +
-                        "<sheets>");
+                    "<bookViews>" +
+                    "<workbookView activeTab=\"" + activeTab + "\"/>" +
+                    "</bookViews>" +
+                    "<sheets>");
 
             for (Worksheet ws : worksheets) {
                 writeWorkbookSheet(w, ws);
@@ -216,49 +219,49 @@ public class Workbook {
             w.append("<definedNames>");
             for (Worksheet ws : worksheets) {
                 int worksheetIndex = getIndex(ws) - 1;
-                String defineName = Stream.of(ws.getRepeatingCols(),ws.getRepeatingRows())
-                                .filter(Objects::nonNull)
-                                .map(r -> "&apos;" + ws.getName() + "&apos;!" + r.toString())
-                                .collect(Collectors.joining(","));
+                String defineName = Stream.of(ws.getRepeatingCols(), ws.getRepeatingRows())
+                        .filter(Objects::nonNull)
+                        .map(r -> "&apos;" + ws.getName() + "&apos;!" + r.toString())
+                        .collect(Collectors.joining(","));
 
                 if (!defineName.isEmpty()) {
                     w.append("<definedName function=\"false\" " +
-                                "hidden=\"false\" localSheetId=\"" +
-                                worksheetIndex + "\" name=\"_xlnm.Print_Titles\" " +
-                                "vbProcedure=\"false\">")
-                     .append(defineName)
-                     .append("</definedName>");
+                                    "hidden=\"false\" localSheetId=\"" +
+                                    worksheetIndex + "\" name=\"_xlnm.Print_Titles\" " +
+                                    "vbProcedure=\"false\">")
+                            .append(defineName)
+                            .append("</definedName>");
                 }
                 /** define specifically named ranges **/
                 for (Map.Entry<String, Range> nr : ws.getNamedRanges().entrySet()) {
                     String rangeName = nr.getKey();
                     Range range = nr.getValue();
                     w.append("<definedName function=\"false\" " +
-                                "hidden=\"false\" localSheetId=\"" +
-                                worksheetIndex + "\" name=\"")
-                        .append(rangeName)
-                        .append("\" vbProcedure=\"false\">&apos;")
-                        .append(ws.getName())
-                        .append("&apos;")
-                        .append("!")
-                        .append("$" + Range.colToString(range.getLeft()) + "$" + (1 + range.getTop()))
-                        .append(":")
-                        .append("$" + Range.colToString(range.getRight()) + "$" + (1 + range.getBottom()))
-                        .append("</definedName>");
+                                    "hidden=\"false\" localSheetId=\"" +
+                                    worksheetIndex + "\" name=\"")
+                            .append(rangeName)
+                            .append("\" vbProcedure=\"false\">&apos;")
+                            .append(ws.getName())
+                            .append("&apos;")
+                            .append("!")
+                            .append("$" + Range.colToString(range.getLeft()) + "$" + (1 + range.getTop()))
+                            .append(":")
+                            .append("$" + Range.colToString(range.getRight()) + "$" + (1 + range.getBottom()))
+                            .append("</definedName>");
                 }
                 Range af = ws.getAutoFilterRange();
                 if (af != null) {
                     w.append("<definedName function=\"false\" hidden=\"true\" localSheetId=\"")
-                    .append(worksheetIndex)
-                    .append("\" name=\"_xlnm._FilterDatabase\" vbProcedure=\"false\">")
-                    .append("&apos;")
-                    .append(ws.getName())
-                    .append("&apos;")
-                    .append("!")
-                    .append("$" + Range.colToString(af.getLeft()) + "$" + (1 + af.getTop()))
-                    .append(":")
-                    .append("$" + Range.colToString(af.getRight()) + "$" + (1 + af.getBottom()))
-                    .append("</definedName>");
+                            .append(worksheetIndex)
+                            .append("\" name=\"_xlnm._FilterDatabase\" vbProcedure=\"false\">")
+                            .append("&apos;")
+                            .append(ws.getName())
+                            .append("&apos;")
+                            .append("!")
+                            .append("$" + Range.colToString(af.getLeft()) + "$" + (1 + af.getTop()))
+                            .append(":")
+                            .append("$" + Range.colToString(af.getRight()) + "$" + (1 + af.getBottom()))
+                            .append("</definedName>");
                 }
             }
             w.append("</definedNames>");
@@ -268,7 +271,8 @@ public class Workbook {
 
     /**
      * Writes a {@code sheet} tag to the writer.
-     * @param w The writer to write to
+     *
+     * @param w  The writer to write to
      * @param ws The WorkSheet that is resembled by the {@code sheet} tag.
      * @throws IOException If an I/O error occurs.
      */
@@ -286,7 +290,7 @@ public class Workbook {
     /**
      * Write a new file as a zip entry to the output writer.
      *
-     * @param name File name.
+     * @param name     File name.
      * @param consumer Output writer consumer, producing file contents.
      * @throws IOException If an I/O error occurs.
      */
@@ -302,6 +306,7 @@ public class Workbook {
         os.putNextEntry(new ZipEntry(name));
         return writer;
     }
+
     void endFile() throws IOException {
         writer.flush();
         os.closeEntry();
@@ -320,12 +325,12 @@ public class Workbook {
     /**
      * Merge given style attributes with cached style.
      *
-     * @param currentStyle Current (cached) style index, 0 if none.
+     * @param currentStyle    Current (cached) style index, 0 if none.
      * @param numberingFormat Numbering format.
-     * @param font Font attributes.
-     * @param fill Fill attributes.
-     * @param border Border attributes.
-     * @param alignment Alignment attributes.
+     * @param font            Font attributes.
+     * @param fill            Fill attributes.
+     * @param border          Border attributes.
+     * @param alignment       Alignment attributes.
      * @return Cached style index.
      */
     int mergeAndCacheStyle(int currentStyle, String numberingFormat, Font font, Fill fill, Border border, Alignment alignment, Protection protection) {
@@ -346,7 +351,7 @@ public class Workbook {
      * Get unique index of a worksheet.
      *
      * @param ws Worksheet. It must have been created previously by calling
-     * {@link #newWorksheet(String)} on this workbook.
+     *           {@link #newWorksheet(String)} on this workbook.
      * @return Worksheet index.
      */
     int getIndex(Worksheet ws) {
@@ -387,5 +392,15 @@ public class Workbook {
             worksheets.add(worksheet);
             return worksheet;
         }
+    }
+
+    public Worksheet getSheetAt(int index) {
+        if (index < 0) {
+            throw new IllegalArgumentException("index must be positive");
+        }
+        if (index >= this.worksheets.size()) {
+            throw new IllegalArgumentException("index must be greater than the number of worksheets");
+        }
+        return this.worksheets.get(index);
     }
 }

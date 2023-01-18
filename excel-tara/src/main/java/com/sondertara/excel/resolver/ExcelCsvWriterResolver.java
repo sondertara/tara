@@ -7,8 +7,8 @@ import com.sondertara.excel.entity.ExcelWriteSheetEntity;
 import com.sondertara.excel.exception.ExcelTaraException;
 import com.sondertara.excel.function.ExportFunction;
 import com.sondertara.excel.task.CsvGenerateTask;
-
 import de.siegmar.fastcsv.writer.CsvWriter;
+import de.siegmar.fastcsv.writer.QuoteStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
  */
 public class ExcelCsvWriterResolver {
 
-    private static final Logger logger = LoggerFactory.getLogger(ExcelReader.class);
+    private static final Logger logger = LoggerFactory.getLogger(ExcelCsvWriterResolver.class);
 
     private final ExcelWriteSheetEntity excelEntity;
 
@@ -83,7 +83,7 @@ public class ExcelCsvWriterResolver {
             }
             PrintWriter printWriter = new PrintWriter(csvFile, Constants.CHARSET);
 
-            try (CsvWriter csv = CsvWriter.builder().build(printWriter)) {
+            try (CsvWriter csv = CsvWriter.builder().quoteStrategy(QuoteStrategy.REQUIRED).build(printWriter)) {
                 csv.writeRow(excelEntity.getPropertyList().stream().map(ExcelCellEntity::getColumnName).toArray(String[]::new));
             }
             for (File file : collect) {

@@ -15,7 +15,10 @@
  */
 package com.sondertara.excel.fast.writer;
 
+import com.sondertara.common.time.DatePattern;
+
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -56,7 +59,7 @@ public class Worksheet {
      */
     public static final double MAX_ROW_HEIGHT = 409.5;
 
-    private final Workbook workbook;
+    private final FastWorkbook fastWorkbook;
     private final String name;
     /**
      * List of rows. A row is an array of cells.
@@ -235,11 +238,11 @@ public class Worksheet {
     /**
      * Constructor.
      *
-     * @param workbook Parent workbook.
+     * @param fastWorkbook Parent workbook.
      * @param name Worksheet name.
      */
-    Worksheet(Workbook workbook, String name) {
-        this.workbook = Objects.requireNonNull(workbook);
+    Worksheet(FastWorkbook fastWorkbook, String name) {
+        this.fastWorkbook = Objects.requireNonNull(fastWorkbook);
         this.name = Objects.requireNonNull(name);
     }
 
@@ -250,6 +253,11 @@ public class Worksheet {
      */
     public String getName() {
         return name;
+    }
+
+
+    public int getLastRowNum(){
+        return this.rows.size();
     }
 
     /**
@@ -297,8 +305,8 @@ public class Worksheet {
      *
      * @return Parent workbook.
      */
-    public Workbook getWorkbook() {
-        return workbook;
+    public FastWorkbook getWorkbook() {
+        return fastWorkbook;
     }
 
     /**
@@ -430,9 +438,9 @@ public class Worksheet {
      * Keep this sheet in active tab.
      */
     public void keepInActiveTab() {
-        int sheetIndex = workbook.getIndex(this);
+        int sheetIndex = fastWorkbook.getIndex(this);
         //tabs are indexed from 0, sheets are indexed from 1
-        workbook.setActiveTab(sheetIndex - 1);
+        fastWorkbook.setActiveTab(sheetIndex - 1);
     }
 
     /**
@@ -563,7 +571,7 @@ public class Worksheet {
      * @param value Cell value.
      */
     public void value(int r, int c, String value) {
-        cell(r, c).setValue(workbook, value);
+        cell(r, c).setValue(fastWorkbook, value);
     }
     /**
      * Set the cell value at the given coordinates.
@@ -574,6 +582,42 @@ public class Worksheet {
      */
     public void value(int r, int c, Number value) {
         cell(r, c).setValue(value);
+    }
+    public void value(int r, int c, Object value) {
+        if (value ==null){
+            cell(r, c).setValue(fastWorkbook,"");
+            return;
+        }
+        if (value instanceof String){
+            cell(r, c).setValue(fastWorkbook,(String) value);
+            return;
+        }
+        if (value instanceof Number) {
+            if (value instanceof BigDecimal){
+                cell(r, c).setValue((BigDecimal) value);
+            }else {
+                cell(r, c).setValue((Number) value);
+            }
+            return;
+        }
+        if (value instanceof Boolean){
+            cell(r, c).setValue((Boolean) value);
+            return;
+        }
+        if (value instanceof Date){
+            cell(r, c).setValue((Date) value);
+            style(r, c).format(DatePattern.NORM_DATETIME_PATTERN).set();
+
+        }else if (value instanceof LocalDateTime){
+            cell(r, c).setValue((LocalDateTime) value);
+            style(r, c).format(DatePattern.NORM_DATETIME_PATTERN).set();
+        }else if (value instanceof LocalDate){
+            cell(r, c).setValue((LocalDate) value);
+            style(r, c).format(DatePattern.NORM_DATE_PATTERN).set();
+        }else if (value instanceof ZonedDateTime){
+            cell(r, c).setValue((ZonedDateTime) value);
+            style(r, c).format(DatePattern.NORM_DATETIME_PATTERN).set();
+        }
     }
     /**
      * Set the cell value at the given coordinates.
@@ -719,7 +763,10 @@ public class Worksheet {
                     // Exclude merged cells from computation && hidden rows
                     Object o = hiddenRows.contains(r) || isCellInMergedRanges(r, c) ? null : value(r, c);
                     if (o != null && !(o instanceof Formula)) {
-                        int length = o.toString().length();
+                        //int length = o.toString().length();
+                        //maxWidth = Math.max(maxWidth, (int) ((length * 7 + 10) / 7.0 * 256) / 256.0);
+                        int length = o.toString().getBytes().length;
+                        length = o.toString().length() + (int) Math.ceil((length - o.toString().length()) * 0.8d / 2);
                         maxWidth = Math.max(maxWidth, (int) ((length * 7 + 10) / 7.0 * 256) / 256.0);
                     }
                 }
@@ -872,7 +919,7 @@ public class Worksheet {
             writer.append("<legacyDrawing r:id=\"v\"/>");
         }
         writer.append("</worksheet>");
-        workbook.endFile();
+        fastWorkbook.endFile();
 
         // Free memory; we no longer need this data
         rows.clear();
@@ -894,8 +941,8 @@ public class Worksheet {
      */
     public void flush() throws IOException {
         if(writer == null) {
-            int index = workbook.getIndex(this);
-            writer = workbook.beginFile("xl/worksheets/sheet" + index + ".xml");
+            int index = fastWorkbook.getIndex(this);
+            writer = fastWorkbook.beginFile("xl/worksheets/sheet" + index + ".xml");
             writer.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
             writer.append("<worksheet xmlns=\"http://schemas.openxmlformats.org/spreadsheetml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\">");
             writer.append("<sheetPr filterMode=\"" + "false" + "\"><pageSetUpPr fitToPage=\"" + fitToPage + "\" autoPageBreaks=\"" + autoPageBreaks + "\"/></sheetPr>");

@@ -11,7 +11,6 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>excel-tara</artifactId>
-    <version>1.0.3-SNAPSHOT</version>
     <name>excel-tara</name>
     <description>High performance Excel kit.</description>
     <properties>

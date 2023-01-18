@@ -13,7 +13,6 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>common-tara</artifactId>
-    <version>1.0.3-SNAPSHOT</version>
 
     <name>common-tara</name>
     <description>common utils.</description>
