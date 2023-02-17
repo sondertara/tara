@@ -101,8 +101,11 @@ public class MeteorId {
                     throw new IllegalStateException("Seconds overflow. The max second is " + maxSecond);
                 }
             }
-            return second << timeShift | nodeId << nodeShift | seqNum << seqShift | randNum;
-
+            long l = second << timeShift | nodeId << nodeShift | seqNum << seqShift | randNum;
+            if (l < 0) {
+                System.out.println("Seconds overflow");
+            }
+            return l;
         }
 
         public void setNodeId(long nodeId) {
@@ -118,10 +121,12 @@ public class MeteorId {
      * @return the random number
      */
     private static long rand(Node node) {
-        node.seed ^= node.seed << 7;
-        node.seed ^= node.seed >> 9;
-        node.seed ^= node.seed << 8;
-        return node.seed % MeteorId.maxRand;
+        long x = node.seed;
+        x ^= x << 13;
+        x ^= x << 17;
+        x ^= x << 5;
+        node.seed = x % MeteorId.maxRand;
+        return node.seed;
     }
 
 }
