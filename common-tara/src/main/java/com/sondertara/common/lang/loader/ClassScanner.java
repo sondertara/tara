@@ -11,6 +11,7 @@ import com.sondertara.common.util.CollectionUtils;
 import com.sondertara.common.util.ResourceUtils;
 import com.sondertara.common.util.StringUtils;
 import com.sondertara.common.util.URLUtils;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,6 +32,7 @@ import java.util.jar.JarFile;
  * @author huangxiaohu
  * @since 4.6.9
  */
+@Slf4j
 public class ClassScanner implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -80,7 +82,7 @@ public class ClassScanner implements Serializable {
      * @return 类集合
      */
     public static Set<Class<?>> scanAllPackageByAnnotation(String packageName,
-            Class<? extends Annotation> annotationClass) {
+                                                           Class<? extends Annotation> annotationClass) {
         return scanAllPackage(packageName, clazz -> clazz.isAnnotationPresent(annotationClass));
     }
 
@@ -93,7 +95,7 @@ public class ClassScanner implements Serializable {
      * @return 类集合
      */
     public static Set<Class<?>> scanPackageByAnnotation(String packageName,
-            Class<? extends Annotation> annotationClass) {
+                                                        Class<? extends Annotation> annotationClass) {
         return scanPackage(packageName, clazz -> clazz.isAnnotationPresent(annotationClass));
     }
 
@@ -243,7 +245,11 @@ public class ClassScanner implements Serializable {
                     scanFile(ResourceUtils.getFile(url, "URL"), null);
                     break;
                 case "jar":
-                    scanJar(URLUtils.getJarFile(url));
+                    try {
+                        scanJar(URLUtils.getJarFile(url));
+                    } catch (ClassNotFoundException e) {
+                        log.error("Class not found in classpath", e);
+                    }
                     break;
                 default:
             }
@@ -310,6 +316,10 @@ public class ClassScanner implements Serializable {
             } else if (fileName.endsWith(FileUtils.JAR_FILE_EXT)) {
                 try {
                     scanJar(new JarFile(file));
+                } catch (NoClassDefFoundError | ClassNotFoundException ignored) {
+                    // 由于依赖库导致的类无法加载，直接跳过此类
+                } catch (UnsupportedClassVersionError ignored) {
+                    // 版本导致的不兼容的类，跳过
                 } catch (IOException e) {
                     throw new TaraException(e);
                 }
@@ -329,7 +339,7 @@ public class ClassScanner implements Serializable {
      *
      * @param jar jar包
      */
-    private void scanJar(JarFile jar) {
+    private void scanJar(JarFile jar) throws ClassNotFoundException, NoClassDefFoundError {
         String name;
         for (JarEntry entry : new EnumerationIter<>(jar.entries())) {
             name = StringUtils.removePrefix(entry.getName(), StringUtils.SLASH);

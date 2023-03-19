@@ -64,102 +64,6 @@ class BeanCopier extends AbstractCopier {
         }
     }
 
-    /**
-     * Defer after construction to avoid cyclic reference
-     */
-    void ensureAnalyzed() {
-        if (converter != null) {
-            return;
-        }
-        // DCL without volatile
-        if (copiers == null) {
-            synchronized (this) {
-                if (copiers == null) {
-                    copiers = analyze(fromCls, toCls);
-                }
-            }
-        }
-    }
-
-    /**
-     * Top bean
-     */
-    Object topCopyWithoutTopConverter(Object source) {
-        if (converter != null) {
-            return converter.convert(source, null);
-        }
-
-        Object target;
-        try {
-            target = constructor.newInstance();
-        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
-            throw new BeanCopyException(e);
-        }
-        topCopyWithoutTopConverter(source, target);
-        return target;
-    }
-
-    Object copyConvert(Object source, Object defaultValue) {
-        if (converter != null) {
-            return converter.convert(source, null);
-        }
-
-        Object target;
-        try {
-            target = constructor.newInstance();
-        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
-            throw new BeanCopyException(e);
-        }
-        topCopyWithoutTopConverter(source, target);
-        return target;
-    }
-
-    /**
-     * Top bean
-     */
-    void topCopyWithoutTopConverter(Object source, Object target) {
-        ensureAnalyzed();
-        for (Copier copier : copiers) {
-            copier.copy(source, target);
-        }
-    }
-
-    /**
-     * Referenced bean
-     */
-    @Override
-    public void copy(Object source, Object target) {
-        Object from, to;
-        try {
-            from = fromField.get(source);
-            to = toField.get(target);
-            if (from == null) {
-                if (ignoreNull) {
-                    return;
-                }
-                toField.set(target, null);
-                return;
-            }
-
-            if (converter != null) {
-                toField.set(target, converter.convert(from, null));
-                return;
-            }
-
-            if (to == null) {
-                to = constructor.newInstance();
-                toField.set(target, to);
-            }
-        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
-            throw new BeanCopyException(e);
-        }
-
-        ensureAnalyzed();
-        for (Copier copier : copiers) {
-            copier.copy(from, to);
-        }
-    }
-
     private static List<Copier> analyze(Class<?> sourceCls, Class<?> targetCls) {
         Map<String, Field> fromFieldsMap = new HashMap<>(8);
         for (Field field : allNonStaticFields(sourceCls)) {
@@ -233,6 +137,102 @@ class BeanCopier extends AbstractCopier {
             }
         } while ((cur = cur.getSuperclass()) != null);
         return all;
+    }
+
+    /**
+     * Defer after construction to avoid cyclic reference
+     */
+    void ensureAnalyzed() {
+        if (converter != null) {
+            return;
+        }
+        // DCL without volatile
+        if (copiers == null) {
+            synchronized (this) {
+                if (copiers == null) {
+                    copiers = analyze(fromCls, toCls);
+                }
+            }
+        }
+    }
+
+    /**
+     * Top bean
+     */
+    Object topCopyWithoutTopConverter(Object source) {
+        if (converter != null) {
+            return converter.convert(source, null);
+        }
+
+        Object target;
+        try {
+            target = constructor.newInstance();
+        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+            throw new BeanCopyException(e);
+        }
+        topCopyWithoutTopConverter(source, target);
+        return target;
+    }
+
+    Object copyConvert(Object source, Object defaultValue) {
+        if (converter != null) {
+            return converter.convert(source, null);
+        }
+
+        Object target;
+        try {
+            target = constructor.newInstance();
+        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+            throw new BeanCopyException(e);
+        }
+        topCopyWithoutTopConverter(source, target);
+        return target;
+    }
+
+    /**
+     * Top bean
+     */
+    void topCopyWithoutTopConverter(Object source, Object target) {
+        ensureAnalyzed();
+        for (Copier copier : copiers) {
+            copier.copy(source, target);
+        }
+    }
+
+    /**
+     * Referenced bean
+     */
+    @Override
+    public void copy(Object source, Object target) {
+        Object from, to;
+        try {
+            from = fromField.get(source);
+            to = toField.get(target);
+            if (from == null) {
+                if (COPY_IGNORE_NULL.get()) {
+                    return;
+                }
+                toField.set(target, null);
+                return;
+            }
+
+            if (converter != null) {
+                toField.set(target, converter.convert(from, null));
+                return;
+            }
+
+            if (to == null) {
+                to = constructor.newInstance();
+                toField.set(target, to);
+            }
+        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+            throw new BeanCopyException(e);
+        }
+
+        ensureAnalyzed();
+        for (Copier copier : copiers) {
+            copier.copy(from, to);
+        }
     }
 
     @Override

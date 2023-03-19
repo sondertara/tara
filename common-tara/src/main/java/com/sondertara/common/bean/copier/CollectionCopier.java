@@ -24,7 +24,7 @@ class CollectionCopier extends AbstractCopier {
         try {
             Collection fromColl = (Collection) fromField.get(source);
             if (fromColl == null) {
-                if (ignoreNull) {
+                if (COPY_IGNORE_NULL.get()) {
                     return;
                 }
                 toField.set(target, null);

@@ -95,9 +95,9 @@ public class LocalDateTimeUtils extends CalendarUtils {
     /**
      * 常用的时间格式
      */
-    private final static String[] FREQUENTLY_USED_DATE_FORMATS = new String[]{"yyyy-MM-dd HH:mm:ss",
-            "yyyy/MM/dd HH:mm:ss", "yyyy.MM.dd HH:mm:ss", "yyyy年MM月dd日 HH时mm分ss秒", "yyyy-MM-dd", "yyyy/MM/dd",
-            "yyyy.MM.dd", "HH:mm:ss", "HH时mm分ss秒", "yyyy-MM-dd HH:mm", "yyyy-MM-dd HH:mm:ss.SSS"};
+    private final static String[] FREQUENTLY_USED_DATE_FORMATS = new String[]{"yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd", "HH:mm:ss",
+            "yyyy/MM/dd HH:mm:ss", "yyyy.MM.dd HH:mm:ss", "yyyy年MM月dd日 HH时mm分ss秒", "yyyy/MM/dd",
+            "yyyy.MM.dd", "HH时mm分ss秒", "yyyy-MM-dd HH:mm", "yyyy-MM-dd HH:mm:ss.SSS"};
 
     /**
      * 当前时间，转换为{@link DateTime}对象
@@ -344,17 +344,24 @@ public class LocalDateTimeUtils extends CalendarUtils {
     }
 
     /**
-     * 格式化日期时间<br>
-     * 格式 yyyy-MM-dd HH:mm:ss
+     * 用常用时间格式格式化时间
      *
-     * @param date 被格式化的日期
-     * @return 格式化后的日期
+     * @param date 时间
+     * @return 时间字符串
      */
-    public static String formatDateTime(Date date) {
+    public static String formatDate(Date date) {
         if (null == date) {
             return null;
         }
-        return DatePattern.NORM_DATETIME_FORMAT.format(date);
+        for (String format : FREQUENTLY_USED_DATE_FORMATS) {
+            try {
+                return format(date, format);
+            } catch (Exception ignored) {
+
+            }
+        }
+        //if all formats are failed, return the default format string by instant of the date parameter.
+        return TemporalAccessorUtils.format(date.toInstant(), DatePattern.NORM_DATETIME_PATTERN);
     }
 
     /**
@@ -1956,6 +1963,7 @@ public class LocalDateTimeUtils extends CalendarUtils {
         return format(date, DatePattern.NORM_DATETIME_PATTERN);
     }
 
+
     public static String formatLocalDateTime(LocalDateTime localDateTime, String pattern) {
         if (null == localDateTime) {
             return null;
@@ -2027,7 +2035,6 @@ public class LocalDateTimeUtils extends CalendarUtils {
         }
         return -1;
     }
-
 
 
     /**
