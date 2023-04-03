@@ -1,4 +1,3 @@
-
 package com.sondertara.common.bean.copier;
 
 import com.sondertara.common.bean.exception.BeanCopyException;
@@ -22,7 +21,7 @@ class MapCopier extends AbstractCopier {
         try {
             Map fromMap = (Map) fromField.get(source);
             if (fromMap == null) {
-                if (ignoreNull) {
+                if (COPY_IGNORE_NULL.get()) {
                     return;
                 }
                 toField.set(target, null);

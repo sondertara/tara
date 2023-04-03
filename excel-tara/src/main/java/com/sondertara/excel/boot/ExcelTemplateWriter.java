@@ -20,11 +20,6 @@ public class ExcelTemplateWriter extends AbstractExcelWriter<Workbook> {
 
     @Override
     public Workbook generate() {
-        // ExcelWriteSheetEntity excelMapping =
-        // ExcelMappingFactory.loadExportExcelClass(excelClass);
-        // ExcelTemplateWriterResolver resolver = new
-        // ExcelTemplateWriterResolver(excelMapping);
-        // return resolver.generateTemplate();
         return this.getWriterContext().getExecutor().execute();
 
     }

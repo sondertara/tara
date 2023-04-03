@@ -2,11 +2,11 @@ package com.sondertara.notify.lark;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.sondertara.common.model.ResultDTO;
-import com.sondertara.common.util.HttpUtils;
 import com.sondertara.common.util.StringUtils;
 import com.sondertara.notify.Notifier;
 import com.sondertara.notify.common.NotifyPlatform;
 import com.sondertara.notify.common.NotifyPlatformEnum;
+import kong.unirest.Unirest;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -34,7 +34,8 @@ public class LarkNotifier implements Notifier {
     public ResultDTO<String> send(NotifyPlatform notifyPlatform, String text) {
         String serverUrl = LarkNotifyConst.LARK_WEBHOOK + notifyPlatform.getUrlKey();
         try {
-            String json = HttpUtils.sendPostJson(serverUrl, text);
+
+            String json = Unirest.post(serverUrl).body(text).asString().getBody();
 
             if (StringUtils.isEmpty(json)) {
                 return ResultDTO.fail("request error!");

@@ -74,9 +74,7 @@ public class BeanUtils {
      * @param map the original map
      * @param t   the bean instance
      * @param <T> the type of the bean
-     * @return the bean instance
      */
-    @SuppressWarnings("unchecked")
     public static <T> void mapToBean(Map<?, ?> map, T t) {
         new MapToBeanCopier().copy(map, t);
     }
@@ -89,7 +87,6 @@ public class BeanUtils {
      * @param <T>   the type of the bean
      * @return the target bean
      */
-    @SuppressWarnings("unchecked")
     public static <T> T mapToBean(Map<?, ?> map, Class<T> clazz) {
         T instance = ReflectUtils.newInstance(clazz);
         mapToBean(map, instance);

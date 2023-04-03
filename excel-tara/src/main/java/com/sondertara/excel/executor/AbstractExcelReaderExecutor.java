@@ -1,5 +1,7 @@
 package com.sondertara.excel.executor;
 
+import com.sondertara.common.lang.reflect.ReflectUtils;
+import com.sondertara.common.util.StringUtils;
 import com.sondertara.excel.analysis.XlsxAnalysisHandler;
 import com.sondertara.excel.context.ExcelRawReaderContext;
 import com.sondertara.excel.exception.ExcelAnnotaionReaderException;
@@ -21,11 +23,12 @@ import com.sondertara.excel.support.validator.AbstractExcelColumnValidator;
 import com.sondertara.excel.support.validator.ExcelDefaultValidator;
 import com.sondertara.excel.utils.CacheUtils;
 import com.sondertara.excel.utils.ExcelFieldUtils;
-import org.apache.commons.lang3.StringUtils;
+
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.util.ZipSecureFile;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
+import org.apache.xmlbeans.SchemaType;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -167,11 +170,7 @@ public abstract class AbstractExcelReaderExecutor<T> implements ExcelReaderLifec
         final List<ExcelCellDef> excelCells = row.getExcelCells();
         boolean allPassed = true;
         T instance;
-        try {
-            instance = (T) this.curSheet.getMappingClass().newInstance();
-        } catch (final InstantiationException | IllegalAccessException e) {
-            throw new ExcelReaderException("实例化对象" + this.curSheet.getMappingClass() + "失败!");
-        }
+        instance = (T) ReflectUtils.newInstance(this.curSheet.getMappingClass());
 
         for (int i = 0; i < excelCells.size(); i++) {
             this.curColIndex = i + 1;
@@ -254,13 +253,9 @@ public abstract class AbstractExcelReaderExecutor<T> implements ExcelReaderLifec
             final Class<? extends Annotation> aClass = annotation.annotationType();
             if (aClass.isAnnotationPresent(ConstraintValidator.class)) {
                 final ConstraintValidator constraintValidator = aClass.getAnnotation(ConstraintValidator.class);
-                try {
-                    final AbstractExcelColumnValidator<Annotation> columnValidator = constraintValidator.validator().newInstance();
-                    columnValidator.initialize(annotation);
-                    columnValidators.add(columnValidator);
-                } catch (final InstantiationException | IllegalAccessException e) {
-                    throw new ExcelReaderException("实例化校验器[" + constraintValidator.validator() + "]时失败!", e);
-                }
+                final AbstractExcelColumnValidator<Annotation> columnValidator = ReflectUtils.newInstance(constraintValidator.validator());
+                columnValidator.initialize(annotation);
+                columnValidators.add(columnValidator);
             }
         }
 
@@ -278,13 +273,9 @@ public abstract class AbstractExcelReaderExecutor<T> implements ExcelReaderLifec
             final Class<? extends Annotation> aClass = annotation.annotationType();
             if (aClass.isAnnotationPresent(ExcelConverter.class)) {
                 final ExcelConverter excelConverter = aClass.getAnnotation(ExcelConverter.class);
-                try {
-                    AbstractExcelColumnConverter<Annotation, ?> columnConverter = excelConverter.convertBy().newInstance();
-                    columnConverter.initialize(annotation);
-                    columnConverters.add(columnConverter);
-                } catch (final InstantiationException | IllegalAccessException e) {
-                    throw new ExcelConvertException("实例化转换器[" + excelConverter.convertBy() + "]时失败!", e);
-                }
+                AbstractExcelColumnConverter<Annotation, ?> columnConverter = ReflectUtils.newInstance(excelConverter.convertBy());
+                columnConverter.initialize(annotation);
+                columnConverters.add(columnConverter);
             }
         }
 

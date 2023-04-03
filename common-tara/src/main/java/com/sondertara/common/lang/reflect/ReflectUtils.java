@@ -9,7 +9,7 @@ import com.sondertara.common.lang.Assert;
 import com.sondertara.common.lang.map.WeakConcurrentMap;
 import com.sondertara.common.util.ArrayUtils;
 import com.sondertara.common.util.ClassUtils;
-import com.sondertara.common.util.MethodHandleUtil;
+import com.sondertara.common.util.MethodHandleUtils;
 import com.sondertara.common.util.ModifierUtils;
 import com.sondertara.common.util.StringUtils;
 
@@ -813,22 +813,6 @@ public class ReflectUtils {
     /**
      * 实例化对象
      *
-     * @param <T>   对象类型
-     * @param clazz 类名
-     * @return 对象
-     */
-    @SuppressWarnings("unchecked")
-    public static <T> T newInstance(String clazz) {
-        try {
-            return (T) Class.forName(clazz).newInstance();
-        } catch (Exception e) {
-            throw new TaraException("Instance class [{}] error!", clazz, e);
-        }
-    }
-
-    /**
-     * 实例化对象
-     *
      * @param <T>    对象类型
      * @param clazz  类
      * @param params 构造函数参数
@@ -1029,7 +1013,7 @@ public class ReflectUtils {
         if (method.isDefault()) {
             // 当方法是default方法时，尤其对象是代理对象，需使用句柄方式执行
             // 代理对象情况下调用method.invoke会导致循环引用执行，最终栈溢出
-            return MethodHandleUtil.invokeSpecial(obj, method, args);
+            return MethodHandleUtils.invokeSpecial(obj, method, args);
         }
 
         try {

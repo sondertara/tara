@@ -6,8 +6,10 @@ import com.sondertara.common.io.FileUtils;
 import com.sondertara.common.model.PageResult;
 import com.sondertara.common.util.BeanUtils;
 import com.sondertara.common.util.RandomUtils;
-import com.sondertara.excel.domain.User;
+import com.sondertara.excel.base.TaraExcelConfig;
+import com.sondertara.excel.boot.ExcelSimpleLegacyWriter;
 import com.sondertara.excel.boot.ExcelSimpleWriter;
+import com.sondertara.excel.domain.User;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -24,11 +26,10 @@ import java.util.stream.Collectors;
 
 public class ExcelSimpleWriteTest {
     private static final String DEFAULT_TARGET_EXCEL_DIR = "/generated-excel/";
-    static String path = "E:\\workspace\\java\\tara\\example\\src\\main\\resources\\user_query.xlsx";
+    static String path ="test1.xlsx";
 
     @BeforeAll
     public static void setup() throws IOException {
-
         FileUtils.remove(path);
         FileUtils.touch(path);
 
@@ -45,7 +46,7 @@ public class ExcelSimpleWriteTest {
     public void testQuery() throws IOException {
         OutputStream outputStream = Files.newOutputStream(Paths.get(path));
         Stopwatch stopwatch = Stopwatch.createStarted();
-        ExcelSimpleWriter.create().header(Lists.newArrayList("姓名", "年龄", "生日", "身高")).addData(index -> {
+        ExcelSimpleLegacyWriter.create().header(Lists.newArrayList("姓名", "年龄", "生日", "身高")).addData(index -> {
             List<User> users = new ArrayList<>();
             for (int i = 0; i < 3000; i++) {
                 User user = new User();
@@ -62,7 +63,7 @@ public class ExcelSimpleWriteTest {
                 users.add(user);
             }
             try {
-                Thread.sleep(10 * 1000);
+                Thread.sleep(2 * 1000);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -75,7 +76,7 @@ public class ExcelSimpleWriteTest {
                 Map<String, Object> bean = BeanUtils.beanToMap(s);
                 return objects;
             }).collect(Collectors.toList());
-            PageResult<Object[]> result = PageResult.of(list).pagination(index, 3000);
+            PageResult<Object[]> result = PageResult.of(list).pagination(index, 3000).total(11000L);
             return result;
         }).to(outputStream);
         System.out.println("Cost:" + stopwatch.stop().elapsed(TimeUnit.SECONDS));
@@ -88,7 +89,7 @@ public class ExcelSimpleWriteTest {
         OutputStream outputStream = Files.newOutputStream(Paths.get(path));
         Stopwatch stopwatch = Stopwatch.createStarted();
 
-        ExcelSimpleWriter simpleWriter = ExcelSimpleWriter.create().header(Lists.newArrayList("姓名", "年龄", "生日", "身高"));
+        ExcelSimpleWriter<?> simpleWriter = ExcelSimpleWriter.create().header(Lists.newArrayList("姓名", "年龄", "生日", "身高"));
         for (int j = 0; j < 5; j++) {
             List<User> users = new ArrayList<>();
             for (int i = 0; i < 3000; i++) {
@@ -100,7 +101,7 @@ public class ExcelSimpleWriteTest {
                 users.add(user);
             }
             try {
-                Thread.sleep(10 * 1000);
+                Thread.sleep(1 * 1000);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }

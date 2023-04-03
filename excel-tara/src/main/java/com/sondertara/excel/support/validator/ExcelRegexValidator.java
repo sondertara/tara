@@ -1,8 +1,9 @@
 package com.sondertara.excel.support.validator;
 
+import com.sondertara.common.util.StringUtils;
 import com.sondertara.excel.exception.ExcelValidationException;
 import com.sondertara.excel.meta.annotation.validation.ExcelRegexValue;
-import org.apache.commons.lang3.StringUtils;
+
 
 import java.util.regex.Pattern;
 

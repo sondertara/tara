@@ -1,5 +1,6 @@
 package com.sondertara.excel.meta.model;
 
+import com.sondertara.common.lang.reflect.ReflectUtils;
 import com.sondertara.excel.exception.ExcelReaderException;
 import com.sondertara.excel.exception.ExcelValidationException;
 import com.sondertara.excel.meta.annotation.ExcelImportField;
@@ -67,14 +68,9 @@ public class AnnotationCellDef extends ExcelCellDef {
             final Class<? extends Annotation> aClass = annotation.annotationType();
             if (aClass.isAnnotationPresent(ConstraintValidator.class)) {
                 final ConstraintValidator constraintValidator = aClass.getAnnotation(ConstraintValidator.class);
-                try {
-                    final AbstractExcelColumnValidator<Annotation> columnValidator = constraintValidator.validator()
-                            .newInstance();
-                    columnValidator.initialize(annotation);
-                    columnValidators.add(columnValidator);
-                } catch (final InstantiationException | IllegalAccessException e) {
-                    throw new ExcelValidationException("实例化校验器[" + constraintValidator.validator() + "]时失败!", e);
-                }
+                final AbstractExcelColumnValidator<Annotation> columnValidator = ReflectUtils.newInstance(constraintValidator.validator());
+                columnValidator.initialize(annotation);
+                columnValidators.add(columnValidator);
             }
         }
 

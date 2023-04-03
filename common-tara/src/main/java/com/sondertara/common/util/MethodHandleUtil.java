@@ -25,12 +25,12 @@ import java.lang.reflect.Method;
 public class MethodHandleUtil extends MethodUtils {
 
     /**
-     * jdk8中如果直接调用{@link MethodHandles#lookup()}获取到的{@link MethodHandles.Lookup}在调用findSpecial和unreflectSpecial
+     * jdk8中如果直接调用{@link MethodHandles#lookup()}获取到的{@link MethodHandles#lookup()}在调用findSpecial和unreflectSpecial
      * 时会出现权限不够问题，抛出"no private access for
      * invokespecial"异常，因此针对JDK8及JDK9+分别封装lookup方法。
      *
      * @param callerClass 被调用的类或接口
-     * @return {@link MethodHandles.Lookup}
+     * @return {@link java.lang.invoke.MethodHandles.Lookup}
      */
     public static MethodHandles.Lookup lookup(Class<?> callerClass) {
         return LookupFactory.lookup(callerClass);

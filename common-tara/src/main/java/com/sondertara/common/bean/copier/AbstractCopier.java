@@ -13,15 +13,10 @@ public abstract class AbstractCopier implements Copier {
     protected Field toField;
     protected TypeConverter<?> converter;
 
-    protected boolean ignoreNull = false;
 
     public AbstractCopier(Field fromField, Field toField) {
         this.fromField = fromField;
         this.toField = toField;
-    }
-
-    public void setIgnoreNull(boolean ignoreNull) {
-        this.ignoreNull = ignoreNull;
     }
 
     @Override
@@ -29,7 +24,7 @@ public abstract class AbstractCopier implements Copier {
         try {
             Object value = fromField.get(source);
             if (value == null) {
-                if (ignoreNull) {
+                if (COPY_IGNORE_NULL.get()) {
                     return;
                 }
                 toField.set(target, null);

@@ -15,4 +15,6 @@ public interface Producer {
      * init
      */
     void init();
+
+    void  exit();
 }

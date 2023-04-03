@@ -6,6 +6,7 @@ import com.github.dozermapper.core.DozerBeanMapperBuilder;
 import com.github.dozermapper.core.Mapper;
 import com.sondertara.common.bean.model.same.BaitSameEntity;
 import com.sondertara.common.bean.model.same.BaitSameVo;
+import org.junit.jupiter.api.Test;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -67,6 +68,7 @@ public class CopySameFieldTest {
     @Benchmark
     @Warmup(iterations = 3, time = 5)
     @Measurement(iterations = 5, time = 5)
+    @Test
     public void localTest() {
         // 90ms 93ms 106ms 101ms 100ms
         BaitSameVo BaitSameVo = getBaitSameVo();

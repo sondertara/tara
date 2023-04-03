@@ -26,7 +26,7 @@ abstract class AbstractProducer implements Producer, Runnable {
             if (produce()) {
                 for (int i = 0; i < threadNum - 1; i++) {
                     phaser.register();
-                    TASK_POOL.execute(() -> {
+                    poolExecutor.execute(() -> {
                         try {
                             do {
                                 try {
@@ -57,7 +57,6 @@ abstract class AbstractProducer implements Producer, Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractProducer.class);
 
-    private static final ThreadPoolExecutor TASK_POOL = new ThreadPoolExecutor(Runtime.getRuntime().availableProcessors(), Runtime.getRuntime().availableProcessors() * 2 + 16, 60, TimeUnit.SECONDS, new LinkedBlockingQueue<>(30), new ThreadFactoryBuilder().setDaemon(true).setNameFormat("Excel-worker-%d").build(), new ThreadPoolExecutor.CallerRunsPolicy());
     private final CountDownLatch countDownLatch;
 
 
@@ -68,17 +67,31 @@ abstract class AbstractProducer implements Producer, Runnable {
 
     private final Phaser phaser = new Phaser();
 
+    private final ThreadPoolExecutor poolExecutor;
+
 
     AbstractProducer(CountDownLatch countDownLatch, int threadNum) {
         this.threadNum = threadNum;
         this.countDownLatch = countDownLatch;
-
+        this.poolExecutor = new ThreadPoolExecutor(threadNum, Math.max(Runtime.getRuntime().availableProcessors() * 2 + 1, threadNum), 10, TimeUnit.SECONDS, new LinkedBlockingQueue<>(10), new ThreadFactoryBuilder().setDaemon(true).setNameFormat("Excel-worker-%d").build(), new ThreadPoolExecutor.AbortPolicy());
     }
+
 
     @Override
     public void init() {
 
-        TASK_POOL.execute(this);
+        poolExecutor.execute(this);
+    }
+
+    @Override
+    public void exit() {
+        if (null != poolExecutor) {
+            try {
+                this.poolExecutor.shutdown();
+            } catch (Exception ignore) {
+
+            }
+        }
     }
 
     public boolean isDone() {

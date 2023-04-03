@@ -1,9 +1,9 @@
 package com.sondertara.excel.utils;
 
 import com.sondertara.common.exception.TaraException;
+import com.sondertara.common.util.StringUtils;
 import com.sondertara.excel.common.constants.Constants;
 import com.sondertara.excel.exception.ExcelException;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.OutputStream;
@@ -29,7 +29,7 @@ public class ExcelResponseUtils {
 
         if (StringUtils.isBlank(fileName)) {
             fileName = "template.xlsx";
-        } else if (!StringUtils.endsWithAny(fileName, ".xlsx", ".xls")) {
+        } else if (!StringUtils.endWithAny(fileName, Constants.Excel_FILE_SUFFIX)) {
             fileName = fileName + ".xlsx";
         }
 
@@ -39,7 +39,7 @@ public class ExcelResponseUtils {
             throw new ExcelException("文件名编码转换异常！");
         }
 
-        response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"; filename*=utf-8''" + fileName);
+        response.setHeader("Content-Disposition", "attachment; filename=" + fileName + "; filename*=utf-8''" + fileName);
         return response;
     }
 
@@ -48,14 +48,14 @@ public class ExcelResponseUtils {
             if (!fileName.endsWith(Constants.CSV_SUFFIX)) {
                 int indexOf = fileName.lastIndexOf(".");
                 if (indexOf > 0) {
-                    fileName = fileName.substring(0, indexOf) + ".xlsx";
+                    fileName = fileName.substring(0, indexOf) + Constants.Excel_FILE_SUFFIX[0];
                 } else {
-                    fileName = fileName + ".xlsx";
+                    fileName = fileName + Constants.Excel_FILE_SUFFIX[0];
                 }
             }
             httpServletResponse.setContentType(Constants.OCTET_STREAM_CONTENT_TYPE);
             String s = new String(fileName.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1);
-            httpServletResponse.setHeader("Content-disposition", "attachment; filename=\"" + s + "\"");
+            httpServletResponse.setHeader("Content-disposition", "attachment; filename=" + s);
             httpServletResponse.flushBuffer();
             consumer.accept(out);
         } catch (Exception e) {

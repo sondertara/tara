@@ -1,13 +1,16 @@
 package com.sondertara.excel.support.converter;
 
+import com.sondertara.common.util.StringUtils;
 import com.sondertara.excel.exception.ExcelConvertException;
 import com.sondertara.excel.meta.annotation.converter.ExcelKVConvert;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
+
 
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * @author huangxiaohu
+ */
 public class ExcelKVConverter implements AbstractExcelColumnConverter<ExcelKVConvert, Object> {
 
     private Map<Object, Object> kvMap;
@@ -35,7 +38,7 @@ public class ExcelKVConverter implements AbstractExcelColumnConverter<ExcelKVCon
             return null;
         }
         if (this.kvMap.containsKey(value.toString())) {
-            return MapUtils.getObject(this.kvMap, value);
+            return this.kvMap.get(value);
         } else {
             if (!this.allowMissHit) {
                 throw new ExcelConvertException("value [{}] miss hit! allow value:{}", value, this.kvMap.keySet());

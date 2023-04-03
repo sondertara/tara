@@ -1,6 +1,7 @@
 package com.sondertara.excel.meta.annotation;
 
 import com.sondertara.excel.enums.ExcelColBindType;
+import com.sondertara.excel.fast.writer.Color;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -54,7 +55,7 @@ public @interface ExcelExport {
      *
      * @return the color
      */
-    String rowStripeColor() default "E2EFDA";
+    String rowStripeColor() default Color.EXCEL_GREEN_STRIPE;
 
     /**
      * the title row height

@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
  * @Description:
  */
 public class CopySameFieldThroughputTest {
-    public static Mapper mapper = DozerBeanMapperBuilder.create().build();
+//    public static Mapper mapper = DozerBeanMapperBuilder.create().build();
     private static BaitSameVo baitSameVo = getBaitSameVo();
     public static String filename = "";
 
@@ -78,12 +78,12 @@ public class CopySameFieldThroughputTest {
         bh.consume( Convert.convert(BaitSameEntity.class, baitSameVo));
     }
 
-    @Benchmark
-    public void dozerTest(Blackhole bh) throws Exception {
-        BaitSameEntity baitSameEntity = new BaitSameEntity();
-        mapper.map(baitSameVo, baitSameEntity);
-        bh.consume(baitSameEntity);
-    }
+//    @Benchmark
+//    public void dozerTest(Blackhole bh) throws Exception {
+//        BaitSameEntity baitSameEntity = new BaitSameEntity();
+//        mapper.map(baitSameVo, baitSameEntity);
+//        bh.consume(baitSameEntity);
+//    }
 
 
 

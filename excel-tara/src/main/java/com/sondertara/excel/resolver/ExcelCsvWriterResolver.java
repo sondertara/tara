@@ -1,14 +1,14 @@
 package com.sondertara.excel.resolver;
 
+import com.sondertara.common.io.FileUtils;
 import com.sondertara.excel.common.constants.Constants;
 import com.sondertara.excel.entity.ExcelCellEntity;
 import com.sondertara.excel.entity.ExcelWriteSheetEntity;
 import com.sondertara.excel.exception.ExcelTaraException;
 import com.sondertara.excel.function.ExportFunction;
 import com.sondertara.excel.task.CsvGenerateTask;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVPrinter;
-import org.apache.commons.io.FileUtils;
+import de.siegmar.fastcsv.writer.CsvWriter;
+import de.siegmar.fastcsv.writer.QuoteStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,10 +26,9 @@ import java.util.stream.Collectors;
  */
 public class ExcelCsvWriterResolver {
 
-    private static final Logger logger = LoggerFactory.getLogger(ExcelReader.class);
+    private static final Logger logger = LoggerFactory.getLogger(ExcelCsvWriterResolver.class);
 
     private final ExcelWriteSheetEntity excelEntity;
-
 
 
     private final String fileName;
@@ -82,15 +81,15 @@ public class ExcelCsvWriterResolver {
                     throw new IOException("Create file:" + csvFile.getAbsolutePath() + " failed");
                 }
             }
-            Appendable printWriter = new PrintWriter(csvFile, Constants.CHARSET);
-            CSVPrinter csvPrinter = CSVFormat.EXCEL.builder().setHeader(excelEntity.getPropertyList().stream().map(ExcelCellEntity::getColumnName).toArray(String[]::new)).build().print(printWriter);
+            PrintWriter printWriter = new PrintWriter(csvFile, Constants.CHARSET);
 
-            csvPrinter.flush();
-            csvPrinter.close();
+            try (CsvWriter csv = CsvWriter.builder().quoteStrategy(QuoteStrategy.REQUIRED).build(printWriter)) {
+                csv.writeRow(excelEntity.getPropertyList().stream().map(ExcelCellEntity::getColumnName).toArray(String[]::new));
+            }
             for (File file : collect) {
                 if (file.getName().endsWith("csv")) {
-                    byte[] bytes = FileUtils.readFileToByteArray(file);
-                    FileUtils.writeByteArrayToFile(csvFile, bytes, true);
+                    byte[] bytes = FileUtils.readBytes(file);
+                    FileUtils.writeBytes(bytes, csvFile, 0, bytes.length, true);
                 }
                 if (!file.getName().contains(fileName)) {
                     file.delete();

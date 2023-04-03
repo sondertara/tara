@@ -2,11 +2,11 @@ package com.sondertara.notify.wechat;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.sondertara.common.model.ResultDTO;
-import com.sondertara.common.util.HttpUtils;
 import com.sondertara.notify.Notifier;
 import com.sondertara.notify.common.NotifyPlatform;
 import com.sondertara.notify.common.NotifyPlatformEnum;
 import com.sondertara.notify.wechat.message.MarkdownReq;
+import kong.unirest.Unirest;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -38,7 +38,7 @@ public class WechatNotifier implements Notifier {
         markdown.setContent(text);
         markdownReq.setMarkdown(markdown);
         try {
-            String result = HttpUtils.sendPostJson(serverUrl, markdownReq.toJsonString());
+            String result = Unirest.post(serverUrl).body(markdownReq.toJsonString()).asString().getBody();
 
             if (com.sondertara.common.util.StringUtils.isEmpty(result)) {
                 return ResultDTO.fail("request error!");

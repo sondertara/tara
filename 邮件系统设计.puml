@@ -1,0 +1,42 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+
+interface IMsgService
+interface MsgBodyRender
+class EmailService
+class MsgSenderFactory
+class TextMsgBody
+class RichTextMsgBody
+
+IMsgService <|-- EmailService
+MsgBodyRender <|-- TextMsgBody
+MsgBodyRender <|-- RichTextMsgBody
+MessageVo <|-- EmailMsgVo
+
+
+interface IMsgService{
+  send(MessageVo msgVo)
+}
+
+interface MsgBodyRender{
+render()
+}
+class MsgSenderFactory{
+void init()
+JavaMailSender createEmailSender(EmailMsgCfg cfg)
+}
+
+class MessageVo{
+String from
+List<String> to
+MsgBodyRender body
+Map<String,String> bodyParams
+}
+
+class EmailMsgVo{
+Map<String,String> attachments
+List<String> cc
+List<String> bcc
+}
+@enduml

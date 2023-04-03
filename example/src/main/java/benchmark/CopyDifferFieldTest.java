@@ -12,6 +12,7 @@ import com.sondertara.common.bean.model.differ.FileBaitEntity;
 import com.sondertara.common.bean.model.differ.FileBaitVo;
 import com.sondertara.common.bean.model.differ.ProcessBaitEntity;
 import com.sondertara.common.bean.model.differ.ProcessBaitVo;
+import org.junit.jupiter.api.Test;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -68,12 +69,16 @@ public class CopyDifferFieldTest {
     @Benchmark
     @Warmup(iterations = 3, time = 5)
     @Measurement(iterations = 10, time = 10)
+    @Test
     public void localTest() {
         // 90ms 93ms 106ms 101ms 100ms
         BaitTemplateVo baitTemplateVo = getBaitTemplateVo();
         for (int i = 0; i < COUNT; i++) {
             BaitTemplateEntity entity = new BaitTemplateEntity();
             com.sondertara.common.util.BeanUtils.copyProperties(baitTemplateVo, entity);
+            for (ArpBaitEntity bait : entity.getArpBaitList()) {
+                System.out.println(bait.getIp());
+            }
         }
     }
 

@@ -108,6 +108,9 @@ public final class Color {
     public static final String GREEN = "008000";
     public static final String LIME_GREEN = "33CC33";
     public static final String PISTACCHIO = "93C572";
+    public static final String EXCEL_GREEN_TITLE = "70AD47";
+    public static final String EXCEL_GREEN_STRIPE = "E2EFDA";
+
     public static final String PEAR = "D1E231";
     public static final String APPLE_GREEN = "8DB600";
     public static final String ANDROID_GREEN = "A4C639";

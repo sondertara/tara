@@ -3,9 +3,9 @@ package com.sondertara.common.bean.copier;
 
 import com.sondertara.common.convert.TypeConverter;
 import com.sondertara.common.lang.Pair;
-import com.sondertara.common.lang.map.WeakConcurrentMap;
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Registry of all added converters.
@@ -13,7 +13,7 @@ import java.util.Map;
  * @author huangxiaohu
  */
 public class ConverterRegistry {
-    private static final Map<Pair<String, String>, TypeConverter<?>> CONVERTER_MAP = new WeakConcurrentMap<>();
+    private static final Map<Pair<String, String>, TypeConverter<?>> CONVERTER_MAP = new ConcurrentHashMap<>();
 
     static TypeConverter<?> find(String fromType, String toType) {
         return CONVERTER_MAP.get(Pair.of(fromType, toType));

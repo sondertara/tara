@@ -6,6 +6,7 @@ import com.sondertara.excel.context.ExcelRawWriterContext;
 import com.sondertara.excel.utils.ExcelResponseUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
@@ -43,8 +44,13 @@ public abstract class AbstractExcelWriter<T> implements TaraExcelWriter {
             if (String.class.equals(t.getClass())) {
                 out.write(FileUtils.readFileToByteArray(new File((String) t)));
             } else if (Workbook.class.isAssignableFrom(t.getClass())) {
-                try (Workbook wb = (Workbook) t) {
-                    wb.write(out);
+                if (t instanceof SXSSFWorkbook) {
+                    try (SXSSFWorkbook wb = (SXSSFWorkbook) t) {
+                        wb.write(out);
+                        wb.dispose();
+                    }
+                }else {
+                    throw new IllegalStateException("Workbook only support SXSSFWorkbook");
                 }
             }
         } catch (Exception e) {

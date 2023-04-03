@@ -2,6 +2,7 @@ package com.sondertara.excel.resolver;
 
 import com.sondertara.excel.base.TaraExcelConfig;
 import com.sondertara.excel.common.constants.Constants;
+import com.sondertara.excel.fast.writer.Color;
 import com.sondertara.excel.utils.ColorUtils;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
@@ -76,13 +77,13 @@ public class ExcelDefaultWriterResolver {
             headCellStyle.setBorderLeft(BorderStyle.THIN);
             headCellStyle.setAlignment(HorizontalAlignment.CENTER);
             headCellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-            XSSFColor color = new XSSFColor(ColorUtils.hexToRgb("E2EFDA"), new DefaultIndexedColorMap());
+            XSSFColor color = new XSSFColor(ColorUtils.hexToRgb(Color.EXCEL_GREEN_TITLE), new DefaultIndexedColorMap());
             headCellStyle.setFillForegroundColor(color);
             headCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
             Font font = workbook.createFont();
             font.setFontHeightInPoints((short) 11);
             font.setFontName("微软雅黑");
-            font.setColor(IndexedColors.BLACK.index);
+            font.setColor(IndexedColors.WHITE.index);
             font.setBold(true);
             headCellStyle.setFont(font);
             headCellStyle.setDataFormat(workbook.createDataFormat().getFormat("@"));

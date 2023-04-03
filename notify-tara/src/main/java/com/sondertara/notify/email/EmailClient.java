@@ -57,7 +57,7 @@ public class EmailClient {
         Session session = Session.getInstance(prop, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(prop.getProperty("user.name", "user_name"),
+                return new PasswordAuthentication(prop.getProperty("username", "username"),
                         prop.getProperty("password", "password"));
             }
         });

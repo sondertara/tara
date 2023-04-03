@@ -4,6 +4,7 @@ import com.sondertara.common.util.ClassLoaderUtils;
 import com.sondertara.common.util.RandomUtils;
 import com.sondertara.common.util.StringUtils;
 
+import java.lang.management.ManagementFactory;
 import java.net.NetworkInterface;
 import java.nio.ByteBuffer;
 import java.util.Enumeration;
@@ -21,34 +22,31 @@ import java.util.concurrent.atomic.AtomicInteger;
  * </pre>
  *
  * <table summary="" border="1">
- * <tr>
- * <td>时间戳</td>
- * <td>机器ID</td>
- * <td>进程ID</td>
- * <td>自增计数器</td>
- * </tr>
- * <tr>
- * <td>4</td>
- * <td>3</td>
- * <td>2</td>
- * <td>3</td>
- * </tr>
+ *     <tr>
+ *         <td>时间戳</td>
+ *         <td>机器ID</td>
+ *         <td>进程ID</td>
+ *         <td>自增计数器</td>
+ *     </tr>
+ *     <tr>
+ *         <td>4</td>
+ *         <td>3</td>
+ *         <td>2</td>
+ *         <td>3</td>
+ *     </tr>
  * </table>
- * <p>
+ *
  * 参考：http://blog.csdn.net/qxc1281/article/details/54021882
  *
- * @author huangxiaohu
+ * @author looly
  * @since 4.0.0
+ *
  */
 public class ObjectId {
 
-    /**
-     * 线程安全的下一个随机数,每次生成自增+1
-     */
+    /** 线程安全的下一个随机数,每次生成自增+1 */
     private static final AtomicInteger NEXT_INC = new AtomicInteger(RandomUtils.randomInt());
-    /**
-     * 机器信息
-     */
+    /** 机器信息 */
     private static final int MACHINE = getMachinePiece() | getProcessPiece();
 
     /**
@@ -92,9 +90,12 @@ public class ObjectId {
      */
     public static byte[] nextBytes() {
         final ByteBuffer bb = ByteBuffer.wrap(new byte[12]);
-        bb.putLong(System.currentTimeMillis() / 1000);// 4位
-        bb.putLong(MACHINE);// 4位
-        bb.putLong(NEXT_INC.getAndIncrement());// 4位
+        // 4位
+        bb.putInt((int)System.currentTimeMillis()/1000);
+        // 4位
+        bb.putInt(MACHINE);
+        // 4位
+        bb.putInt(NEXT_INC.getAndIncrement());
 
         return bb.array();
     }
@@ -132,9 +133,7 @@ public class ObjectId {
         return buf.toString();
     }
 
-    // -----------------------------------------------------------------------------------------
-    // Private method start
-
+    // ----------------------------------------------------------------------------------------- Private method start
     /**
      * 获取机器码片段
      *
@@ -162,6 +161,19 @@ public class ObjectId {
         return machinePiece;
     }
 
+    private static int getPid() throws RuntimeException {
+        final String processName = ManagementFactory.getRuntimeMXBean().getName();
+        if (StringUtils.isBlank(processName)) {
+            throw new RuntimeException("Process name is blank!");
+        }
+        final int atIndex = processName.indexOf('@');
+        if (atIndex > 0) {
+            return Integer.parseInt(processName.substring(0, atIndex));
+        } else {
+            return processName.hashCode();
+        }
+    }
+
     /**
      * 获取进程码片段
      *
@@ -172,11 +184,11 @@ public class ObjectId {
         // 因为静态变量类加载可能相同,所以要获取进程ID + 加载对象的ID值
         final int processPiece;
         // 进程ID初始化
-        long processId;
+        int processId;
         try {
-            processId = Thread.currentThread().getId();
+            processId = getPid();
         } catch (Throwable t) {
-            processId = RandomUtils.randomLong();
+            processId = RandomUtils.randomInt();
         }
 
         final ClassLoader loader = ClassLoaderUtils.getClassLoader();
@@ -185,11 +197,10 @@ public class ObjectId {
 
         // 进程ID + 对象加载ID
         // 保留前2位
-        final String processSb = Long.toHexString(processId) + Integer.toHexString(loaderId);
+        final String processSb = Integer.toHexString(processId) + Integer.toHexString(loaderId);
         processPiece = processSb.hashCode() & 0xFFFF;
 
         return processPiece;
     }
-    // -----------------------------------------------------------------------------------------
-    // Private method end
+    // ----------------------------------------------------------------------------------------- Private method end
 }

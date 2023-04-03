@@ -6,6 +6,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 
+import static com.sondertara.common.bean.copier.Copier.COPY_IGNORE_NULL;
+
 /**
  * Copy properties from an instance of AClass to an instance of BClass,
  * even if AClass and BClass have nested structures and collections/maps of
@@ -24,6 +26,7 @@ import java.util.Objects;
 @SuppressWarnings("unchecked")
 public class BeanCopy {
 
+
     /**
      * Copy properties of source to a new instance of targetCls
      */
@@ -32,9 +35,13 @@ public class BeanCopy {
     }
 
     public static <R> R copyIgnoreNull(Object source, Class<R> targetCls) {
-        BeanCopier beanCopier = BeanCopierRegistry.prepare(source.getClass(), targetCls);
-        beanCopier.setIgnoreNull(true);
-        return (R) beanCopier.topCopyWithoutTopConverter(source);
+        try {
+            COPY_IGNORE_NULL.set(true);
+            BeanCopier beanCopier = BeanCopierRegistry.prepare(source.getClass(), targetCls);
+            return (R) beanCopier.topCopyWithoutTopConverter(source);
+        } finally {
+            COPY_IGNORE_NULL.remove();
+        }
     }
 
     /**
@@ -45,9 +52,13 @@ public class BeanCopy {
     }
 
     public static void copyToIgnoreNull(Object source, Object target) {
-        BeanCopier copier = BeanCopierRegistry.prepare(source.getClass(), target.getClass());
-        copier.setIgnoreNull(true);
-        copier.topCopyWithoutTopConverter(source, target);
+        try {
+            COPY_IGNORE_NULL.set(true);
+            BeanCopier copier = BeanCopierRegistry.prepare(source.getClass(), target.getClass());
+            copier.topCopyWithoutTopConverter(source, target);
+        } finally {
+            COPY_IGNORE_NULL.remove();
+        }
     }
 
     /**
@@ -72,4 +83,6 @@ public class BeanCopy {
             results.put(source.getKey(), elemCopier.topCopyWithoutTopConverter(source.getValue()));
         }
     }
+
+
 }

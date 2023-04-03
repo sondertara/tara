@@ -153,7 +153,7 @@ public class ReferenceConcurrentMap<K, V> implements ConcurrentMap<K, V>, Iterab
      * @return 值对象
      */
     public V computeIfAbsent(K key, Func0<? extends V> supplier) {
-        return computeIfAbsent(key, (keyParam) -> supplier.callWithRuntimeException());
+        return computeIfAbsent(key, (keyParam) -> supplier.call());
     }
 
     @Override

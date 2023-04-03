@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.sondertara</groupId>
     <artifactId>tara</artifactId>
-    <version>1.0.2</version>
+    <version>1.0.2-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>tara</name>
     <description>tara is a awesome java advance Kit.</description>
@@ -29,15 +29,18 @@
     </developers>
 
     <properties>
-        <java.version>1.8</java.version>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <java.version>17</java.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <timestamp>${maven.build.timestamp}</timestamp>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
-        <slf4j.version>2.0.3</slf4j.version>
-        <fastjson2.version>2.0.15</fastjson2.version>
+        <slf4j.version>2.0.5</slf4j.version>
+        <fastjson2.version>2.0.20</fastjson2.version>
+        <lombok.version>1.18.24</lombok.version>
+        <commons.codes.version>1.15</commons.codes.version>
+        <guava.version>31.1-jre</guava.version>
     </properties>
 
     <dependencyManagement>
@@ -45,23 +48,17 @@
             <dependency>
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
-                <version>1.15</version>
+                <version>${commons.codes.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
-                <version>1.18.24</version>
-                <scope>provided</scope>
+                <version>${lombok.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.alibaba.fastjson2</groupId>
                 <artifactId>fastjson2</artifactId>
                 <version>${fastjson2.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.reflections</groupId>
-                <artifactId>reflections</artifactId>
-                <version>0.10.2</version>
             </dependency>
             <dependency>
                 <groupId>jakarta.servlet</groupId>
@@ -70,34 +67,16 @@
                 <scope>provided</scope>
             </dependency>
 
-
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>31.1-jre</version>
+                <version>${guava.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
                 <version>3.12.0</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpclient</artifactId>
-                <version>4.5.13</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpmime</artifactId>
-                <version>4.5.13</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpasyncclient</artifactId>
-                <scope>compile</scope>
-                <version>4.1.5</version>
             </dependency>
 
             <dependency>
@@ -141,7 +120,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>3.2.0</version>
+                <version>3.3.0</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -150,7 +129,6 @@
                 <configuration>
                     <compilerArgument>-Xlint:unchecked,deprecation</compilerArgument>
                 </configuration>
-
             </plugin>
             <!-- Source -->
             <plugin>
@@ -173,7 +151,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.1.1</version>
+                <version>3.4.1</version>
                 <configuration>
                     <show>private</show>
                     <nohelp>true</nohelp>
@@ -218,11 +196,6 @@
                 <version>2.8.2</version>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-site-plugin</artifactId>
-                <version>3.8.2</version>
-            </plugin>
-            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>versions-maven-plugin</artifactId>
                 <version>2.10.0</version>
@@ -241,105 +214,6 @@
                 <javadoc.opts>-Xdoclint:none</javadoc.opts>
             </properties>
         </profile>
-
-        <profile>
-            <id>release</id>
-            <distributionManagement>
-                <snapshotRepository>
-                    <id>oss</id>
-                    <name>OSS Snapshots Repository</name>
-                    <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-                </snapshotRepository>
-                <repository>
-                    <id>oss</id>
-                    <name>OSS Staging Repository</name>
-                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-                </repository>
-            </distributionManagement>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-release-plugin</artifactId>
-                        <version>2.5.3</version>
-                        <configuration>
-                            <autoVersionSubmodules>true</autoVersionSubmodules>
-                            <useReleaseProfile>false</useReleaseProfile>
-                            <releaseProfiles>release</releaseProfiles>
-                            <goals>deploy</goals>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <version>3.10.1</version>
-                        <configuration>
-                            <source>1.8</source>
-                            <target>1.8</target>
-                        </configuration>
-                    </plugin>
-                    <!-- Source -->
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-source-plugin</artifactId>
-                        <version>3.2.1</version>
-                        <executions>
-                            <execution>
-                                <id>attach-sources</id>
-                                <goals>
-                                    <goal>jar-no-fork</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <phase>compile</phase>
-                                <goals>
-                                    <goal>jar-no-fork</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <!-- Javadoc -->
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.1.1</version>
-                        <configuration>
-                            <show>private</show>
-                            <nohelp>true</nohelp>
-                            <charset>UTF-8</charset>
-                            <encoding>UTF-8</encoding>
-                            <docencoding>UTF-8</docencoding>
-                            <!-- TODO 临时解决不规范的javadoc生成报错,后面要规范化后把这行去掉 -->
-                            <additionalJOptions>
-                                <additionalJOption>-Xdoclint:none</additionalJOption>
-                            </additionalJOptions>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>jar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <!-- GPG -->
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <version>3.0.1</version>
-                        <executions>
-                            <execution>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
     </profiles>
 
     <modules>
@@ -347,4 +221,16 @@
         <module>excel-tara</module>
         <module>notify-tara</module>
     </modules>
+    <distributionManagement>
+        <repository>
+            <id>itfb-release</id>
+            <name>itfb-release</name>
+            <url>http://128.192.116.77:8081/repository/maven-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>itfb-snapshots</id>
+            <name>itfb-snapshots</name>
+            <url>http://128.192.116.77:8081/repository/maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
 </project>

@@ -1,0 +1,199 @@
+@page {
+    margin: 20px 5px;
+    -fs-max-overflow-pages: 10
+}
+
+@font-face {
+    font-family: 'cjk';
+    src: url("NotoSansCJKsc-Regular.ttf");
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'cjk';
+    src: url("NotoSansCJKsc-Bold.ttf");
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'cjk';
+    src: url("NotoSansCJKsc-Italic.ttf");
+    font-style: italic;
+}
+
+
+html, body {
+    background-color: #f0f2f5;
+    font-family: 'cjk', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
+th{
+    page-break-inside: avoid;
+}
+
+
+.page-title {
+    width: 100%;
+    text-align: center;
+    font-size: 29px;
+    font-weight: bolder;
+}
+
+.ant-card {
+    box-sizing: border-box;
+    margin: 10px 0;
+    padding: 5px 5px 10px 5px;
+    color: black;
+    font-size: 14px;
+    font-variant: normal;
+    line-height: 1.5715;
+    list-style: none;
+    position: relative;
+    background: #fff;
+    border-radius: 2px;
+}
+
+.ant-card-head {
+    min-height: 48px;
+    padding: 0 4px;
+    margin-bottom: 8px;
+    color: black;
+    font-weight: bold;
+    font-size: 26px;
+    background: transparent;
+    border-bottom: 2px solid #f0f0f0;
+    border-radius: 2px 2px 0 0;
+}
+
+.table-div {
+    text-align: center;
+
+}
+
+.table-title {
+    text-align: center;
+    padding: 0 2px;
+    margin-top: 2px;
+    font-size: 20px;
+    font-weight: bold;
+    border-top: 1px solid lavender;
+    border-left: 1px solid lavender;
+    border-right: 1px solid lavender;
+    border-radius: 2px 2px 0 0;
+}
+
+table.grid-table {
+    width: 100%;
+    font-size: 12px;
+    margin-top: 1px;
+    table-layout: fixed;
+    color: #333333;
+    border-color: #666666;
+    border-collapse: collapse;
+}
+
+table.grid-table th {
+    border-width: 1px;
+    padding: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    border-style: solid;
+    border-color: #666666;
+    background-color: #dedede;
+}
+
+table.grid-table td {
+    border-width: 1px;
+    padding: 5px;
+    border-style: solid;
+    border-color: #666666;
+    word-wrap: break-word;
+    /*background-color: #ffffff;*/
+}
+
+.font-red {
+    color: red;
+    font-weight: bold;
+}
+
+.warning-td {
+    background-color: orange !important;
+}
+
+.background-light-blue {
+    background-color: #87ceeb;
+}
+
+.image-view {
+    text-align: center;
+}
+
+.image-view img {
+    max-width: 96%;
+}
+
+
+.ant-descriptions-view table {
+    width: 100%;
+    background-color: #ffffff;
+    table-layout: fixed;
+}
+
+.ant-descriptions-item {
+    padding-bottom: 0;
+    vertical-align: top;
+}
+
+.ant-descriptions-row {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    color: #1a1a1a;
+    font-size: 14px;
+    font-variant: normal;
+    line-height: 1.5715;
+    list-style: none;
+    position: relative;
+    background: #fff;
+    border-radius: 2px;
+}
+
+.ant-descriptions-row > td {
+    padding-bottom: 16px;
+    padding-right: 10px;
+}
+
+
+.ant-descriptions-item-container {
+}
+
+.ant-descriptions-item-container .ant-descriptions-item-label {
+    font-weight: 700;
+    font-size: 14px;
+    float: left;
+    line-height: 1.5715;
+    text-align: start;
+    width: 112px;
+    height: 100%;
+    /*background-color: red;*/
+
+}
+
+.ant-descriptions-item-label:after {
+    content: ':';
+    position: relative;
+    top: -.5px;
+    clear: both;
+}
+
+.ant-descriptions-item-container .ant-descriptions-item-content {
+    color: black;
+    height: 100%;
+    margin-left: 120px;
+    font-size: 14px;
+    line-height: 1.5715;
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
