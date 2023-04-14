@@ -29,6 +29,7 @@
     </developers>
 
     <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>17</java.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
@@ -220,6 +221,7 @@
         <module>common-tara</module>
         <module>excel-tara</module>
         <module>notify-tara</module>
+        <module>dynamic-tara</module>
     </modules>
     <distributionManagement>
         <repository>

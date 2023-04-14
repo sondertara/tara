@@ -1963,7 +1963,6 @@ public class LocalDateTimeUtils extends CalendarUtils {
         return format(date, DatePattern.NORM_DATETIME_PATTERN);
     }
 
-
     public static String formatLocalDateTime(LocalDateTime localDateTime, String pattern) {
         if (null == localDateTime) {
             return null;
@@ -2035,6 +2034,7 @@ public class LocalDateTimeUtils extends CalendarUtils {
         }
         return -1;
     }
+
 
 
     /**

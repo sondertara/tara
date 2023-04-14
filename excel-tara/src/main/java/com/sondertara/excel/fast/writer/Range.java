@@ -51,12 +51,12 @@ public class Range {
      * {@code top} &lt;= {@code bottom} and {@code left} &lt;= {@code right}.
      *
      * @param worksheet Parent worksheet.
-     * @param top Top row.
-     * @param left Left column.
-     * @param bottom Bottom row.
-     * @param right Right column.
+     * @param top       Top row.
+     * @param left      Left column.
+     * @param bottom    Bottom row.
+     * @param right     Right column.
      */
-    Range(Worksheet worksheet, int top, int left, int bottom, int right) {
+    Range(Worksheet worksheet, int top, int right, int bottom, int left) {
         this.worksheet = Objects.requireNonNull(worksheet);
 
         // Check limits
@@ -70,6 +70,21 @@ public class Range {
         this.left = Math.min(left, right);
         this.bottom = Math.max(bottom, top);
         this.right = Math.max(right, left);
+    }
+
+    /**
+     * Convert a column index to a column name.
+     *
+     * @param c Zero-based column index.
+     * @return Column name.
+     */
+    public static String colToString(int c) {
+        StringBuilder sb = new StringBuilder();
+        while (c >= 0) {
+            sb.append((char) ('A' + (c % 26)));
+            c = (c / 26) - 1;
+        }
+        return sb.reverse().toString();
     }
 
     /**
@@ -134,21 +149,6 @@ public class Range {
         return result;
     }
 
-    /**
-     * Convert a column index to a column name.
-     *
-     * @param c Zero-based column index.
-     * @return Column name.
-     */
-    public static String colToString(int c) {
-        StringBuilder sb = new StringBuilder();
-        while (c >= 0) {
-            sb.append((char) ('A' + (c % 26)));
-            c = (c / 26) - 1;
-        }
-        return sb.reverse().toString();
-    }
-
     @Override
     public String toString() {
         return colToString(left) + (top + 1) + ':' + colToString(right) + (bottom + 1);
@@ -156,7 +156,7 @@ public class Range {
 
     /**
      * Get an absolute reference to this Range.
-     *
+     * <p>
      * ex: $A$1:$A$5
      *
      * @return absolute reference
@@ -221,7 +221,7 @@ public class Range {
     /**
      * Specifically define this range by assigning it a name.
      * It will be visible in the cell range dropdown menu.
-     * 
+     *
      * @param name string representing the name of this cell range
      */
     public void setName(String name) {

@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class MapToBeanCopier implements Copier {
     @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"rawtypes"})
     public void copy(Object source, Object target) {
         if (!Map.class.isAssignableFrom(source.getClass())) {
             throw new IllegalArgumentException("The source must be a Map");
@@ -15,13 +15,14 @@ public class MapToBeanCopier implements Copier {
         Map<String, Field> fieldMap = BeanCopierRegistry.findOrCreate(target.getClass());
         Map map = (Map) source;
         for (Object o : map.keySet()) {
-            Object value = map.get(o);
-            if (value == null) {
-                continue;
+            if (fieldMap.containsKey(o.toString())) {
+                Field field = fieldMap.get(o.toString());
+                Object value = map.get(o);
+                if (value == null) {
+                    continue;
+                }
+                ReflectUtils.setFieldValue(target, field, value);
             }
-            Field field = fieldMap.get(o.toString());
-            ReflectUtils.setFieldValue(target, field, value);
-
         }
     }
 }

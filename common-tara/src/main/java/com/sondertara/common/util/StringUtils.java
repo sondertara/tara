@@ -4,21 +4,12 @@ import com.sondertara.common.io.CharacterReader;
 import com.sondertara.common.lang.Assert;
 import com.sondertara.common.lang.Pair;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -1675,6 +1666,32 @@ public class StringUtils {
             return new String[]{};
         }
         return StringSplitUtils.splitToArray(str.toString(), separator, limit, false, false);
+    }
+    /**
+     * 切分字符串，如果分隔符不存在则返回原字符串
+     *
+     * @param str       被切分的字符串
+     * @param separator 分隔符
+     * @return 字符串
+     * @since 5.6.7
+     */
+    public static String[] splitToArray(CharSequence str, CharSequence separator) {
+        if (str == null) {
+            return new String[]{};
+        }
+
+        return StringSplitUtils.splitToArray(str.toString(), str(separator), 0, false, false);
+    }
+
+    /**
+     * 切分字符串
+     *
+     * @param str       被切分的字符串
+     * @param separator 分隔符字符
+     * @return 切分后的数组
+     */
+    public static String[] splitToArray(CharSequence str, char separator) {
+        return splitToArray(str, separator, 0);
     }
 
     /**

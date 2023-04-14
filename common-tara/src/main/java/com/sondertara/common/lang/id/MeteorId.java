@@ -108,7 +108,7 @@ public class MeteorId {
             return l;
         }
 
-        public void setNodeId(long nodeId) {
+        public synchronized void setNodeId(long nodeId) {
             this.nodeId = nodeId;
         }
     }

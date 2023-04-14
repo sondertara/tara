@@ -32,14 +32,7 @@ import com.sondertara.excel.support.dataconstraint.ExcelDataValidationConstraint
 import com.sondertara.excel.utils.CacheUtils;
 import com.sondertara.excel.utils.ExcelAnnotationUtils;
 import com.sondertara.excel.utils.ExcelFieldUtils;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.DataFormat;
-import org.apache.poi.ss.usermodel.DataValidation;
-import org.apache.poi.ss.usermodel.DataValidationConstraint;
-import org.apache.poi.ss.usermodel.DataValidationHelper;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
@@ -50,15 +43,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -70,20 +55,15 @@ import java.util.stream.Stream;
 public abstract class AbstractExcelWriterExecutor implements TaraExcelExecutor<Workbook>, ExcelWriterLifecycle {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractExcelWriterExecutor.class);
-
-    protected int curRowIndex;
-
-    protected int curSheetIndex;
-    protected int curColIndex;
     private final ExcelRawWriterContext<Workbook> writerContext;
     private final CellStyleCache cellStyleCache;
     private final SXSSFWorkbook sxssfWorkbook;
-
     private final ExcelDefaultWriterResolver resolver;
-
     private final AtomicInteger existSheetIndex = new AtomicInteger(0);
-
     private final ConcurrentHashMap<String, Integer> sheetNameMap = new ConcurrentHashMap<>();
+    protected int curRowIndex;
+    protected int curSheetIndex;
+    protected int curColIndex;
 
     public AbstractExcelWriterExecutor(final ExcelRawWriterContext<Workbook> writerContext) {
         this.sxssfWorkbook = new SXSSFWorkbook(new XSSFWorkbook(), Constants.DEFAULT_ROW_ACCESS_WINDOW_SIZE);
@@ -93,12 +73,64 @@ public abstract class AbstractExcelWriterExecutor implements TaraExcelExecutor<W
         this.resolver = new ExcelDefaultWriterResolver();
     }
 
+    private static boolean isSame(Object previous, Object current) {
+        if (null == previous && null == current) {
+            return true;
+
+        }
+        if (null == previous) {
+            return StringUtils.isBlank(current.toString());
+        }
+
+        if (null == current) {
+            return StringUtils.isBlank(previous.toString());
+        }
+        return previous.toString().equals(current.toString());
+    }
+
+    public static void test(List<?> list) {
+        // previous value
+        Object previous = list.get(0);
+
+        // if the repeat is interrupted
+        boolean isInterrupted = true;
+        List<Pair<Integer, Integer>> range = new ArrayList<>();
+        //start index
+        int start = -1;
+        //end index
+        int end;
+        for (int i = 1; i < list.size(); i++) {
+            if (isSame(previous, list.get(i)) && isInterrupted) {
+                start = i - 1;
+                isInterrupted = false;
+            } else if (!isSame(previous, list.get(i)) && !isInterrupted) {
+                end = i - 1;
+                isInterrupted = true;
+                range.add(Pair.of(start, end));
+            }
+            //the last node
+            if (i == list.size() - 1 && isSame(previous, list.get(i)) && !isInterrupted) {
+                end = i;
+                range.add(Pair.of(start, end));
+                break;
+            }
+            previous = list.get(i);
+        }
+        System.out.println(range);
+
+    }
+
+    public static void main(String[] args) {
+        int[] a = new int[]{1, 1, 2, 3, 3, 3, 4, 5, 5, 7, 8, 8, 8};
+        List<Integer> list = Arrays.stream(a).boxed().collect(Collectors.toList());
+        test(list);
+    }
+
     /**
      * before
      */
     @Override
     public abstract void beforeCallback();
-
 
     @Override
     public void handleComplexHeader(SXSSFSheet sheet, String sheetIdentity) {
@@ -339,6 +371,7 @@ public abstract class AbstractExcelWriterExecutor implements TaraExcelExecutor<W
         List<Integer> rowKeys = Stream.iterate(sheetDefinition.getFirstDataRow() + 1, item -> item + 1).limit(rows.size() + sheetDefinition.getFirstDataRow() + 1).collect(Collectors.toList());
         final Map<Integer, Field> columnFields = sheetDefinition.getColFields();
         Set<Integer> columnKeys = columnFields.keySet();
+        //table 用于合并一列相同值的单元格，一列如果当前值和上一个相等，则两个单元格对应坐标赋值为1
         ArrayTable<Integer, Integer, Integer> table = ArrayTable.create(rowKeys, columnKeys);
         Object firstData = rows.get(0);
         final Row firstRow = sheet.createRow(sheetDefinition.getFirstDataRow());
@@ -352,7 +385,7 @@ public abstract class AbstractExcelWriterExecutor implements TaraExcelExecutor<W
             Object rowData = rows.get(rowIndex);
             previousRowData = createRow(previousRowData, row, rowIndex, rowData, sheetDefinition, table);
         }
-        // 设置列自动大小
+        // 设置列自动大小和自动合并
         sheet.trackAllColumnsForAutoSizing();
         for (final Map.Entry<Integer, Field> columnFieldEntry : columnFields.entrySet()) {
             final Field field = columnFieldEntry.getValue();
@@ -363,25 +396,37 @@ public abstract class AbstractExcelWriterExecutor implements TaraExcelExecutor<W
             } else if (Constants.DEFAULT_COL_WIDTH != excelExportField.colWidth()) {
                 resolver.sizeColumnWidth(sheet, colIndex);
             }
+            //如果自动合并
             if (excelExportField.autoMerge()) {
+                //起始坐标
                 int start = -1;
+                //终止坐标
                 int end;
+                //连续相等是否中断，默认中断
                 boolean flag = true;
+                //取出colIndex一列所有标记的数据
                 Map<Integer, Integer> map = table.column(colIndex);
-
+                //最后一行
                 int lastRowIndex = -1;
                 while (map.entrySet().stream().iterator().hasNext()) {
                     Map.Entry<Integer, Integer> next = map.entrySet().stream().iterator().next();
+                    //如果标记1，且连续相等中断，设置起始节点
                     if (next.getValue() == 1 && flag) {
                         start = next.getKey();
+                        //设置连续相等未中断
                         flag = false;
                     } else if (1 != next.getValue() && !flag) {
+                        //设置终止坐标
                         end = next.getKey() - 1;
+                        //设置连续相等中断标志位
                         flag = true;
+                        //合并单元格
                         sheet.addMergedRegion(new CellRangeAddress(start, end, colIndex, colIndex + 1));
                     }
+                    //最后一行坐标
                     lastRowIndex = next.getKey();
                 }
+                //处理遍历到最后一行时，连续相等未中断
                 if (!flag) {
                     end = lastRowIndex;
                     sheet.addMergedRegion(new CellRangeAddress(start, end, colIndex, colIndex + 1));
@@ -389,61 +434,6 @@ public abstract class AbstractExcelWriterExecutor implements TaraExcelExecutor<W
             }
         }
     }
-
-
-    private static boolean isSame(Object previous, Object current) {
-        if (null == previous && null == current) {
-            return true;
-
-        }
-        if (null == previous) {
-            return StringUtils.isBlank(current.toString());
-        }
-
-        if (null == current) {
-            return StringUtils.isBlank(previous.toString());
-        }
-        return previous.toString().equals(current.toString());
-    }
-
-    public static void test(List<?> list) {
-        // previous value
-        Object previous = list.get(0);
-
-        // if the repeat is interrupted
-        boolean isInterrupted = true;
-        List<Pair<Integer, Integer>> range = new ArrayList<>();
-        //start index
-        int start = -1;
-        //end index
-        int end;
-        for (int i = 1; i < list.size(); i++) {
-            if (isSame(previous, list.get(i)) && isInterrupted) {
-                start = i - 1;
-                isInterrupted = false;
-            } else if (!isSame(previous, list.get(i)) && !isInterrupted) {
-                end = i - 1;
-                isInterrupted = true;
-                range.add(Pair.of(start, end));
-            }
-            //the last node
-            if (i == list.size() - 1 && isSame(previous, list.get(i)) && !isInterrupted) {
-                end = i;
-                range.add(Pair.of(start, end));
-                break;
-            }
-            previous = list.get(i);
-        }
-        System.out.println(range);
-
-    }
-
-    public static void main(String[] args) {
-        int[] a = new int[]{1, 1, 2, 3, 3, 3, 4, 5, 5, 7, 8, 8, 8};
-        List<Integer> list = Arrays.stream(a).boxed().collect(Collectors.toList());
-        test(list);
-    }
-
 
     /**
      * after
@@ -518,6 +508,27 @@ public abstract class AbstractExcelWriterExecutor implements TaraExcelExecutor<W
         return sheet;
     }
 
+    @SuppressWarnings("unchecked")
+    private List<AbstractExcelColumnConverter<Annotation, ?>> findColumnConverter(final Field field) {
+        List<AbstractExcelColumnConverter<Annotation, ?>> columnConverters = new ArrayList<>();
+        final Annotation[] annotations = field.getAnnotations();
+        for (final Annotation annotation : annotations) {
+            final Class<? extends Annotation> aClass = annotation.annotationType();
+            if (aClass.isAnnotationPresent(ExcelConverter.class)) {
+                final ExcelConverter excelConverter = aClass.getAnnotation(ExcelConverter.class);
+                AbstractExcelColumnConverter<Annotation, ?> columnConverter = ReflectUtils.newInstance(excelConverter.convertBy());
+                columnConverter.initialize(annotation);
+                columnConverters.add(columnConverter);
+            }
+        }
+
+        if (columnConverters.size() == 0) {
+            columnConverters = Collections.singletonList(new ExcelDefaultConverter());
+        }
+
+        return columnConverters;
+    }
+
     /**
      * 单元格样式缓存
      */
@@ -553,26 +564,5 @@ public abstract class AbstractExcelWriterExecutor implements TaraExcelExecutor<W
             this.cellStyleCacheMap.remove(clazz);
         }
 
-    }
-
-    @SuppressWarnings("unchecked")
-    private List<AbstractExcelColumnConverter<Annotation, ?>> findColumnConverter(final Field field) {
-        List<AbstractExcelColumnConverter<Annotation, ?>> columnConverters = new ArrayList<>();
-        final Annotation[] annotations = field.getAnnotations();
-        for (final Annotation annotation : annotations) {
-            final Class<? extends Annotation> aClass = annotation.annotationType();
-            if (aClass.isAnnotationPresent(ExcelConverter.class)) {
-                final ExcelConverter excelConverter = aClass.getAnnotation(ExcelConverter.class);
-                AbstractExcelColumnConverter<Annotation, ?> columnConverter = ReflectUtils.newInstance(excelConverter.convertBy());
-                columnConverter.initialize(annotation);
-                columnConverters.add(columnConverter);
-            }
-        }
-
-        if (columnConverters.size() == 0) {
-            columnConverters = Collections.singletonList(new ExcelDefaultConverter());
-        }
-
-        return columnConverters;
     }
 }

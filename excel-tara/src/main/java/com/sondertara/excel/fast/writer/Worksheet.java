@@ -22,17 +22,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A worksheet is a set of cells.
@@ -272,7 +262,7 @@ public class Worksheet {
 
     /**
      * Get cell range that autofilter is applied to.
-     * 
+     *
      * @return Range of cells that autofilter is set to
      *             (null if autofilter is not set).
      */
@@ -292,8 +282,8 @@ public class Worksheet {
 
     /**
      * Get a list of named ranges.
-     * 
-     * @return Map containing named range entries 
+     *
+     * @return Map containing named range entries
      *              where keys are the names and values are cell ranges.
      */
     public Map<String, Range> getNamedRanges() {
@@ -726,8 +716,8 @@ public class Worksheet {
      * @param right Right column.
      * @return Newly created range.
      */
-    public Range range(int top, int left, int bottom, int right) {
-        return new Range(this, top, left, bottom, right);
+    public Range range(int top, int right, int bottom, int left) {
+        return new Range(this, top, right, bottom, left);
     }
 
     /**
@@ -876,7 +866,7 @@ public class Worksheet {
                          "\" top=\"" + topMargin + "\"/>";
         writer.append(margins);
 
-	/* set page orientation for the print setup */
+        /* set page orientation for the print setup */
         writer.append("<pageSetup")
             .append(" paperSize=\"1\"")
             .append(" scale=\"" + pageScale + "\"")
@@ -971,7 +961,7 @@ public class Worksheet {
             Cell[] row = rows.get(r);
             if (row != null) {
                 writeRow(writer, r, hiddenRows.contains(r),
-                		rowHeights.get(r), row);
+                        rowHeights.get(r), row);
             }
             rows.set(r, null); // free flushed row data
         }
@@ -1030,16 +1020,16 @@ public class Worksheet {
      * @throws IOException If an I/O error occurs.
      */
     private static void writeRow(Writer w, int r, boolean isHidden,
-    		 					Double rowHeight, Cell... row) throws IOException {
+                                 Double rowHeight, Cell... row) throws IOException {
         w.append("<row r=\"").append(r + 1).append("\"");
         if (isHidden) {
             w.append(" hidden=\"true\"");
         }
         if(rowHeight != null) {
-        	w.append(" ht=\"")
-        	 .append(rowHeight)
-        	 .append("\"")
-        	 .append(" customHeight=\"1\"");
+            w.append(" ht=\"")
+                    .append(rowHeight)
+                    .append("\"")
+                    .append(" customHeight=\"1\"");
         }
         w.append(">");
         for (int c = 0; c < row.length; ++c) {
@@ -1307,10 +1297,10 @@ public class Worksheet {
      * list of named ranges under the provided name.
      * It will be visible when this sheet is open in the
      * cell range dropdown menu under the specified name.
-     * 
+     *
      * @param range Range of cells that needs to be named.
      * @param name String representing the given cell range's name.
-     * 
+     *
      */
     public void addNamedRange(Range range, String name) {
         this.namedRanges.put(name, range);

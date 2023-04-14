@@ -127,6 +127,8 @@ public final class Color {
      * Light to dark gray.
      */
     public static final String GRAY1 = "EEEEEE";
+
+    public static final java.awt.Color red       = new java.awt.Color(255, 0, 0);
     public static final String GRAY2 = "DDDDDD";
     public static final String GRAY3 = "CCCCCC";
     public static final String GRAY4 = "BBBBBB";
