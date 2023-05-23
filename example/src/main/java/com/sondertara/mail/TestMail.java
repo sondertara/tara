@@ -5,7 +5,6 @@ import com.sondertara.notify.email.EmailClient;
 import com.sondertara.notify.email.entity.EmailEntity;
 import com.sun.mail.util.MailSSLSocketFactory;
 
-import javax.net.ssl.SSLServerSocketFactory;
 import java.security.GeneralSecurityException;
 import java.util.Properties;
 

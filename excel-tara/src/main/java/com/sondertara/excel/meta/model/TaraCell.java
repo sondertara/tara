@@ -1,10 +1,10 @@
 package com.sondertara.excel.meta.model;
 
 import com.sondertara.excel.antlr.ExcelHelper;
-import com.sondertara.excel.meta.celltype.ExcelCellType;
 import com.sondertara.excel.antlr.tablemodel.BorderPositionEnum;
 import com.sondertara.excel.antlr.tablemodel.CellStyle;
 import com.sondertara.excel.antlr.tablemodel.MergedRegion;
+import com.sondertara.excel.meta.celltype.ExcelCellType;
 import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.CellType;

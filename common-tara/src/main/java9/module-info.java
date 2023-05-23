@@ -23,4 +23,5 @@ open module com.sondertara.common {
     exports com.sondertara.common.convert;
     exports com.sondertara.common.lang.reflect;
     exports com.sondertara.common.lang;
+    exports com.sondertara.common.function;
 }

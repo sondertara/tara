@@ -8,12 +8,9 @@ import com.sondertara.common.lang.map.WeakConcurrentMap;
 
 import java.io.File;
 import java.lang.reflect.Array;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.security.SecureClassLoader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -87,13 +84,14 @@ public class ClassLoaderUtils {
      * @return 当前线程的class loader
      * @see Thread#getContextClassLoader()
      */
+    @SuppressWarnings("removal")
     public static ClassLoader getContextClassLoader() {
         if (System.getSecurityManager() == null) {
             return Thread.currentThread().getContextClassLoader();
         } else {
 
             // 绕开权限检查
-            return AccessController
+            return java.security.AccessController
                     .doPrivileged((PrivilegedAction<ClassLoader>) () -> Thread.currentThread().getContextClassLoader());
         }
     }
@@ -112,7 +110,7 @@ public class ClassLoaderUtils {
             return ClassLoader.getSystemClassLoader();
         } else {
             // 绕开权限检查
-            return AccessController.doPrivileged((PrivilegedAction<ClassLoader>) ClassLoader::getSystemClassLoader);
+            return java.security.AccessController.doPrivileged((PrivilegedAction<ClassLoader>) ClassLoader::getSystemClassLoader);
         }
     }
 

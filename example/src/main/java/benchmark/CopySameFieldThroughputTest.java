@@ -3,8 +3,6 @@ package benchmark;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.convert.Convert;
-import com.github.dozermapper.core.DozerBeanMapperBuilder;
-import com.github.dozermapper.core.Mapper;
 import com.sondertara.common.bean.model.same.BaitSameEntity;
 import com.sondertara.common.bean.model.same.BaitSameVo;
 import org.openjdk.jmh.annotations.Benchmark;

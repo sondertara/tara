@@ -4,7 +4,6 @@ import com.sondertara.common.util.StringUtils;
 import com.sondertara.excel.exception.ExcelValidationException;
 import com.sondertara.excel.meta.annotation.validation.ExcelRegexValue;
 
-
 import java.util.regex.Pattern;
 
 /**

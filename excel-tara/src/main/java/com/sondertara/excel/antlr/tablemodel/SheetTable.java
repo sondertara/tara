@@ -1,10 +1,10 @@
 package com.sondertara.excel.antlr.tablemodel;
 
-import com.sondertara.excel.meta.model.TaraCell;
+import com.sondertara.excel.antlr.ExcelHelper;
 import com.sondertara.excel.antlr.parser.VariableParserBaseVisitor;
 import com.sondertara.excel.antlr.parser.VariableParserLexer;
 import com.sondertara.excel.antlr.parser.VariableParserParser;
-import com.sondertara.excel.antlr.ExcelHelper;
+import com.sondertara.excel.meta.model.TaraCell;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.TerminalNode;

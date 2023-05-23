@@ -6,10 +6,7 @@ import java.io.PushbackInputStream;
 import java.util.zip.CRC32;
 import java.util.zip.ZipEntry;
 
-import static com.sondertara.excel.fast.opczip.reader.skipping.ZipReadSpec.CEN;
-import static com.sondertara.excel.fast.opczip.reader.skipping.ZipReadSpec.DAT;
-import static com.sondertara.excel.fast.opczip.reader.skipping.ZipReadSpec.DAT_SIZE;
-import static com.sondertara.excel.fast.opczip.reader.skipping.ZipReadSpec.LFH;
+import static com.sondertara.excel.fast.opczip.reader.skipping.ZipReadSpec.*;
 
 
 class CompressedEntryInputStream extends FilterInputStream {

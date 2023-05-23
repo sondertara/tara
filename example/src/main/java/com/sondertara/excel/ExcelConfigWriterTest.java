@@ -1,15 +1,15 @@
 package com.sondertara.excel;
 
 
-import com.sondertara.excel.domain.school.ClassScore;
-import com.sondertara.excel.domain.school.GradesRanking;
-import com.sondertara.excel.domain.school.SchoolReportData;
-import com.sondertara.excel.domain.school.Score;
 import com.sondertara.excel.antlr.ExcelHelper;
 import com.sondertara.excel.antlr.tablemodel.BorderPositionEnum;
 import com.sondertara.excel.antlr.tablemodel.ExcelWorkbook;
 import com.sondertara.excel.antlr.tablemodel.Row;
 import com.sondertara.excel.antlr.tablemodel.SheetTable;
+import com.sondertara.excel.domain.school.ClassScore;
+import com.sondertara.excel.domain.school.GradesRanking;
+import com.sondertara.excel.domain.school.SchoolReportData;
+import com.sondertara.excel.domain.school.Score;
 import org.apache.commons.io.IOUtils;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.junit.jupiter.api.BeforeAll;

@@ -9,20 +9,7 @@ import java.util.zip.InflaterInputStream;
 import java.util.zip.ZipEntry;
 
 import static com.sondertara.excel.fast.opczip.reader.skipping.ExactIO.skipExactly;
-import static com.sondertara.excel.fast.opczip.reader.skipping.ZipReadSpec.CEN;
-import static com.sondertara.excel.fast.opczip.reader.skipping.ZipReadSpec.DATA_DESCRIPTOR_USED;
-import static com.sondertara.excel.fast.opczip.reader.skipping.ZipReadSpec.DAT_SIZE;
-import static com.sondertara.excel.fast.opczip.reader.skipping.ZipReadSpec.LFH;
-import static com.sondertara.excel.fast.opczip.reader.skipping.ZipReadSpec.LFH_CRC;
-import static com.sondertara.excel.fast.opczip.reader.skipping.ZipReadSpec.LFH_EXT;
-import static com.sondertara.excel.fast.opczip.reader.skipping.ZipReadSpec.LFH_FLG;
-import static com.sondertara.excel.fast.opczip.reader.skipping.ZipReadSpec.LFH_LEN;
-import static com.sondertara.excel.fast.opczip.reader.skipping.ZipReadSpec.LFH_NAM;
-import static com.sondertara.excel.fast.opczip.reader.skipping.ZipReadSpec.LFH_SIZ;
-import static com.sondertara.excel.fast.opczip.reader.skipping.ZipReadSpec.LFH_SIZE;
-import static com.sondertara.excel.fast.opczip.reader.skipping.ZipReadSpec.get16;
-import static com.sondertara.excel.fast.opczip.reader.skipping.ZipReadSpec.get32;
-import static com.sondertara.excel.fast.opczip.reader.skipping.ZipReadSpec.readNBytes;
+import static com.sondertara.excel.fast.opczip.reader.skipping.ZipReadSpec.*;
 
 public class ZipStreamReader implements AutoCloseable {
     private final PushbackInputStream in;

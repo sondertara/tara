@@ -4,7 +4,6 @@ import com.sondertara.common.io.FileUtils;
 import com.sondertara.common.model.ResultDTO;
 import com.sondertara.common.util.StringFormatter;
 
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

@@ -15,7 +15,6 @@
  */
 package com.sondertara.common.lang;
 
-import com.sondertara.common.lang.Assert;
 import com.sondertara.common.util.ObjectUtils;
 
 import java.util.Objects;

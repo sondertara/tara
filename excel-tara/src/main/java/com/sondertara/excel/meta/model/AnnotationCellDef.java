@@ -2,7 +2,6 @@ package com.sondertara.excel.meta.model;
 
 import com.sondertara.common.lang.reflect.ReflectUtils;
 import com.sondertara.excel.exception.ExcelReaderException;
-import com.sondertara.excel.exception.ExcelValidationException;
 import com.sondertara.excel.meta.annotation.ExcelImportField;
 import com.sondertara.excel.meta.annotation.validation.ConstraintValidator;
 import com.sondertara.excel.support.validator.AbstractExcelColumnValidator;
