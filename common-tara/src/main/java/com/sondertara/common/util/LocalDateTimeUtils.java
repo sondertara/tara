@@ -13,7 +13,6 @@ import com.sondertara.common.time.TemporalAccessorUtils;
 import com.sondertara.common.time.TemporalUtils;
 import com.sondertara.common.time.Week;
 import com.sondertara.common.time.Zodiac;
-import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.time.DateParser;
@@ -1675,7 +1674,7 @@ public class LocalDateTimeUtils extends CalendarUtils {
 
         Calendar instance = Calendar.getInstance();
         instance.setTime(startDateInclusive);
-        instance.add(Calendar.SECOND, RandomUtils.nextInt(0, betweenSeconds));
+        instance.add(Calendar.SECOND, RandomUtils.randomInt(0, betweenSeconds));
         return instance.getTime();
     }
 
@@ -1687,7 +1686,7 @@ public class LocalDateTimeUtils extends CalendarUtils {
     public static Date random() {
         Calendar instance = Calendar.getInstance();
         instance.setTimeInMillis(0L);
-        instance.add(Calendar.MINUTE, RandomUtils.nextInt(0, Integer.MAX_VALUE));
+        instance.add(Calendar.MINUTE, RandomUtils.randomInt(0, Integer.MAX_VALUE));
         return instance.getTime();
     }
 

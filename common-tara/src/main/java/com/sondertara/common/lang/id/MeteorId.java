@@ -1,132 +1,131 @@
 package com.sondertara.common.lang.id;
 
+import com.sondertara.common.util.IpUtils;
+
+import java.util.SplittableRandom;
+
 /**
  * Based on SnowFlake
- * bit:     0     1~29  30~49  50~60   61~63
+ * bit:     0     1~30  31~48  49~60   61~63
  * section: keep  data  node   serial  random
+ * length:  1 bit 30bit	18bit  12bit   3bit
  */
 public class MeteorId {
     /**
-     * initial value is 2022-01-01 00:00:00
+     * initial value is 2023-04-24 12:13:00
      */
-    private final static long initSecond = 1640966400L;
+    public final static long INIT_SECOND = 1682309580L;
     /**
      * node section number bits
      */
-    private final static long nodeBits = 20;
+    public final static int NODE_BITS = 18;
 
     /**
      * serial section number bits
      */
-    private final static long seqBits = 11;
+    public final static int SEQ_BITS = 12;
 
     /**
      * random  section number bits
      */
 
-    private final static long randBits = 3;
+    public final static long RAND_BITS = 3;
+    private long second;
+    private long seqNum;
+    private long randNum;
 
 
     /**
      * the high bits of data section
      */
-    private final static long secBits = 64 - 1 - nodeBits - seqBits - randBits;
+    public final long secBits;
+
 
     /**
      * max second
      */
-    private final static long maxSecond = ~(-1 << secBits);
+    public final long maxSecond;
     /**
      * max node
      */
-    private final static long maxNode = ~(-1 << nodeBits);
+    public final long maxNode;
     /**
-     * max data
+     * max serial
      */
-    private final static long maxSeq = ~(-1 << secBits);
+    public final long maxSeq;
     /**
      * max random
      */
-    private final static long maxRand = ~(-1 << randBits);
+    public final long maxRand = ~(-1 << RAND_BITS);
 
     /**
      * the data section left shift
      */
-    private final static long timeShift = nodeBits + seqBits + randBits;
+    public final long timeShift;
     /**
      * the node section left shift
      */
-    private final static long nodeShift = seqBits + randBits;
+    public final long nodeShift;
     /**
      * the serial section left shift
      */
-    private final static long seqShift = randBits;
+    public final long seqShift = RAND_BITS;
 
 
-    private static final Node INSTANCE = new Node(0);
+    private long nodeId;
+
 
     public static long nextId() {
-        return INSTANCE.nexId();
+        return MeteorIdFactory.INSTANCE.nexId();
     }
 
 
-    public static void setNodeId(long nodeId) {
-        INSTANCE.setNodeId(nodeId);
-    }
+    protected MeteorId(long initSecond, long nodeId, int nodeBits, int seqBits) {
 
-    static class Node {
-        private long seqNum;
-        private long randNum;
-        private long second;
-        private long seed;
-        private long nodeId;
-
-        public Node(long nodeId) {
-            if (nodeId < 0 || nodeId > maxNode) {
-                throw new IllegalArgumentException("Node id must between 0 and " + maxNode);
-            }
-            this.nodeId = nodeId;
-            this.seqNum = 0;
-            this.randNum = 0;
-            this.seed = 1;
-            this.second = System.currentTimeMillis() / 1000 - initSecond;
+        this.maxNode = ~(-1L << nodeBits);
+        if (nodeId < 0 || nodeId > maxNode) {
+            throw new IllegalArgumentException("Node id must between 0 and " + maxNode);
         }
+        if (nodeId == 0) {
+            try {
+                String[] split = IpUtils.getLocalIp().split("\\.");
+                long id = Long.parseLong(split[2]) << 8 | Long.parseLong(split[3]);
+                this.nodeId = id & this.maxNode;
 
-        public synchronized long nexId() {
-            this.seqNum = (seqNum + 1) & maxSeq;
-            randNum = rand(this);
-            if (seqNum == 0) {
-                second = (second + 1) & maxSecond;
-                if (second == 0) {
-                    throw new IllegalStateException("Seconds overflow. The max second is " + maxSecond);
-                }
+            } catch (Exception e) {
+                this.nodeId = random.nextInt(1 << 8);
             }
-            long l = second << timeShift | nodeId << nodeShift | seqNum << seqShift | randNum;
-            if (l < 0) {
-                System.out.println("Seconds overflow");
-            }
-            return l;
         }
-
-        public synchronized void setNodeId(long nodeId) {
-            this.nodeId = nodeId;
+        this.secBits = 64 - 1 - nodeBits - seqBits - RAND_BITS;
+        if (seqBits < 0) {
+            throw new IllegalArgumentException("nodeBits or seqBits is too long");
         }
+        this.maxSecond = ~(-1L << secBits);
+        this.maxSeq = ~(-1L << seqBits);
+        this.timeShift = nodeBits + seqBits + RAND_BITS;
+        this.nodeShift = seqBits + RAND_BITS;
+        this.seqNum = 0;
+        this.randNum = 0;
+        this.second = System.currentTimeMillis() / 1000 - initSecond;
     }
 
-    /**
-     * Generate random number
-     * base on xor shift
-     *
-     * @param node the node
-     * @return the random number
-     */
-    private static long rand(Node node) {
-        long x = node.seed;
-        x ^= x << 13;
-        x ^= x << 17;
-        x ^= x << 5;
-        node.seed = x % MeteorId.maxRand;
-        return node.seed;
+    private final SplittableRandom random = new SplittableRandom();
+
+    public synchronized long nexId() {
+        this.seqNum = (seqNum + 1) & maxSeq;
+        randNum = random.nextInt((int) (maxRand + 1));
+        if (seqNum == 0) {
+            second = (second + 1) & maxSecond;
+            if (second == 0) {
+                throw new IllegalStateException("Seconds overflow. The max second is " + maxSecond);
+            }
+        }
+        long l = second << timeShift | nodeId << nodeShift | seqNum << seqShift | randNum;
+        if (l < 0) {
+            throw new IllegalStateException("MeteorId seconds overflow");
+        }
+        return l;
     }
+
 
 }

@@ -30,7 +30,7 @@ public class MethodHandleUtils extends MethodUtils {
      * invokespecial"异常，因此针对JDK8及JDK9+分别封装lookup方法。
      *
      * @param callerClass 被调用的类或接口
-     * @return {@link java.lang.invoke.MethodHandles.Lookup}
+     * @return {@link MethodHandles.Lookup}
      */
     public static MethodHandles.Lookup lookup(Class<?> callerClass) {
         return LookupFactory.lookup(callerClass);

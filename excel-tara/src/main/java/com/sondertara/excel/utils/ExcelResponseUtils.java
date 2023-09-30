@@ -29,7 +29,7 @@ public class ExcelResponseUtils {
 
         if (StringUtils.isBlank(fileName)) {
             fileName = "template.xlsx";
-        } else if (!StringUtils.endWithAny(fileName, Constants.Excel_FILE_SUFFIX)) {
+        } else if (!StringUtils.endWithAny(fileName, Constants.EXCEL_FILE_SUFFIX)) {
             fileName = fileName + ".xlsx";
         }
 
@@ -48,9 +48,9 @@ public class ExcelResponseUtils {
             if (!fileName.endsWith(Constants.CSV_SUFFIX)) {
                 int indexOf = fileName.lastIndexOf(".");
                 if (indexOf > 0) {
-                    fileName = fileName.substring(0, indexOf) + Constants.Excel_FILE_SUFFIX[0];
+                    fileName = fileName.substring(0, indexOf) + Constants.EXCEL_FILE_SUFFIX[0];
                 } else {
-                    fileName = fileName + Constants.Excel_FILE_SUFFIX[0];
+                    fileName = fileName + Constants.EXCEL_FILE_SUFFIX[0];
                 }
             }
             httpServletResponse.setContentType(Constants.OCTET_STREAM_CONTENT_TYPE);

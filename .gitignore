@@ -174,3 +174,4 @@ pom.xml.versionsBackup
 logs
 export_tmp
 .vscode
+.tara_html

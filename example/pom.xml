@@ -179,7 +179,7 @@
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
                             <!--                            <mainClass>benchmark.CopySameFieldTest</mainClass>-->
-                            <mainClass>com.sondertara.mail.TestMail</mainClass>
+                            <mainClass>com.sondertara.excel.ParseFile</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
