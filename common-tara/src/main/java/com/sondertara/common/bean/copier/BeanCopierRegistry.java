@@ -1,8 +1,8 @@
 package com.sondertara.common.bean.copier;
 
-import com.sondertara.common.lang.Pair;
-import com.sondertara.common.lang.map.WeakConcurrentMap;
-import com.sondertara.common.lang.reflect.ReflectUtils;
+import com.sondertara.common.struct.Pair;
+import com.sondertara.common.collection.WeakConcurrentMap;
+import com.sondertara.common.reflect.ClassUtils;
 
 import java.lang.reflect.Field;
 import java.util.Map;
@@ -48,6 +48,6 @@ public class BeanCopierRegistry {
     }
 
     static Map<String, Field> findOrCreate(Class<?> targetCls) {
-        return SIMPLE_CLASS_COPIER_MAP.computeIfAbsent(targetCls, key -> ReflectUtils.getFieldMap(targetCls));
+        return SIMPLE_CLASS_COPIER_MAP.computeIfAbsent(targetCls, key -> ClassUtils.getFieldMap(targetCls));
     }
 }

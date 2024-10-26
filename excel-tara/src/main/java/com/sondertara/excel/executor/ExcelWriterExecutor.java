@@ -1,11 +1,12 @@
 package com.sondertara.excel.executor;
 
+import com.sondertara.common.timing.Stopwatch;
 import com.sondertara.excel.context.ExcelRawWriterContext;
 import com.sondertara.excel.exception.ExcelAnnotationWriterException;
 import com.sondertara.excel.exception.ExcelWriterException;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 /**
  * @author huangxiaohu
@@ -13,13 +14,16 @@ import org.apache.poi.xssf.streaming.SXSSFSheet;
 @Slf4j
 public class ExcelWriterExecutor extends AbstractExcelWriterExecutor {
 
-    public ExcelWriterExecutor(final ExcelRawWriterContext<Workbook> writerContext) {
-        super(writerContext);
+    private Stopwatch stopwatch = Stopwatch.createUnstarted();
+
+    public ExcelWriterExecutor(final SXSSFWorkbook sxssfWorkbook, final ExcelRawWriterContext<SXSSFWorkbook> writerContext) {
+        super(sxssfWorkbook, writerContext);
     }
 
     @Override
     public void beforeCallback() {
-
+        log.info("Write excel data is starting");
+        stopwatch.start();
     }
 
 
@@ -69,8 +73,10 @@ public class ExcelWriterExecutor extends AbstractExcelWriterExecutor {
         final long startTimeMillis = System.currentTimeMillis();
         try {
             super.initData();
-        } catch (final Throwable e) {
-            throw new ExcelWriterException("写入数据失败", e);
+        } catch (final ExcelWriterException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ExcelWriterException("Write Excel error,{}", e.getMessage(), e);
         } finally {
             log.debug("finish write data! [cost:{}ms]", (System.currentTimeMillis() - startTimeMillis));
         }
@@ -78,6 +84,8 @@ public class ExcelWriterExecutor extends AbstractExcelWriterExecutor {
 
     @Override
     public void afterCallback() {
+        long elapsedSeconds = stopwatch.stop().elapsedSeconds();
+        log.info("Write excel data is completed,cost time:{}s", elapsedSeconds);
 
     }
 }

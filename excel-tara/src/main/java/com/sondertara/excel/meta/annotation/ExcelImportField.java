@@ -1,7 +1,5 @@
 package com.sondertara.excel.meta.annotation;
 
-import com.sondertara.common.time.DatePattern;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -37,7 +35,7 @@ public @interface ExcelImportField {
      *
      * @return the data format
      */
-    String dateFormat() default DatePattern.NORM_DATETIME_PATTERN;
+    ExcelDataFormat dataFormat() default @ExcelDataFormat;
 
     /**
      * the column title

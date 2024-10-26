@@ -1,8 +1,7 @@
 package com.sondertara.excel.context;
 
+import com.sondertara.excel.lifecycle.ExcelReadListener;
 import com.sondertara.excel.meta.model.TaraSheet;
-import com.sondertara.excel.support.callback.CellReadExCallback;
-import com.sondertara.excel.support.callback.RowReadExCallback;
 
 import java.util.Map;
 
@@ -19,17 +18,11 @@ public interface ExcelRawReaderContext<T> extends ExcelReaderContext<T> {
     Map<Integer, ? extends TaraSheet> getSheetDefinitions();
 
     /**
-     * read row error callback
+     * read listener
      *
      * @return callback
      */
-    RowReadExCallback getExcelRowReadExCallback();
+    ExcelReadListener<T> getReadListener();
 
-    /**
-     * read cell error callback
-     *
-     * @return callback
-     */
-    CellReadExCallback getExcelCellReadExCallback();
 
 }

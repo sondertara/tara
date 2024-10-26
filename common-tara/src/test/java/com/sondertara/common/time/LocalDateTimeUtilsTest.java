@@ -1,7 +1,8 @@
 package com.sondertara.common.time;
 
-import com.sondertara.common.util.LocalDateTimeUtils;
-import org.apache.commons.lang3.time.FastDateFormat;
+import com.sondertara.common.datetime.DatePattern;
+import com.sondertara.common.datetime.LocalDateTimeUtils;
+import com.sondertara.common.datetime.format.FastDateFormat;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -27,7 +28,7 @@ public class LocalDateTimeUtilsTest {
 
     @Test
     public void thisDayOfMonth() {
-        LocalDateTime localDateTime = LocalDateTimeUtils.parseLocalDateTime(LocalDateTimeUtils.parseDate("2022-01-03"));
+        LocalDateTime localDateTime = LocalDateTimeUtils.parseLocalDateTime(LocalDateTimeUtils.parse("2022-01-03"));
         localDateTime.toLocalDate().minusDays(1);
 
         WeekFields weekFields=WeekFields.of(Locale.getDefault());
@@ -45,9 +46,9 @@ public class LocalDateTimeUtilsTest {
         // 一天的开始
         LocalDateTime localDateTime = LocalDateTimeUtils.parseLocalDateTime(dateStr);
         LocalDate localDate = localDateTime.toLocalDate();
-        Assertions.assertEquals("2017-03-01 00:00:00", LocalDateTimeUtils.getDayStart(localDate));
+        Assertions.assertEquals("2017-03-01 00:00:00", LocalDateTimeUtils.beginOfDay(localDate));
         // 一天的结束
-        final String endOfDay = LocalDateTimeUtils.getDayEnd(localDate);
+        final String endOfDay = LocalDateTimeUtils.endOfDay(localDate);
         Assertions.assertEquals("2017-03-01 23:59:59", endOfDay);
     }
 
@@ -55,7 +56,7 @@ public class LocalDateTimeUtilsTest {
     @Test
     public void parseTest6() {
         final String str = "Tue Jun 4 16:25:15 +0800 2019";
-        final Date dateTime = LocalDateTimeUtils.parseDate(str);
+        final Date dateTime = LocalDateTimeUtils.parse(str);
         assert dateTime != null;
         Assertions.assertEquals("2019-06-04 16:25:15", LocalDateTimeUtils.format(dateTime));
     }
@@ -63,12 +64,12 @@ public class LocalDateTimeUtilsTest {
     @Test
     public void parseTest7() {
         String str = "2019-06-01T19:45:43.000 +0800";
-        Date dateTime = LocalDateTimeUtils.parseDate(str);
+        Date dateTime = LocalDateTimeUtils.parse(str);
         assert dateTime != null;
         Assertions.assertEquals("2019-06-01 19:45:43", LocalDateTimeUtils.format(dateTime));
 
         str = "2019-06-01T19:45:43 +08:00";
-        dateTime = LocalDateTimeUtils.parseDate(str);
+        dateTime = LocalDateTimeUtils.parse(str);
         assert dateTime != null;
         Assertions.assertEquals("2019-06-01 19:45:43", LocalDateTimeUtils.format(dateTime));
     }
@@ -76,7 +77,7 @@ public class LocalDateTimeUtilsTest {
     @Test
     public void parseTest8() {
         final String str = "2020-06-28T02:14:13.000Z";
-        final Date dateTime = LocalDateTimeUtils.parseDate(str);
+        final Date dateTime = LocalDateTimeUtils.parse(str);
         assert dateTime != null;
         Assertions.assertEquals("2020-06-28 02:14:13", LocalDateTimeUtils.format(dateTime));
     }
@@ -87,22 +88,22 @@ public class LocalDateTimeUtilsTest {
     @Test
     public void parseNormFullTest() {
         String str = "2020-02-06 01:58:00.000020";
-        Date dateTime = LocalDateTimeUtils.parseDate(str);
+        Date dateTime = LocalDateTimeUtils.parse(str);
         Assertions.assertNotNull(dateTime);
         Assertions.assertEquals("2020-02-06 01:58:00.000", LocalDateTimeUtils.format(dateTime, DatePattern.NORM_DATETIME_MS_PATTERN));
 
         str = "2020-02-06 01:58:00.00002";
-        dateTime = LocalDateTimeUtils.parseDate(str);
+        dateTime = LocalDateTimeUtils.parse(str);
         Assertions.assertNotNull(dateTime);
         Assertions.assertEquals("2020-02-06 01:58:00.000", LocalDateTimeUtils.format(dateTime, DatePattern.NORM_DATETIME_MS_PATTERN));
 
         str = "2020-02-06 01:58:00.111000";
-        dateTime = LocalDateTimeUtils.parseDate(str);
+        dateTime = LocalDateTimeUtils.parse(str);
         Assertions.assertNotNull(dateTime);
         Assertions.assertEquals("2020-02-06 01:58:00.111", LocalDateTimeUtils.format(dateTime, DatePattern.NORM_DATETIME_MS_PATTERN));
 
         str = "2020-02-06 01:58:00.111";
-        dateTime = LocalDateTimeUtils.parseDate(str);
+        dateTime = LocalDateTimeUtils.parse(str);
         Assertions.assertNotNull(dateTime);
         Assertions.assertEquals("2020-02-06 01:58:00.111", LocalDateTimeUtils.format(dateTime, DatePattern.NORM_DATETIME_MS_PATTERN));
     }
@@ -112,12 +113,12 @@ public class LocalDateTimeUtilsTest {
     public void parseUTCOffsetTest() {
         // issue#I437AP@Gitee
         String str = "2019-06-01T19:45:43+08:00";
-        Date dateTime = LocalDateTimeUtils.parseDate(str);
+        Date dateTime = LocalDateTimeUtils.parse(str);
         assert dateTime != null;
         Assertions.assertEquals("2019-06-01 19:45:43", LocalDateTimeUtils.format(dateTime));
 
         str = "2019-06-01T19:45:43 +08:00";
-        dateTime = LocalDateTimeUtils.parseDate(str);
+        dateTime = LocalDateTimeUtils.parse(str);
         assert dateTime != null;
         Assertions.assertEquals("2019-06-01 19:45:43", LocalDateTimeUtils.format(dateTime));
     }
@@ -126,7 +127,7 @@ public class LocalDateTimeUtilsTest {
     public void parseAndOffsetTest() {
         // 检查UTC时间偏移是否准确
         final String str = "2019-09-17T13:26:17.948Z";
-        final Date dateTime = LocalDateTimeUtils.parseDate(str);
+        final Date dateTime = LocalDateTimeUtils.parse(str);
         assert dateTime != null;
         Assertions.assertEquals("2019-09-17 13:26:17", LocalDateTimeUtils.format(dateTime));
     }
@@ -134,7 +135,7 @@ public class LocalDateTimeUtilsTest {
     @Test
     public void parseDateTest() {
         final String dateStr = "2018-4-10";
-        final Date date = LocalDateTimeUtils.parseDate(dateStr);
+        final Date date = LocalDateTimeUtils.parse(dateStr);
         final String format = LocalDateTimeUtils.format(date, DatePattern.NORM_DATE_PATTERN);
         Assertions.assertEquals("2018-04-10", format);
     }
@@ -146,10 +147,10 @@ public class LocalDateTimeUtilsTest {
         final String dateStr3 = "2017.02.01";
         final String dateStr4 = "2017年02月01日";
 
-        final Date dt1 = LocalDateTimeUtils.parseDate(dateStr1);
-        final Date dt2 = LocalDateTimeUtils.parseDate(dateStr2);
-        final Date dt3 = LocalDateTimeUtils.parseDate(dateStr3);
-        final Date dt4 = LocalDateTimeUtils.parseDate(dateStr4);
+        final Date dt1 = LocalDateTimeUtils.parse(dateStr1);
+        final Date dt2 = LocalDateTimeUtils.parse(dateStr2);
+        final Date dt3 = LocalDateTimeUtils.parse(dateStr3);
+        final Date dt4 = LocalDateTimeUtils.parse(dateStr4);
         Assertions.assertEquals(dt1, dt2);
         Assertions.assertEquals(dt2, dt3);
         Assertions.assertEquals(dt3, dt4);
@@ -162,10 +163,10 @@ public class LocalDateTimeUtilsTest {
         final String dateStr3 = "2017.02.01 12:23";
         final String dateStr4 = "2017年02月01日 12:23";
 
-        final Date dt1 = LocalDateTimeUtils.parseDate(dateStr1);
-        final Date dt2 = LocalDateTimeUtils.parseDate(dateStr2);
-        final Date dt3 = LocalDateTimeUtils.parseDate(dateStr3);
-        final Date dt4 = LocalDateTimeUtils.parseDate(dateStr4);
+        final Date dt1 = LocalDateTimeUtils.parse(dateStr1);
+        final Date dt2 = LocalDateTimeUtils.parse(dateStr2);
+        final Date dt3 = LocalDateTimeUtils.parse(dateStr3);
+        final Date dt4 = LocalDateTimeUtils.parse(dateStr4);
         Assertions.assertEquals(dt1, dt2);
         Assertions.assertEquals(dt2, dt3);
         Assertions.assertEquals(dt3, dt4);
@@ -178,10 +179,10 @@ public class LocalDateTimeUtilsTest {
         final String dateStr3 = "2017.02.01 12:23:45";
         final String dateStr4 = "2017年02月01日 12时23分45秒";
 
-        final Date dt1 = LocalDateTimeUtils.parseDate(dateStr1);
-        final Date dt2 = LocalDateTimeUtils.parseDate(dateStr2);
-        final Date dt3 = LocalDateTimeUtils.parseDate(dateStr3);
-        final Date dt4 = LocalDateTimeUtils.parseDate(dateStr4);
+        final Date dt1 = LocalDateTimeUtils.parse(dateStr1);
+        final Date dt2 = LocalDateTimeUtils.parse(dateStr2);
+        final Date dt3 = LocalDateTimeUtils.parse(dateStr3);
+        final Date dt4 = LocalDateTimeUtils.parse(dateStr4);
         Assertions.assertEquals(dt1, dt2);
         Assertions.assertEquals(dt2, dt3);
         Assertions.assertEquals(dt3, dt4);
@@ -191,10 +192,10 @@ public class LocalDateTimeUtilsTest {
     @Test
     public void parseUTCTest() {
         String dateStr1 = "2018-09-13T05:34:31Z";
-        Date dt = LocalDateTimeUtils.parseDate(dateStr1);
+        Date dt = LocalDateTimeUtils.parse(dateStr1);
 
         // parse方法支持UTC格式测试
-        final Date dt2 = LocalDateTimeUtils.parseDate(dateStr1);
+        final Date dt2 = LocalDateTimeUtils.parse(dateStr1);
         Assertions.assertEquals(dt, dt2);
 
         // 默认使用Pattern对应的时区，即UTC时区
@@ -264,15 +265,15 @@ public class LocalDateTimeUtilsTest {
         // issue1503@Github
         // 检查不同毫秒长度都可以正常匹配
         String utcTime = "2021-03-30T12:56:51.3Z";
-        Date parse = LocalDateTimeUtils.parseDate(utcTime);
+        Date parse = LocalDateTimeUtils.parse(utcTime);
         Assertions.assertEquals("2021-03-30 12:56:51", LocalDateTimeUtils.format(parse));
 
         utcTime = "2021-03-30T12:56:51.34Z";
-        parse = LocalDateTimeUtils.parseDate(utcTime);
+        parse = LocalDateTimeUtils.parse(utcTime);
         Assertions.assertEquals("2021-03-30 12:56:51", LocalDateTimeUtils.format(parse));
 
         utcTime = "2021-03-30T12:56:51.345Z";
-        parse = LocalDateTimeUtils.parseDate(utcTime);
+        parse = LocalDateTimeUtils.parse(utcTime);
         Assertions.assertEquals("2021-03-30 12:56:51", LocalDateTimeUtils.format(parse));
 
     }
@@ -300,10 +301,10 @@ public class LocalDateTimeUtilsTest {
 
         final SimpleDateFormat sdf = new SimpleDateFormat(DatePattern.JDK_DATETIME_PATTERN, Locale.US);
         sdf.setTimeZone(TimeZone.getTimeZone("America/Chicago"));
-        final DateTime parse = LocalDateTimeUtils.parse(dateStr, sdf);
+        final Date parse = LocalDateTimeUtils.parse(dateStr, sdf);
 
         final FastDateFormat fdf = FastDateFormat.getInstance(DatePattern.JDK_DATETIME_PATTERN, TimeZone.getTimeZone("America/Chicago"), Locale.US);
-        final DateTime parse2 = LocalDateTimeUtils.parse(dateStr, fdf);
+        final Date parse2 = LocalDateTimeUtils.parse(dateStr, fdf);
 
         Assertions.assertEquals(parse, parse2);
     }

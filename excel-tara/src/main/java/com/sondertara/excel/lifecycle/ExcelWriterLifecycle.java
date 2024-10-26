@@ -1,11 +1,9 @@
 package com.sondertara.excel.lifecycle;
 
-import org.apache.poi.xssf.streaming.SXSSFSheet;
-
 /**
  * @author huangxiaohu
  */
-public interface ExcelWriterLifecycle {
+public interface ExcelWriterLifecycle<T> {
     /**
      * before callback
      */
@@ -15,17 +13,17 @@ public interface ExcelWriterLifecycle {
     /**
      * 处理复杂表头
      */
-    void handleComplexHeader(SXSSFSheet sheet,String sheetIdentity);
+    void handleComplexHeader(T sheet,String sheetIdentity);
 
     /**
      * 添加校验的下拉数据
      */
-    void addDataValidation(SXSSFSheet sheet,String sheetIdentity);
+    void addDataValidation(T sheet,String sheetIdentity);
 
     /**
      * 初始化标题
      */
-    void initHeadTitle(SXSSFSheet sheet,String sheetIdentity);
+    void initHeadTitle(T sheet,String sheetIdentity);
 
     /**
      * 初始化数据

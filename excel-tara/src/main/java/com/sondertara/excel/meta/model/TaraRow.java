@@ -14,7 +14,9 @@ import java.util.stream.Stream;
  */
 @Data
 public class TaraRow implements Iterable<TaraCell>, Serializable {
-
+    /**
+     * row index (0 based)
+     */
     private long rowIndex;
 
     protected Object rowData;

@@ -1,6 +1,6 @@
 package com.sondertara.common.command;
 
-import com.sondertara.common.util.StringUtils;
+import com.sondertara.common.text.StringUtils;
 import lombok.Data;
 
 import java.io.Serializable;

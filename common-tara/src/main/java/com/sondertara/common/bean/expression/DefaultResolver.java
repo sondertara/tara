@@ -51,8 +51,7 @@ package com.sondertara.common.bean.expression;
  *     supported.</li>
  * </ul>
  *
- * @since 1.8.0
- */
+ *  */
 public class DefaultResolver implements Resolver {
 
     private static final char NESTED = '.';

@@ -1,5 +1,6 @@
 package com.sondertara.excel.base;
 
+import com.sondertara.excel.lifecycle.ExcelReadListener;
 import com.sondertara.excel.meta.annotation.ExcelImport;
 
 import java.util.List;
@@ -16,5 +17,7 @@ public interface TaraExcelBeanReader {
      * @return list
      */
     <T> List<T> read(Class<T> clazz);
+
+   <T> void read(Class<T> clazz,ExcelReadListener<T>readListener);
 
 }

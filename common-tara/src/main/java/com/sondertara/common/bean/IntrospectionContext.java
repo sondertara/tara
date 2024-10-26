@@ -34,8 +34,7 @@ import java.util.Set;
  * </p>
  *
  * @version $Id$
- * @since 1.9
- */
+ *  */
 public interface IntrospectionContext {
 	/**
 	 * Returns the class that is subject of introspection.

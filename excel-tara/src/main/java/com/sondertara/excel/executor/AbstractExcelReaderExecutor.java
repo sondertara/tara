@@ -1,13 +1,12 @@
 package com.sondertara.excel.executor;
 
-import com.sondertara.common.lang.reflect.ReflectUtils;
-import com.sondertara.common.util.StringUtils;
+import com.sondertara.common.reflect.ReflectUtils;
+import com.sondertara.common.text.StringUtils;
 import com.sondertara.excel.analysis.XlsxAnalysisHandler;
+import com.sondertara.excel.common.constants.ExcelExportConstants;
 import com.sondertara.excel.context.ExcelRawReaderContext;
 import com.sondertara.excel.exception.ExcelAnnotaionReaderException;
-import com.sondertara.excel.exception.ExcelConvertException;
 import com.sondertara.excel.exception.ExcelReaderException;
-import com.sondertara.excel.exception.ExcelValidationException;
 import com.sondertara.excel.lifecycle.ExcelReaderLifecycle;
 import com.sondertara.excel.meta.annotation.ExcelImportField;
 import com.sondertara.excel.meta.annotation.converter.ExcelConverter;
@@ -21,14 +20,12 @@ import com.sondertara.excel.support.converter.AbstractExcelColumnConverter;
 import com.sondertara.excel.support.converter.ExcelDefaultConverter;
 import com.sondertara.excel.support.validator.AbstractExcelColumnValidator;
 import com.sondertara.excel.support.validator.ExcelDefaultValidator;
-import com.sondertara.excel.utils.CacheUtils;
 import com.sondertara.excel.utils.ExcelFieldUtils;
-
+import lombok.SneakyThrows;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.util.ZipSecureFile;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
-import org.apache.xmlbeans.SchemaType;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -50,26 +47,28 @@ import java.util.Map;
  * @author huangxiaohu
  */
 
-public abstract class AbstractExcelReaderExecutor<T> implements ExcelReaderLifecycle, TaraExcelExecutor<List<T>> {
+public abstract class AbstractExcelReaderExecutor<T> implements ExcelReaderLifecycle, TaraExcelExecutor {
 
-    protected int curSheetIndex = 0;
+    protected int curSheetIndex = 1;
     protected int curRowIndex;
     protected int curColIndex;
     protected int totalRows;
 
-    protected ExcelRawReaderContext<List<T>> readerContext;
-    protected AnnotationSheet curSheet;
 
-    private final List<T> dataList = new ArrayList<>();
+    protected boolean date1904;
 
-    public AbstractExcelReaderExecutor(final ExcelRawReaderContext<List<T>> readerContext) {
+    protected ExcelRawReaderContext<T> readerContext;
+    protected volatile AnnotationSheet curSheet;
+
+
+    public AbstractExcelReaderExecutor(final ExcelRawReaderContext<T> readerContext) {
         this.readerContext = readerContext;
     }
 
     protected abstract ExcelPerRowProcessor getExcelRowProcess();
 
     @Override
-    public List<T> execute() {
+    public void execute() {
         Map<Integer, ? extends TaraSheet> map = readerContext.getSheetDefinitions();
         // 延迟解析比率
         ZipSecureFile.setMinInflateRatio(-1.0d);
@@ -77,25 +76,30 @@ public abstract class AbstractExcelReaderExecutor<T> implements ExcelReaderLifec
             final XSSFReader xssfReader = new XSSFReader(pkg);
             final XMLReader parser = SAXParserFactory.newInstance().newSAXParser().getXMLReader();
             parser.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-            final ContentHandler xlsxAnalysisHandler = new XlsxAnalysisHandler(xssfReader.getStylesTable(), xssfReader.getSharedStringsTable(), getExcelRowProcess(), readerContext.getExcelRowReadExCallback());
+            final ContentHandler xlsxAnalysisHandler = new XlsxAnalysisHandler(xssfReader.getStylesTable(), xssfReader.getSharedStringsTable(), getExcelRowProcess(), readerContext.getReadListener());
             parser.setContentHandler(xlsxAnalysisHandler);
-            // InputStream data = xssfReader.getWorkbookData();
-            // parser.parse(new InputSource(data));
+             InputStream data = xssfReader.getWorkbookData();
+
+
+
+
             final Iterator<InputStream> sheets = xssfReader.getSheetsData();
             while (sheets.hasNext()) {
                 final InputStream sheet = sheets.next();
-                if (map.containsKey(this.curSheetIndex + 1)) {
-                    this.curSheetIndex++;
+                if (map.containsKey(this.curSheetIndex)) {
                     final InputSource sheetSource = new InputSource(sheet);
                     parser.parse(sheetSource);
                 }
+                this.curSheetIndex++;
                 sheet.close();
             }
-            return dataList;
+        } catch (ExcelAnnotaionReaderException e) {
+            throw new ExcelReaderException(e.getShortMessage(),e);
         } catch (final IOException | SAXException | OpenXML4JException | ParserConfigurationException e) {
             throw new ExcelReaderException(e);
         }
     }
+
 
     @Override
     public boolean isEmptyRow(final ExcelRowDef row) {
@@ -120,6 +124,7 @@ public abstract class AbstractExcelReaderExecutor<T> implements ExcelReaderLifec
         }
     }
 
+    @SneakyThrows
     @Override
     public boolean validate(final ExcelRowDef row) {
         final List<ExcelCellDef> excelCells = row.getExcelCells();
@@ -133,7 +138,7 @@ public abstract class AbstractExcelReaderExecutor<T> implements ExcelReaderLifec
                 columnValidate(cell, field);
             } catch (final Exception ex) {
                 allPassed = false;
-                readerContext.getExcelCellReadExCallback().call(row, cell, ex);
+                readerContext.getReadListener().onCellException(ex, cell, row);
             }
         }
         return allPassed;
@@ -145,19 +150,19 @@ public abstract class AbstractExcelReaderExecutor<T> implements ExcelReaderLifec
             // 非空校验
             final ExcelImportField importColumn = field.getAnnotation(ExcelImportField.class);
             if (!importColumn.allowBlank()) {
-                throw new ExcelAnnotaionReaderException(this.curSheetIndex,this.curRowIndex,this.curColIndex,cell.getAbcColIndex(),"该字段为空");
+                throw new ExcelAnnotaionReaderException(this.curSheetIndex, this.curRowIndex, this.curColIndex, cell.getAbcColIndex(), "该字段为空");
             }
         }
 
-        List<AbstractExcelColumnValidator<Annotation>> columnValidators = CacheUtils.getColValidatorCache().getIfPresent(field.getName());
+        List<AbstractExcelColumnValidator<Annotation>> columnValidators = ExcelExportConstants.getColValidatorCache().get(field.getName());
         if (columnValidators == null) {
             columnValidators = findColumnValidators(field);
-            CacheUtils.getColValidatorCache().put(field.getName(), columnValidators);
+            ExcelExportConstants.getColValidatorCache().put(field.getName(), columnValidators);
         }
 
         for (final AbstractExcelColumnValidator<? extends Annotation> columnValidator : columnValidators) {
             if (!columnValidator.validate(cell.getCellValue())) {
-                throw new ExcelValidationException("该字段数据校验不通过!");
+                throw new ExcelAnnotaionReaderException(this.curSheetIndex, this.curRowIndex, this.curColIndex, cell.getAbcColIndex(), "该字段数据校验不通过!");
             }
         }
         return true;
@@ -165,7 +170,7 @@ public abstract class AbstractExcelReaderExecutor<T> implements ExcelReaderLifec
 
     @Override
     @SuppressWarnings("unchecked")
-    public void format(final ExcelRowDef row) {
+    public void format(final ExcelRowDef row) throws Exception {
         final Map<Integer, Field> columnFields = this.curSheet.getColFields();
         final List<ExcelCellDef> excelCells = row.getExcelCells();
         boolean allPassed = true;
@@ -180,10 +185,10 @@ public abstract class AbstractExcelReaderExecutor<T> implements ExcelReaderLifec
                 final Field field = columnFields.get(cell.getColIndex());
                 Object cellValue = cell.getCellValue();
                 // 值转换
-                List<AbstractExcelColumnConverter<Annotation, ?>> columnConverters = CacheUtils.getColConverterCache().getIfPresent(field.getName());
+                List<AbstractExcelColumnConverter<Annotation, ?>> columnConverters =ExcelExportConstants.getColConverterCache().get(field.getName());
                 if (columnConverters == null) {
                     columnConverters = findColumnConverter(field);
-                    CacheUtils.getColConverterCache().put(field.getName(), columnConverters);
+                    ExcelExportConstants.getColConverterCache().put(field.getName(), columnConverters);
                 }
 
                 try {
@@ -192,15 +197,15 @@ public abstract class AbstractExcelReaderExecutor<T> implements ExcelReaderLifec
                     }
                 } catch (final Exception ex) {
                     allPassed = false;
-                    readerContext.getExcelCellReadExCallback().call(row, cell, ex);
+                    readerContext.getReadListener().onCellException(ex, cell, row);
                     break;
                 }
 
                 try {
-                    ExcelFieldUtils.setFieldValue(field, instance, cellValue, field.getAnnotation(ExcelImportField.class).dateFormat());
+                    ExcelFieldUtils.setFieldValue(field, instance, cellValue, field.getAnnotation(ExcelImportField.class).dataFormat(),this.date1904);
                 } catch (final Exception ex) {
                     allPassed = false;
-                    readerContext.getExcelCellReadExCallback().call(row, cell, new ExcelReaderException("字段赋值失败!", ex));
+                    readerContext.getReadListener().onCellException(new ExcelReaderException("字段赋值失败!", ex), cell, row);
                     break;
                 }
             }
@@ -208,7 +213,7 @@ public abstract class AbstractExcelReaderExecutor<T> implements ExcelReaderLifec
 
         // 只有全部字段都解析成功，才将数据添加到返回的列表中
         if (allPassed) {
-            dataList.add(instance);
+            readerContext.getReadListener().doAfterRowAnalysed(instance);
         }
     }
 

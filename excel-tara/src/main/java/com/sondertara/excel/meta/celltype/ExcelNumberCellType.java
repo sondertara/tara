@@ -1,6 +1,6 @@
 package com.sondertara.excel.meta.celltype;
 
-import com.sondertara.common.util.StringUtils;
+import com.sondertara.common.text.StringUtils;
 import com.sondertara.excel.common.constants.ExcelConstants;
 import com.sondertara.excel.utils.ExcelXmlCodecUtils;
 import lombok.extern.slf4j.Slf4j;

@@ -1,13 +1,15 @@
 package com.sondertara.excel.task;
 
-import com.sondertara.common.model.PageResult;
-import com.sondertara.common.util.LocalDateTimeUtils;
+import com.sondertara.common.datetime.LocalDateTimeUtils;
+import com.sondertara.common.text.StringUtils;
 import com.sondertara.excel.base.TaraExcelConfig;
 import com.sondertara.excel.common.constants.Constants;
 import com.sondertara.excel.entity.ExcelCellEntity;
 import com.sondertara.excel.entity.ExcelWriteSheetEntity;
 import com.sondertara.excel.function.ExportFunction;
+import com.sondertara.excel.meta.annotation.ExcelDataFormat;
 import de.siegmar.fastcsv.writer.CsvWriter;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,6 +18,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -33,7 +37,7 @@ public class CsvGenerateTask<R> extends AbstractExcelGenerateTask<R> {
         this.excelEntity = e;
         this.filename = filename;
         this.consumers(TaraExcelConfig.CONFIG.getCsvConsumerThread());
-        this.producers(TaraExcelConfig.CONFIG.getCsvProducerThread());
+        this.producers(TaraExcelConfig.CONFIG.getExcelProducerThread());
     }
 
     @Override
@@ -47,9 +51,11 @@ public class CsvGenerateTask<R> extends AbstractExcelGenerateTask<R> {
     }
 
     @Override
-    public void parse(PageResult<R> excelQueryEntity) {
+    protected void consumeData(@NonNull PageResultWrapper<R> data) {
+
+        int currentIndex = data.currentIndex();
         if (logger.isDebugEnabled()) {
-            logger.debug("Data of page[{}] processing  is starting ......", excelQueryEntity.getPage());
+            logger.debug("Data of page[{}] processing  is starting ......", currentIndex);
         }
         try {
             final String workPath = Constants.FILE_PATH + File.separator + filename + File.separator;
@@ -60,17 +66,17 @@ public class CsvGenerateTask<R> extends AbstractExcelGenerateTask<R> {
                     throw new IOException("Create directory:" + file.getAbsolutePath() + " error");
                 }
             }
-            PrintWriter printWriter = new PrintWriter(workPath + excelQueryEntity.getPage() + ".csv", Constants.CHARSET);
+            PrintWriter printWriter = new PrintWriter(workPath + currentIndex + ".csv", Constants.CHARSET);
 
             try (CsvWriter csv = CsvWriter.builder().build(printWriter)) {
-                final List<R> list = excelQueryEntity.getData();
-                for (R data : list) {
-                    List<String> row = buildRow(data, excelEntity);
+                final List<R> list = data.getRaw().getData();
+                for (R pageData : list) {
+                    List<String> row = buildRow(pageData, excelEntity);
                     csv.writeRow(row);
                 }
             }
             if (logger.isDebugEnabled()) {
-                logger.debug("Data of page[{}] processing has been completed...", excelQueryEntity.getPage());
+                logger.debug("Data of page[{}] processing has been completed...", currentIndex);
             }
         } catch (Exception e) {
             logger.error("write into file error:", e);
@@ -81,15 +87,14 @@ public class CsvGenerateTask<R> extends AbstractExcelGenerateTask<R> {
      * build data row except first row in Excel.
      *
      * @param entity      data
-     * @param excelEntity excel entity via
-     *                    {@link com.sondertara.excel.meta.annotation.ExcelExportField}
+     * @param excelEntity excel entity via {@link com.sondertara.excel.meta.annotation.ExcelExportField}
      */
     private List<String> buildRow(Object entity, ExcelWriteSheetEntity excelEntity) throws IllegalAccessException {
 
         List<ExcelCellEntity> propertyList = excelEntity.getPropertyList();
         List<String> list = new ArrayList<>(propertyList.size());
         for (ExcelCellEntity property : propertyList) {
-            String cell;
+            String cell = null;
             Field field = property.getFieldEntity();
             Object cellValue = field.get(entity);
 
@@ -98,7 +103,20 @@ public class CsvGenerateTask<R> extends AbstractExcelGenerateTask<R> {
             } else if (cellValue instanceof BigDecimal) {
                 cell = (((BigDecimal) cellValue).setScale(property.getScale(), property.getRoundingMode())).toString();
             } else if (cellValue instanceof Date) {
-                cell = LocalDateTimeUtils.format((Date) cellValue, property.getDateFormat().value());
+                ExcelDataFormat dateFormat = property.getDateFormat();
+                if (null == dateFormat || StringUtils.isBlank(dateFormat)) {
+                    cell = LocalDateTimeUtils.format((Date) cellValue);
+                }
+            } else if (cellValue instanceof LocalDate) {
+                ExcelDataFormat dateFormat = property.getDateFormat();
+                if (null == dateFormat || StringUtils.isBlank(dateFormat)) {
+                    cell = LocalDateTimeUtils.format((LocalDate) cellValue);
+                }
+            } else if (cellValue instanceof LocalDateTime) {
+                ExcelDataFormat dateFormat = property.getDateFormat();
+                if (null == dateFormat || StringUtils.isBlank(dateFormat)) {
+                    cell = LocalDateTimeUtils.format((LocalDateTime) cellValue);
+                }
             } else {
                 cell = cellValue.toString();
             }

@@ -1,7 +1,8 @@
 
 package com.sondertara.common.bean.copier;
 
-import com.sondertara.common.convert.GenericConvert;
+import com.sondertara.common.convert.ConvertUtils;
+import com.sondertara.common.convert.SimpleConverter;
 
 import java.lang.reflect.Field;
 
@@ -16,7 +17,11 @@ class SingleCopier extends AbstractCopier {
         if (!toCls.isAssignableFrom(fromCls)) {
             converter = ConverterRegistry.find(fromCls.getName(), toCls.getName());
             if (converter == null) {
-                converter = new GenericConvert(toField.getGenericType());
+                converter = ConvertUtils.findTypeConvert(fromCls, toCls);
+                if (null == converter) {
+                    converter = new SimpleConverter(toField.getGenericType());
+                }
+                ConverterRegistry.put(fromCls.getName(), toCls.getName(), converter);
                 // throw new BeanAnalysisException(String.format("Converter not found. from: %s,
                 // to: %s", fromCls.getName(), toCls.getName()));
             }

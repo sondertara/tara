@@ -1,7 +1,7 @@
 package com.sondertara.excel.context;
 
-import com.google.common.collect.Maps;
-import com.sondertara.common.util.CollectionUtils;
+import com.sondertara.common.collection.Maps;
+import com.sondertara.common.collection.CollectionUtils;
 import com.sondertara.excel.function.ExportFunction;
 import com.sondertara.excel.meta.annotation.ExcelExport;
 import com.sondertara.excel.meta.model.AnnotationExcelWriterSheetDefinition;
@@ -42,11 +42,6 @@ public abstract class BaseAnnotationExcelWriterContext<T> implements ExcelRawWri
     }
 
 
-    @Override
-    public void addMapper(Class<?> excelClass, ExportFunction<?> function) {
-        sheetDefinitions.add(new AnnotationExcelWriterSheetDefinition<>(excelClass, function));
-        Collections.sort(sheetDefinitions);
-    }
 
     @Override
     public void addData(List<?> dataList) {
@@ -54,6 +49,12 @@ public abstract class BaseAnnotationExcelWriterContext<T> implements ExcelRawWri
             throw new IllegalArgumentException("collection size == 0");
         }
         sheetDefinitions.add(new AnnotationExcelWriterSheetDefinition<>(dataList.get(0).getClass(), dataList));
+        Collections.sort(sheetDefinitions);
+    }
+
+    @Override
+    public void addData(Class<?> excelClass, ExportFunction<?> function) {
+        sheetDefinitions.add(new AnnotationExcelWriterSheetDefinition<>(excelClass, function));
         Collections.sort(sheetDefinitions);
     }
 

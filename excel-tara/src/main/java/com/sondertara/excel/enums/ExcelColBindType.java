@@ -12,7 +12,7 @@ public enum ExcelColBindType {
     /**
      * Bind column by the filed definition order
      */
-    ORDER,
+    DEF_ORDER,
     /**
      * Bind column by col index
      */

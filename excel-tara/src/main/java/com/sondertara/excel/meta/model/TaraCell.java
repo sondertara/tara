@@ -1,10 +1,10 @@
 package com.sondertara.excel.meta.model;
 
 import com.sondertara.excel.antlr.ExcelHelper;
-import com.sondertara.excel.meta.celltype.ExcelCellType;
 import com.sondertara.excel.antlr.tablemodel.BorderPositionEnum;
 import com.sondertara.excel.antlr.tablemodel.CellStyle;
 import com.sondertara.excel.antlr.tablemodel.MergedRegion;
+import com.sondertara.excel.meta.celltype.ExcelCellType;
 import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.CellType;
@@ -29,8 +29,11 @@ public class TaraCell implements Serializable {
     private String rawValue;
     private String dataFormatId;
     private String dataFormatString;
-
-    private int row;
+    /**
+     * the row index cell is(0 based)
+     */
+    private int rowIndex;
+    private int colIndex;
     private String col;
     private CellStyle cellStyle;
     private CellType cellType;
@@ -95,7 +98,8 @@ public class TaraCell implements Serializable {
     }
 
     public TaraCell(XSSFCell xssfCell, CellRangeAddress cellAddresses) {
-        this.row = xssfCell.getRowIndex() + 1;
+        this.rowIndex = xssfCell.getRowIndex();
+        this.colIndex = xssfCell.getColumnIndex();
         this.col = ExcelHelper.getColName(xssfCell.getColumnIndex());
         this.cellStyle = new CellStyle(xssfCell.getCellStyle());
         this.cellType = xssfCell.getCellType();
@@ -136,12 +140,12 @@ public class TaraCell implements Serializable {
         }
     }
 
-    public int getRow() {
-        return row;
+    public int getRowIndex() {
+        return rowIndex;
     }
 
-    public void setRow(int row) {
-        this.row = row;
+    public void setRowIndex(int rowIndex) {
+        this.rowIndex = rowIndex;
     }
 
     public String getCol() {

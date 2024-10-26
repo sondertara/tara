@@ -11,6 +11,7 @@ public class DefaultDataCellStyleBuilder implements CellStyleBuilder {
 
     @Override
     public CellStyle build(Workbook workbook, ExcelCellStyleDefinition cellStyleDefinition, Cell cell) {
+
         CellStyle cellStyle = cellStyleDefinition.getCellStyle();
 
         // 设置对齐方式

@@ -1,9 +1,8 @@
 package com.sondertara.common.command;
 
+import com.sondertara.common.text.StringUtils;
 import com.sondertara.common.io.FileUtils;
 import com.sondertara.common.model.ResultDTO;
-import com.sondertara.common.util.StringFormatter;
-
 
 import java.io.File;
 import java.io.IOException;
@@ -35,7 +34,7 @@ public class ExecOsCommand {
         try {
             exitValue = pro.waitFor();
         } catch (InterruptedException e1) {
-            return ResultDTO.fail(StringFormatter.format("Exec command failed:{}", e1.getMessage()));
+            return ResultDTO.fail(StringUtils.format("Exec command failed:{}", e1.getMessage()));
         } finally {
             if (null != scriptFile) {
                FileUtils.del(new File(scriptFile));

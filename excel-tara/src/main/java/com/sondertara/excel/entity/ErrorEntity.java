@@ -34,4 +34,5 @@ public class ErrorEntity {
      * 错误信息
      */
     private String errorMessage;
+
 }

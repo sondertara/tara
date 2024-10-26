@@ -22,8 +22,7 @@ package com.sondertara.common.bean.exception;
  * query against given bean since a nested bean referenced is null.
  *
  * @author huangxiaohu
- * @since 1.7
- * @version $Id$
+ *  * @version $Id$
  */
 
 public class NestedNullException extends BeanAccessLanguageException {

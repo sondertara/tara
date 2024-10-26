@@ -1,9 +1,9 @@
 package com.sondertara.common.io;
 
 
+import com.sondertara.common.text.StringUtils;
 import com.sondertara.common.exception.IORuntimeException;
 import com.sondertara.common.io.file.FileWrapper;
-import com.sondertara.common.util.StringUtils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -129,7 +129,7 @@ public class FileReader extends FileWrapper {
         } catch (Exception e) {
             throw new IORuntimeException(e);
         } finally {
-            IoUtils.close(in);
+            IOUtils.close(in);
         }
 
         return bytes;
@@ -169,7 +169,7 @@ public class FileReader extends FileWrapper {
         } catch (IOException e) {
             throw new IORuntimeException(e);
         } finally {
-            IoUtils.close(reader);
+            IOUtils.close(reader);
         }
     }
 
@@ -178,15 +178,14 @@ public class FileReader extends FileWrapper {
      *
      * @param lineHandler 行处理器
      * @throws IORuntimeException IO异常
-     * @since 3.0.9
-     */
+     *      */
     public void readLines(LineHandler lineHandler) throws IORuntimeException {
         BufferedReader reader = null;
         try {
             reader = FileUtils.getReader(file, charset);
-            IoUtils.readLines(reader, lineHandler);
+            IOUtils.readLines(reader, lineHandler);
         } finally {
-            IoUtils.close(reader);
+            IOUtils.close(reader);
         }
     }
 
@@ -217,7 +216,7 @@ public class FileReader extends FileWrapper {
         } catch (IOException e) {
             throw new IORuntimeException(e);
         } finally {
-            IoUtils.close(reader);
+            IOUtils.close(reader);
         }
         return result;
     }
@@ -229,7 +228,7 @@ public class FileReader extends FileWrapper {
      * @throws IORuntimeException IO异常
      */
     public BufferedReader getReader() throws IORuntimeException {
-        return IoUtils.getReader(getInputStream(), this.charset);
+        return IOUtils.getReader(getInputStream(), this.charset);
     }
 
     /**
@@ -264,16 +263,15 @@ public class FileReader extends FileWrapper {
      * @param isCloseOut 是否关闭输出流
      * @return 写出的流byte数
      * @throws IORuntimeException IO异常
-     * @since 5.5.2
-     */
+     *      */
     public long writeToStream(OutputStream out, boolean isCloseOut) throws IORuntimeException {
         try (FileInputStream in = new FileInputStream(this.file)) {
-            return IoUtils.copy(in, out);
+            return IOUtils.copy(in, out);
         } catch (IOException e) {
             throw new IORuntimeException(e);
         } finally {
             if (isCloseOut) {
-                IoUtils.close(out);
+                IOUtils.close(out);
             }
         }
     }

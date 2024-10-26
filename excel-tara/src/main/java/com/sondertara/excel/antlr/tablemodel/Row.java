@@ -1,7 +1,7 @@
 package com.sondertara.excel.antlr.tablemodel;
 
+import com.sondertara.common.base.ObjectUtils;
 import com.sondertara.excel.meta.model.TaraCell;
-import org.apache.commons.lang3.SerializationUtils;
 import org.apache.poi.ss.usermodel.BorderStyle;
 
 import java.io.Serializable;
@@ -55,7 +55,7 @@ public class Row implements Iterable<TaraCell>, Serializable {
      * @return new Row
      */
     public Row copy() {
-        return SerializationUtils.clone(this);
+        return ObjectUtils.clone(this);
     }
 
     /**

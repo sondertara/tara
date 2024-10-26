@@ -2,32 +2,41 @@ package com.sondertara.excel.boot;
 
 import com.sondertara.excel.context.AnnotationExcelWriterContext;
 import com.sondertara.excel.resolver.builder.AbstractExcelWriter;
-import com.sondertara.excel.resolver.builder.DataCollectionBuilder;
 import com.sondertara.excel.resolver.builder.DateQueryBuilder;
-import org.apache.poi.ss.usermodel.Workbook;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 /**
  * @author huangxiaohu
  */
-
-public class ExcelBeanWriter extends AbstractExcelWriter<Workbook> {
+@Slf4j
+public class ExcelBeanWriter extends AbstractExcelWriter<SXSSFWorkbook> {
 
     public ExcelBeanWriter() {
         super(new AnnotationExcelWriterContext());
     }
 
-    public static DateQueryBuilder<Workbook> fromQuery() {
 
-        return new DateQueryBuilder<>(new ExcelBeanWriter());
-
+    public static ExcelBeanWriter create() {
+        return new ExcelBeanWriter();
     }
 
-    public static DataCollectionBuilder<Workbook> fromData() {
-        return new DataCollectionBuilder<>(new ExcelBeanWriter());
+    public <R> DateQueryBuilder<ExcelBeanWriter, R> mapping(Class<R> rClass) {
+        return new DateQueryBuilder<>(this, rClass);
     }
 
     @Override
-    public Workbook generate() {
-        return this.getWriterContext().getExecutor().execute();
+    public SXSSFWorkbook generate() {
+        if (log.isDebugEnabled()) {
+            log.debug("Start writing excel.");
+        }
+        final long startTimeMillis = System.currentTimeMillis();
+        try {
+            return this.getWriterContext().getResult();
+        } finally {
+            if (log.isDebugEnabled()) {
+                log.debug("finish write excel,total cost {}ms", (System.currentTimeMillis() - startTimeMillis));
+            }
+        }
     }
 }

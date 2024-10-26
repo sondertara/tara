@@ -14,35 +14,42 @@ import java.util.function.Consumer;
  * @author huangxiaohu
  */
 @Data
-public class TaraSheet implements Iterable<TaraRow>{
-    public int index;
+public class TaraSheet implements Iterable<TaraRow>, ExcelSheetVisitor {
+    /**
+     * zero-based
+     */
+    public int sheetIndex;
     protected String name;
 
-    private Map<Integer,String> titles = new LinkedHashMap<>();
+
+    protected boolean hasTitle = true;
+    protected int firstDataRow=1;
+
+    private Map<Integer, String> titles = new LinkedHashMap<>();
     protected List<TaraRow> rows = new ArrayList<>();
 
     private int rowCount = 0;
 
     private SheetVisibility visibility;
 
-    public TaraSheet(int index, String name, SheetVisibility visibility) {
-        this.index = index;
+    public TaraSheet(int sheetIndex, String name, SheetVisibility visibility) {
+        this.sheetIndex = sheetIndex;
         this.name = name;
         this.visibility = visibility;
     }
 
-    public TaraSheet(int index, String name) {
-        this.index = index;
+    public TaraSheet(int sheetIndex, String name) {
+        this.sheetIndex = sheetIndex;
         this.name = name;
     }
 
-    public TaraSheet(int index) {
-        this.index = index;
+    public TaraSheet(int sheetIndex) {
+        this.sheetIndex = sheetIndex;
     }
 
-    public TaraSheet(int index, SheetVisibility visibility) {
+    public TaraSheet(int sheetIndex, SheetVisibility visibility) {
 
-        this(index, null, null);
+        this(sheetIndex, null, null);
     }
 
     @Override
@@ -56,8 +63,12 @@ public class TaraSheet implements Iterable<TaraRow>{
     }
 
 
-
     public void addRow(TaraRow row) {
         this.rows.add(row);
+    }
+
+    @Override
+    public int firstDataRow() {
+        return this.firstDataRow;
     }
 }

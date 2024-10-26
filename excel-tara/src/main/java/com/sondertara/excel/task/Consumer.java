@@ -4,7 +4,7 @@ package com.sondertara.excel.task;
  * @author huangxiaohu
  * 消费
  */
-public interface Consumer {
+public interface Consumer extends Runnable {
 
     void init();
 

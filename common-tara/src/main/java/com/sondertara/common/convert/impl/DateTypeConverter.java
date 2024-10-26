@@ -1,7 +1,7 @@
 package com.sondertara.common.convert.impl;
 
-import com.sondertara.common.convert.AbstractTypeConverter;
-import com.sondertara.common.util.LocalDateTimeUtils;
+import com.sondertara.common.datetime.LocalDateTimeUtils;
+import com.sondertara.common.function.TypeConverter;
 
 import java.time.temporal.TemporalAccessor;
 import java.util.Calendar;
@@ -10,23 +10,19 @@ import java.util.Date;
 /**
  * @author huangxiaohu
  */
-public class DateTypeConverter extends AbstractTypeConverter<Date> {
+
+public class DateTypeConverter implements TypeConverter<Date> {
 
     @Override
-    protected Date convertInternal(Object value) {
-        Long mills;
+    public Date apply(Object value) {
         if (value instanceof Calendar) {
-            mills = ((Calendar) value).getTimeInMillis();
+            return LocalDateTimeUtils.date((Calendar) value);
         } else if (value instanceof Long) {
-            mills = (Long) value;
+            return LocalDateTimeUtils.date((Long) value);
         } else if (value instanceof TemporalAccessor) {
-            mills = LocalDateTimeUtils.toInstant((TemporalAccessor) value).toEpochMilli();
+            return LocalDateTimeUtils.date((TemporalAccessor) value);
         } else {
-            String sValue = convertToStr(value);
-            mills = LocalDateTimeUtils.parseDate(sValue).getTime();
-
+            return LocalDateTimeUtils.date(value);
         }
-
-        return new Date(mills);
     }
 }

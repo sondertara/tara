@@ -22,7 +22,7 @@ import java.util.Iterator;
  * @author huangxiaohu
  */
 
-public class RawExcelReaderExecutor implements TaraExcelExecutor<TaraWorkbook> {
+public class RawExcelReaderExecutor implements TaraExcelExecutor {
 
     protected int curSheetIndex = 0;
 
@@ -35,7 +35,7 @@ public class RawExcelReaderExecutor implements TaraExcelExecutor<TaraWorkbook> {
     }
 
     @Override
-    public TaraWorkbook execute() {
+    public void execute() {
         // 延迟解析比率
         ZipSecureFile.setMinInflateRatio(-1.0d);
         try (final OPCPackage pkg = OPCPackage.open(readerContext.getInputStream())) {
@@ -62,6 +62,5 @@ public class RawExcelReaderExecutor implements TaraExcelExecutor<TaraWorkbook> {
         } catch (final IOException | SAXException | OpenXML4JException | ParserConfigurationException e) {
             throw new RuntimeException(e);
         }
-        return this.workbook;
     }
 }

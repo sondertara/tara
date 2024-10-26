@@ -1,14 +1,13 @@
 package com.sondertara.excel.meta.model;
 
-import com.sondertara.common.lang.reflect.ReflectUtils;
+import com.sondertara.common.reflect.ReflectUtils;
+import com.sondertara.common.text.StringUtils;
+import com.sondertara.excel.common.constants.ExcelExportConstants;
 import com.sondertara.excel.exception.ExcelReaderException;
-import com.sondertara.excel.exception.ExcelValidationException;
 import com.sondertara.excel.meta.annotation.ExcelImportField;
 import com.sondertara.excel.meta.annotation.validation.ConstraintValidator;
 import com.sondertara.excel.support.validator.AbstractExcelColumnValidator;
 import com.sondertara.excel.support.validator.ExcelDefaultValidator;
-import com.sondertara.excel.utils.CacheUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -44,12 +43,12 @@ public class AnnotationCellDef extends ExcelCellDef {
             }
         }
 
-        List<AbstractExcelColumnValidator<Annotation>> columnValidators = CacheUtils.getColValidatorCache()
-                .getIfPresent(field.getName());
+        List<AbstractExcelColumnValidator<Annotation>> columnValidators = ExcelExportConstants.getColValidatorCache()
+                .get(field.getName());
 
         if (columnValidators == null) {
             columnValidators = findColumnValidators(field);
-            CacheUtils.getColValidatorCache().put(field.getName(), columnValidators);
+            ExcelExportConstants.getColValidatorCache().put(field.getName(), columnValidators);
         }
 
         for (final AbstractExcelColumnValidator columnValidator : columnValidators) {

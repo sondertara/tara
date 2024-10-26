@@ -10,8 +10,14 @@ import java.util.List;
 public class ExcelRowDef implements Serializable {
 
     private static final long serialVersionUID = 4029152892615551071L;
-
+    /**
+     * sheetIndex (1 based)
+     */
     private Integer sheetIndex;
+
+    /**
+     * rowIndex (1 based)
+     */
     private Integer rowIndex;
     private List<ExcelCellDef> excelCells = new ArrayList<>();
 

@@ -2,13 +2,14 @@ package com.sondertara.excel.boot;
 
 import com.sondertara.excel.common.constants.Constants;
 import com.sondertara.excel.context.AnnotationCsvWriterContext;
-import com.sondertara.excel.function.ExportFunction;
 import com.sondertara.excel.resolver.builder.AbstractExcelWriter;
+import com.sondertara.excel.resolver.builder.DateQueryBuilder;
 import com.sondertara.excel.utils.ExcelResponseUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletResponse;
+import java.nio.file.Path;
 
 /**
  * Excel write by csv
@@ -16,7 +17,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author huangxiaohu
  */
-public class ExcelCsvWriter extends AbstractExcelWriter<String> {
+public class ExcelCsvWriter extends AbstractExcelWriter<Path> {
 
     private static final Logger logger = LoggerFactory.getLogger(ExcelCsvWriter.class);
 
@@ -25,17 +26,19 @@ public class ExcelCsvWriter extends AbstractExcelWriter<String> {
         super(new AnnotationCsvWriterContext());
     }
 
-    public static <R> ExcelCsvWriter mapper(Class<R> excelClass, ExportFunction<R> query) {
-        ExcelCsvWriter csvWriter = new ExcelCsvWriter();
-        csvWriter.getWriterContext().addMapper(excelClass, query);
-        return csvWriter;
+
+    public static ExcelCsvWriter create() {
+        return new ExcelCsvWriter();
     }
 
+    public <R> DateQueryBuilder<ExcelCsvWriter, R> mapping(Class<R> rClass) {
+        return new DateQueryBuilder<>(this, rClass);
+    }
 
     @Override
-    public String generate() {
+    public Path generate() {
         logger.info("CSV exporting is starting...");
-        return this.getWriterContext().getExecutor().execute();
+        return this.getWriterContext().getResult();
     }
 
 

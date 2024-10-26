@@ -18,7 +18,8 @@
 package com.sondertara.common.bean;
 
 
-import org.apache.commons.lang3.reflect.MethodUtils;
+
+import com.sondertara.common.reflect.ReflectUtils;
 
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
@@ -354,7 +355,7 @@ public class MappedPropertyDescriptor extends PropertyDescriptor {
             return null;
         }
 
-        final Method method = MethodUtils.getMatchingAccessibleMethod(clazz, methodName, parameterTypes);
+        final Method method = ReflectUtils.getMethod(clazz, methodName, parameterTypes);
         if (method != null) {
             return method;
         }

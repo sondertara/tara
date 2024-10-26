@@ -1,8 +1,8 @@
 package com.sondertara.common.convert.impl;
 
-import com.sondertara.common.convert.AbstractTypeConverter;
+import com.sondertara.common.text.StringUtils;
 import com.sondertara.common.exception.TaraException;
-import org.apache.commons.lang3.StringUtils;
+import com.sondertara.common.function.TypeConverter;
 
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -10,16 +10,16 @@ import java.text.ParseException;
 /**
  * @author huangxiaohu
  */
-public class NumberTypeConverter extends AbstractTypeConverter<Number> {
+public class NumberTypeConverter implements TypeConverter<Number> {
 
     @Override
-    protected Number convertInternal(Object value) {
+    public Number apply(Object value) {
         if (value instanceof Number) {
             return (Number) value;
         } else if (value instanceof Boolean) {
             return (Boolean) value ? 1 : 0;
         }
-        final String sValue = convertToStr(value);
+        final String sValue = TypeConverter.convertToStr(value);
 
         if (StringUtils.isBlank(sValue)) {
             return null;

@@ -1,7 +1,6 @@
 package com.sondertara.common.model;
 
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.JSONWriter;
+import com.sondertara.common.json.JsonUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,6 +18,11 @@ import java.util.function.Supplier;
 @Data
 @Slf4j
 public class ResultDTO<T> implements Serializable {
+    private static final long serialVersionUID = 1L;
+
+    public ResultDTO() {
+        this.success=false;
+    }
 
     /**
      * 结果
@@ -141,6 +145,6 @@ public class ResultDTO<T> implements Serializable {
     }
 
     public String toJsonString() {
-        return JSON.toJSONString(this, JSONWriter.Feature.WriteMapNullValue);
+        return JsonUtils.toJsonString(this);
     }
 }

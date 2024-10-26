@@ -1,20 +1,26 @@
 package com.sondertara.excel.resolver.builder;
 
-import com.sondertara.common.exception.TaraException;
+import com.sondertara.common.io.FileUtils;
+import com.sondertara.common.io.stream.ByteArrayOutputStream;
 import com.sondertara.excel.base.TaraExcelWriter;
 import com.sondertara.excel.context.ExcelRawWriterContext;
+import com.sondertara.excel.exception.ExcelWriterException;
 import com.sondertara.excel.utils.ExcelResponseUtils;
-import org.apache.commons.io.FileUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.IOException;
 import java.io.OutputStream;
 
 /**
  * @author huangxiaohu
  */
+@Slf4j
 public abstract class AbstractExcelWriter<T> implements TaraExcelWriter {
 
     /**
@@ -37,31 +43,83 @@ public abstract class AbstractExcelWriter<T> implements TaraExcelWriter {
      */
     public abstract T generate();
 
+
     @Override
     public void to(OutputStream out) {
-        T t = generate();
         try {
+            T t = generate();
             if (String.class.equals(t.getClass())) {
-                out.write(FileUtils.readFileToByteArray(new File((String) t)));
+                out.write(FileUtils.readBytes(new File((String) t)));
             } else if (Workbook.class.isAssignableFrom(t.getClass())) {
                 if (t instanceof SXSSFWorkbook) {
-                    try (SXSSFWorkbook wb = (SXSSFWorkbook) t) {
-                        wb.write(out);
-                        wb.dispose();
+                    if (log.isDebugEnabled()) {
+                        log.debug("Write SXSSFWorkbook to out stream start...");
                     }
-                }else {
+                    byte[] bytes = null;
+                    try {
+                        try (SXSSFWorkbook wb = (SXSSFWorkbook) t; ByteArrayOutputStream outputStream = new ByteArrayOutputStream(2048)) {
+                            wb.write(outputStream);
+                            bytes = outputStream.toByteArray();
+                        }
+                        if (log.isDebugEnabled()) {
+                            log.debug("Write SXSSFWorkbook to bytes  finish...");
+                        }
+                        IOUtils.write(bytes, out);
+                        out.flush();
+                    } finally {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Write SXSSFWorkbook to out stream finish...");
+                        }
+                    }
+                } else {
                     throw new IllegalStateException("Workbook only support SXSSFWorkbook");
                 }
             }
-        } catch (Exception e) {
-            throw new TaraException("Write workbook to stream error", e);
+        } catch (IOException e) {
+            throw new ExcelWriterException("Write excel cause IO error,{}", e.getMessage(), e);
         }
 
     }
 
     @Override
     public void to(HttpServletResponse httpServletResponse, String fileName) {
-        ExcelResponseUtils.writeResponse(httpServletResponse, fileName, this::to);
+        try {
+            T t = generate();
+            ExcelResponseUtils.wrapBuiltinResponse(httpServletResponse, fileName);
+            if (String.class.equals(t.getClass())) {
+
+                ServletOutputStream outputStream = httpServletResponse.getOutputStream();
+                outputStream.write(FileUtils.readBytes(new File((String) t)));
+                outputStream.flush();
+            } else if (Workbook.class.isAssignableFrom(t.getClass())) {
+                if (t instanceof SXSSFWorkbook) {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Write SXSSFWorkbook to out stream start...");
+                    }
+                    byte[] bytes = null;
+                    try {
+                        try (SXSSFWorkbook wb = (SXSSFWorkbook) t; ByteArrayOutputStream outputStream = new ByteArrayOutputStream(2048)) {
+                            wb.write(outputStream);
+                            bytes = outputStream.toByteArray();
+                        }
+                        if (log.isDebugEnabled()) {
+                            log.debug("Write SXSSFWorkbook to bytes  finish...");
+                        }
+                    } finally {
+                        if (log.isDebugEnabled()) {
+                            log.debug("Write SXSSFWorkbook to out stream finish...");
+                        }
+                    }
+                    ServletOutputStream outputStream = httpServletResponse.getOutputStream();
+                    IOUtils.write(bytes, outputStream);
+                    outputStream.flush();
+                } else {
+                    throw new IllegalStateException("Workbook only support SXSSFWorkbook");
+                }
+            }
+        } catch (IOException e) {
+            throw new ExcelWriterException("Write excel cause IO error,{}", e.getMessage(), e);
+        }
     }
 
     protected ExcelRawWriterContext<T> getWriterContext() {

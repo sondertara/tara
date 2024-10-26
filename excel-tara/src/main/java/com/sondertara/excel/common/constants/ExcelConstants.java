@@ -25,6 +25,7 @@ public class ExcelConstants {
      * 单元格标签
      */
     public static final String CELL_TAG = "c";
+    public static final String SHEET_TAG = "sheetData";
     /**
      * * cell location symbol in xml
      */

@@ -22,8 +22,7 @@ package com.sondertara.common.bean.exception;
  * query against given bean. This is a runtime exception and access langauges
  * are encouraged to subclass to create custom exceptions whenever appropriate.
  *
- * @since 1.7
- * @version $Id$
+ *  * @version $Id$
  */
 
 public class BeanAccessLanguageException extends IllegalArgumentException {

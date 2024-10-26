@@ -1,8 +1,8 @@
 
 package com.sondertara.common.bean.copier;
 
-import com.sondertara.common.convert.TypeConverter;
-import com.sondertara.common.lang.Pair;
+import com.sondertara.common.struct.Pair;
+import com.sondertara.common.function.TypeConverter;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

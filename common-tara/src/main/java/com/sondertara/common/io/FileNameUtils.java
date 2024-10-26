@@ -1,8 +1,8 @@
 package com.sondertara.common.io;
 
-import com.sondertara.common.util.CharUtils;
-import com.sondertara.common.util.RegexUtils;
-import com.sondertara.common.util.StringUtils;
+import com.sondertara.common.text.CharUtils;
+import com.sondertara.common.text.StringUtils;
+import com.sondertara.common.regex.RegexUtils;
 
 import java.io.File;
 import java.util.regex.Pattern;
@@ -11,8 +11,7 @@ import java.util.regex.Pattern;
  * 文件名相关工具类
  *
  * @author huangxiaohu
- * @since 5.4.1
- */
+ *  */
 public class FileNameUtils {
 
     /**
@@ -55,8 +54,7 @@ public class FileNameUtils {
      *
      * @param file 文件
      * @return 文件名
-     * @since 4.1.13
-     */
+     *      */
     public static String getName(File file) {
         return (null != file) ? file.getName() : null;
     }
@@ -71,8 +69,7 @@ public class FileNameUtils {
      *
      * @param filePath 文件
      * @return 文件名
-     * @since 4.1.13
-     */
+     *      */
     public static String getName(String filePath) {
         if (null == filePath) {
             return null;
@@ -106,8 +103,7 @@ public class FileNameUtils {
      * @param file 文件
      * @return 扩展名
      * @see #extName(File)
-     * @since 5.3.8
-     */
+     *      */
     public static String getSuffix(File file) {
         return extName(file);
     }
@@ -118,8 +114,7 @@ public class FileNameUtils {
      * @param fileName 文件名
      * @return 扩展名
      * @see #extName(String)
-     * @since 5.3.8
-     */
+     *      */
     public static String getSuffix(String fileName) {
         return extName(fileName);
     }
@@ -130,8 +125,7 @@ public class FileNameUtils {
      * @param file 文件
      * @return 主文件名
      * @see #mainName(File)
-     * @since 5.3.8
-     */
+     *      */
     public static String getPrefix(File file) {
         return mainName(file);
     }
@@ -142,8 +136,7 @@ public class FileNameUtils {
      * @param fileName 完整文件名
      * @return 主文件名
      * @see #mainName(String)
-     * @since 5.3.8
-     */
+     *      */
     public static String getPrefix(String fileName) {
         return mainName(fileName);
     }
@@ -246,8 +239,7 @@ public class FileNameUtils {
      *
      * @param fileName 文件名（必须不包括路径，否则路径符将被替换）
      * @return 清理后的文件名
-     * @since 3.3.1
-     */
+     *      */
     public static String cleanInvalid(String fileName) {
         return StringUtils.isBlank(fileName) ? fileName : RegexUtils.delAll(FILE_NAME_INVALID_PATTERN_WIN, fileName);
     }
@@ -257,8 +249,7 @@ public class FileNameUtils {
      *
      * @param fileName 文件名（必须不包括路径，否则路径符将被替换）
      * @return 是否包含非法字符
-     * @since 3.3.1
-     */
+     *      */
     public static boolean containsInvalid(String fileName) {
         return (!StringUtils.isBlank(fileName)) && RegexUtils.contains(FILE_NAME_INVALID_PATTERN_WIN, fileName);
     }
@@ -269,8 +260,7 @@ public class FileNameUtils {
      * @param fileName 文件名，例如tara.png
      * @param extNames 被检查的扩展名数组，同一文件类型可能有多种扩展名，扩展名不带“.”
      * @return 是否是指定扩展名的类型
-     * @since 5.5.2
-     */
+     *      */
     public static boolean isType(String fileName, String... extNames) {
         return StringUtils.equalsAnyIgnoreCase(extName(fileName), extNames);
     }

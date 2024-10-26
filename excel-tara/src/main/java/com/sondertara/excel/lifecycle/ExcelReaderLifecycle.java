@@ -19,8 +19,7 @@ public interface ExcelReaderLifecycle {
      * 前置设置
      *
      * @param row row
-     * @since 1.0.5
-     */
+     *      */
     void preSet(ExcelRowDef row);
 
     /**
@@ -36,6 +35,6 @@ public interface ExcelReaderLifecycle {
      *
      * @param row row
      */
-    void format(ExcelRowDef row);
+    void format(ExcelRowDef row) throws Exception;
 
 }

@@ -13,9 +13,17 @@ import java.io.Serializable;
 
 @Slf4j
 public class ExcelCellDef implements Serializable {
-
+    /**
+     * 1 based
+     */
     private Integer sheetIndex;
+    /**
+     * 1 based
+     */
     private Integer rowIndex;
+    /**
+     * 0 based
+     */
     private Integer colIndex;
     private String colTitle;
 

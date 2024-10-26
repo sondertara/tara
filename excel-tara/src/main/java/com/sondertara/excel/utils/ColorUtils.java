@@ -1,10 +1,9 @@
 package com.sondertara.excel.utils;
 
 
+import com.sondertara.common.text.StringUtils;
 
-import com.sondertara.common.util.StringUtils;
-
-import java.awt.Color;
+import java.awt.*;
 
 /**
  * 颜色工具类
@@ -12,6 +11,11 @@ import java.awt.Color;
  * @author
  */
 public final class ColorUtils {
+
+
+    public static final String EXCEL_GREEN_TITLE = "70AD47";
+    public static final String EXCEL_GREEN_STRIPE = "E2EFDA";
+
     private ColorUtils() {
     }
 

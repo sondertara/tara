@@ -1,16 +1,18 @@
 package com.sondertara.excel.boot;
 
 
-import com.sondertara.common.model.PageResult;
 import com.sondertara.excel.base.TaraExcelConfig;
 import com.sondertara.excel.base.TaraExcelWriter;
 import com.sondertara.excel.common.constants.Constants;
-import com.sondertara.excel.fast.writer.FastWorkbook;
+import com.sondertara.excel.common.constants.ExcelExportConstants;
 import com.sondertara.excel.function.ExportFunction;
 import com.sondertara.excel.task.AbstractExcelGenerateTask;
+import com.sondertara.excel.task.PageResultWrapper;
 import com.sondertara.excel.utils.ExcelResponseUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.dhatim.fastexcel.Workbook;
+import org.jspecify.annotations.NonNull;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
@@ -34,6 +36,10 @@ public abstract class ExcelSimpleWriter<T> implements TaraExcelWriter {
      * Current Sheet name
      */
     String sheetName = "Sheet";
+
+    int mexSheetCount = TaraExcelConfig.CONFIG.getDefaultRowPerSheet();
+
+    int maxColWidth = ExcelExportConstants.MAX_COL_WIDTH;
     /**
      * the workbook
      */
@@ -69,7 +75,7 @@ public abstract class ExcelSimpleWriter<T> implements TaraExcelWriter {
     }
 
 
-    public static ExcelSimpleFastWriter read(FastWorkbook workbook) {
+    public static ExcelSimpleFastWriter read(Workbook workbook) {
         return new ExcelSimpleFastWriter(workbook);
     }
 
@@ -103,6 +109,19 @@ public abstract class ExcelSimpleWriter<T> implements TaraExcelWriter {
         return this;
     }
 
+    public ExcelSimpleWriter<?> maxSheetCount(int count) {
+        if (count > Constants.MAX_RECORD_PER_SHEET) {
+            throw new IllegalArgumentException("Sheet row count must less than " + Constants.MAX_RECORD_PER_SHEET);
+        }
+        this.mexSheetCount = count;
+        return this;
+    }
+
+    public ExcelSimpleWriter<?> maxColWidth(int width) {
+        this.maxColWidth = width;
+        return this;
+    }
+
     /**
      * add data by pagination query
      * If it takes time to query data or large amount of data,can use query function which is designed by producer-consumer pattern
@@ -111,49 +130,22 @@ public abstract class ExcelSimpleWriter<T> implements TaraExcelWriter {
      * @return this
      * @see ExportFunction
      */
+
+
     public synchronized ExcelSimpleWriter<?> addData(ExportFunction<Object[]> query) {
         AbstractExcelGenerateTask<Object[]> generateTask = new AbstractExcelGenerateTask<Object[]>(query) {
-            @Override
-            public void parse(PageResult<Object[]> pageResult) {
 
-                List<Object[]> result = pageResult.getData();
-                int index = pageResult.getPage();
+            @Override
+            protected void consumeData(@NonNull PageResultWrapper<Object[]> data) {
+                List<Object[]> result = data.getRaw().getData();
+                int index = data.currentIndex();
                 if (log.isDebugEnabled()) {
                     log.debug("parse data of index:" + index);
                 }
-                if (indexParse.get() == index) {
-                    try {
-                        lock.lock();
-                        indexParse.incrementAndGet();
-                        if (log.isDebugEnabled()) {
-                            log.debug("Write data of index:" + index);
-                        }
-                        write(result);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    } finally {
-                        lock.unlock();
-                    }
-                } else {
-                    peerDataMap.put(index, result);
-                    if (peerDataMap.containsKey(indexParse.get() + 1)) {
-                        try {
-                            lock.lock();
-                            if (log.isDebugEnabled()) {
-                                log.debug("Write data of index:" + indexParse.get()+1);
-                            }
-                            write(peerDataMap.remove(indexParse.incrementAndGet()));
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        } finally {
-                            lock.unlock();
-                        }
-                    }
-                }
+
+                write(result);
             }
         };
-        generateTask.producers(TaraExcelConfig.CONFIG.getCsvProducerThread());
-        generateTask.consumers(2);
         generateTask.start();
         return this;
     }

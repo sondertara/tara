@@ -1,19 +1,20 @@
 package com.sondertara.excel.boot;
 
+import com.sondertara.common.collection.list.Partition;
 import com.sondertara.common.exception.TaraException;
+import com.sondertara.common.id.NanoId;
 import com.sondertara.common.io.FileUtils;
-import com.sondertara.common.io.IoUtils;
-import com.sondertara.common.lang.Partition;
-import com.sondertara.common.lang.id.NanoId;
-import com.sondertara.excel.base.TaraExcelConfig;
-import com.sondertara.excel.fast.writer.BorderStyle;
-import com.sondertara.excel.fast.writer.Color;
-import com.sondertara.excel.fast.writer.FastWorkbook;
-import com.sondertara.excel.fast.writer.Worksheet;
+import com.sondertara.common.io.IOUtils;
+import com.sondertara.excel.exception.ExcelWriterException;
 import com.sondertara.excel.resolver.ExcelDefaultWriterResolver;
+import com.sondertara.excel.utils.ColorUtils;
 import com.sondertara.excel.utils.ExcelResponseUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xssf.streaming.SXSSFCell;
+import org.dhatim.fastexcel.BorderStyle;
+import org.dhatim.fastexcel.Color;
+import org.dhatim.fastexcel.Workbook;
+import org.dhatim.fastexcel.Worksheet;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedInputStream;
@@ -36,13 +37,15 @@ import java.util.concurrent.ExecutionException;
  * @author huangxiaohu
  */
 @Slf4j
-public class ExcelSimpleFastWriter extends ExcelSimpleWriter<FastWorkbook> {
+public class ExcelSimpleFastWriter extends ExcelSimpleWriter<Workbook> {
 
 
     private Path tmpFile;
 
+    private volatile boolean notSetColWidth = true;
 
-    public ExcelSimpleFastWriter(FastWorkbook workbook) {
+
+    public ExcelSimpleFastWriter(Workbook workbook) {
         super(workbook);
         this.sheetIndex.set(workbook.getNumberOfSheets());
 
@@ -53,16 +56,16 @@ public class ExcelSimpleFastWriter extends ExcelSimpleWriter<FastWorkbook> {
             Path path = Paths.get(FileUtils.getTmpDirPath(), "tara", NanoId.randomNanoId());
             FileUtils.mkdir(path.getParent());
             this.tmpFile = path;
-            this.workbook = new FastWorkbook(Files.newOutputStream(path), "TaraApplication", "1.0");
+            this.workbook = new Workbook(Files.newOutputStream(path), "TaraApplication", "1.0");
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new ExcelWriterException(e);
         }
         this.sheetIndex.set(workbook.getNumberOfSheets());
 
     }
 
 
-    public static ExcelSimpleFastWriter read(FastWorkbook workbook) {
+    public static ExcelSimpleFastWriter read(Workbook workbook) {
         return new ExcelSimpleFastWriter(workbook);
     }
 
@@ -83,24 +86,24 @@ public class ExcelSimpleFastWriter extends ExcelSimpleWriter<FastWorkbook> {
         if (log.isDebugEnabled()) {
             log.debug("Write workbook start[{}]", Thread.currentThread().getName());
         }
-        ExcelDefaultWriterResolver resolver = new ExcelDefaultWriterResolver();
+        ExcelDefaultWriterResolver resolver = new ExcelDefaultWriterResolver(maxColWidth);
         Worksheet existSheet = getSheet();
+
         int lastRowNum = existSheet.getLastRowNum();
         LinkedList<Object[]> exitData = new LinkedList<>(mapList);
-        for (int i = 0; i < Math.min(mapList.size(), TaraExcelConfig.CONFIG.getDefaultRowPeerSheet() - lastRowNum); i++) {
+        for (int i = 0; i < Math.min(mapList.size(), mexSheetCount - lastRowNum); i++) {
             createCell(existSheet, lastRowNum + i, exitData.removeFirst(), resolver);
         }
         if (exitData.isEmpty()) {
             return;
         }
-        Partition<Object[]> partition = new Partition<>(exitData, TaraExcelConfig.CONFIG.getDefaultRowPeerSheet());
+        Partition<Object[]> partition = new Partition<>(exitData, mexSheetCount);
         List<CompletableFuture<Void>> tasks = new ArrayList<>();
         for (List<Object[]> objects : partition) {
             Worksheet newSheet = createSheet(sheetIndex.incrementAndGet());
             CompletableFuture<Void> cf1 = CompletableFuture.runAsync(() -> {
                 for (int k = 0; k < objects.size(); k++) {
                     createCell(newSheet, k + 1, objects.get(k), resolver);
-                    //resolver.sizeColumnWidth(newSheet, titles.size());
                 }
             });
             tasks.add(cf1);
@@ -122,7 +125,7 @@ public class ExcelSimpleFastWriter extends ExcelSimpleWriter<FastWorkbook> {
      * @return poi workbook
      */
     @Override
-    public FastWorkbook generate() {
+    public Workbook generate() {
         if (isSheetInitialized.compareAndSet(false, true)) {
             getSheet();
         }
@@ -136,9 +139,9 @@ public class ExcelSimpleFastWriter extends ExcelSimpleWriter<FastWorkbook> {
     @Override
     public void to(OutputStream out) {
         try {
-            FastWorkbook wb = generate();
+            Workbook wb = generate();
             wb.finish();
-            IoUtils.copy(new BufferedInputStream(Files.newInputStream(tmpFile)), out);
+            IOUtils.copy(new BufferedInputStream(Files.newInputStream(tmpFile)), out);
         } catch (Exception e) {
             throw new TaraException("Write workbook to stream error", e);
         } finally {
@@ -173,7 +176,7 @@ public class ExcelSimpleFastWriter extends ExcelSimpleWriter<FastWorkbook> {
      * @return sheet
      */
     private Worksheet createSheet(int index) {
-        ExcelDefaultWriterResolver resolver = new ExcelDefaultWriterResolver();
+        ExcelDefaultWriterResolver resolver = new ExcelDefaultWriterResolver(maxColWidth);
         Worksheet sheet = workbook.newWorksheet(sheetName + "_" + (index + 1));
         createHeader(sheet, resolver);
         //resolver.sizeColumnWidth(sheet, titles.size());
@@ -189,8 +192,6 @@ public class ExcelSimpleFastWriter extends ExcelSimpleWriter<FastWorkbook> {
      * @param resolver Excel resolver
      */
     private void createCell(Worksheet sheet, int rowNum, Object[] objects, ExcelDefaultWriterResolver resolver) {
-
-
         for (int j = 0; j < objects.length; j++) {
             Object value = objects[j];
             sheet.value(rowNum, j, value);
@@ -212,22 +213,8 @@ public class ExcelSimpleFastWriter extends ExcelSimpleWriter<FastWorkbook> {
     private void createHeader(Worksheet ws, ExcelDefaultWriterResolver resolver) {
         for (int j = 0; j < titles.size(); j++) {
             ws.value(0, j, titles.get(j));
-            ws.style(0, j).bold().borderStyle(BorderStyle.THIN).fillColor(Color.PISTACCHIO).horizontalAlignment("center").fontSize(12).set();
+            ws.style(0, j).bold().borderStyle(BorderStyle.THIN).fillColor(ColorUtils.EXCEL_GREEN_TITLE).horizontalAlignment("center").fontColor(Color.WHITE).fontSize(12).set();
         }
-
-        //CellStyle headCellStyle = null;
-        //if (TaraExcelConfig.CONFIG.isOpenAutoColWidth()) {
-        //    headerRow.setHeight((short) 400);
-        //    headCellStyle = resolver.getHeaderCellStyle(workbook);
-        //}
-        //for (int j = 0; j < titles.size(); j++) {
-        //    SXSSFCell cell = headerRow.createCell(j);
-        //    if (Constants.OPEN_CELL_STYLE && null != headCellStyle) {
-        //        cell.setCellStyle(headCellStyle);
-        //    }
-        //    cell.setCellValue(titles.get(j));
-        //    resolver.calculateColumnWidth(cell, j);
-        //}
     }
 
     /**

@@ -16,10 +16,9 @@
  */
 package com.sondertara.common.bean;
 
-import org.apache.commons.lang3.reflect.MethodUtils;
+import com.sondertara.common.reflect.ClassUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 import java.beans.BeanInfo;
 import java.beans.IndexedPropertyDescriptor;
@@ -47,8 +46,7 @@ import java.util.List;
  *
  * @author huangxiaohu
  * @version $Id$
- * @since 1.9
- */
+ *  */
 public class DefaultBeanIntrospector implements BeanIntrospector {
 	/** The singleton instance of this class. */
 	public static final BeanIntrospector INSTANCE = new DefaultBeanIntrospector();
@@ -137,7 +135,7 @@ public class DefaultBeanIntrospector implements BeanIntrospector {
 				if (descriptor.getReadMethod() == null) {
 					final String methodName = descriptor.getIndexedReadMethod() != null
 							? descriptor.getIndexedReadMethod().getName() : "get" + propName;
-					final Method readMethod = MethodUtils.getMatchingAccessibleMethod(beanClass, methodName,
+					final Method readMethod = ClassUtils.getDeclaredMethod(beanClass, methodName,
 							EMPTY_CLASS_PARAMETERS);
 					if (readMethod != null) {
 						try {
@@ -150,7 +148,7 @@ public class DefaultBeanIntrospector implements BeanIntrospector {
 				if (descriptor.getWriteMethod() == null) {
 					final String methodName = descriptor.getIndexedWriteMethod() != null
 							? descriptor.getIndexedWriteMethod().getName() : "set" + propName;
-					Method writeMethod = MethodUtils.getMatchingAccessibleMethod(beanClass, methodName,
+					Method writeMethod = ClassUtils.getDeclaredMethod(beanClass, methodName,
 							LIST_CLASS_PARAMETER);
 					if (writeMethod == null) {
 						for (final Method m : beanClass.getMethods()) {

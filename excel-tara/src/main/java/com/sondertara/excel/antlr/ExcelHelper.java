@@ -1,6 +1,7 @@
 package com.sondertara.excel.antlr;
 
-import com.sondertara.common.bean.PropertyUtils;
+import com.sondertara.common.exception.ReflectionException;
+import com.sondertara.common.reflect.PropertyUtils;
 import com.sondertara.excel.antlr.parser.DataVariableParserVisitor;
 import com.sondertara.excel.antlr.parser.VariableParserLexer;
 import com.sondertara.excel.antlr.parser.VariableParserParser;
@@ -12,7 +13,6 @@ import com.sondertara.excel.antlr.tablemodel.Row;
 import com.sondertara.excel.antlr.tablemodel.SheetTable;
 import com.sondertara.excel.exception.ConvertException;
 import com.sondertara.excel.exception.InvokeMethodException;
-import com.sondertara.excel.exception.ReflectionException;
 import com.sondertara.excel.meta.model.TaraCell;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -253,7 +253,7 @@ public class ExcelHelper {
                     // set merged region
                     MergedRegion mergedRegion = cell.getMergedRegion();
                     if (mergedRegion != null) {
-                        CellRangeAddress cellRangeAddress = new CellRangeAddress(mergedRegion.getFirstRowNum() - 1, mergedRegion.getLastRowNum() - 1, getColIndex(mergedRegion.getFirstColName()), getColIndex(mergedRegion.getLastColName()));
+                        CellRangeAddress cellRangeAddress = new CellRangeAddress(mergedRegion.getFirstRow() - 1, mergedRegion.getLastRow() - 1, getColIndex(mergedRegion.getFirstColName()), getColIndex(mergedRegion.getLastColName()));
                         xssfSheet.addMergedRegion(cellRangeAddress);
                     }
 
@@ -436,7 +436,7 @@ public class ExcelHelper {
         }
 
         try {
-            PropertyDescriptor pd = PropertyUtils.getPropertyDescriptor(obj, declaredField.getName());
+            PropertyDescriptor pd = PropertyUtils.getPropertyDescriptorByName(obj, declaredField.getName());
             Method method = pd.getReadMethod();
             return method.invoke(obj);
         } catch (Exception e) {

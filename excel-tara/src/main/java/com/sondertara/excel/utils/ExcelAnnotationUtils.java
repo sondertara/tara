@@ -1,6 +1,5 @@
 package com.sondertara.excel.utils;
 
-import com.sondertara.common.util.StringUtils;
 import com.sondertara.excel.meta.annotation.ExcelExportField;
 
 /**
@@ -8,11 +7,8 @@ import com.sondertara.excel.meta.annotation.ExcelExportField;
  */
 public class ExcelAnnotationUtils {
 
-    public static String getColName(ExcelExportField excelExportField) {
-        if (StringUtils.isNotBlank(excelExportField.value())) {
-            return excelExportField.value().trim();
-        }
+    public static String[] getColName(ExcelExportField excelExportField) {
 
-        return excelExportField.colName().trim();
+        return excelExportField.colName();
     }
 }

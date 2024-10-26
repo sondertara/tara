@@ -1,9 +1,8 @@
 package com.sondertara.excel.support.converter;
 
-import com.sondertara.common.util.StringUtils;
+import com.sondertara.common.text.StringUtils;
 import com.sondertara.excel.exception.ExcelConvertException;
 import com.sondertara.excel.meta.annotation.converter.ExcelKVConvert;
-
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,7 +23,7 @@ public class ExcelKVConverter implements AbstractExcelColumnConverter<ExcelKVCon
         this.kvMap = new HashMap<>(8);
         for (String kv : kvMap1) {
             String[] aKv = StringUtils.split(kv, "=");
-            if (aKv == null || aKv.length != 2) {
+            if (aKv.length != 2) {
                 throw new IllegalArgumentException("@ExcelKVConvert's kvMap attributes must include \"=\"");
             }
             this.kvMap.put(aKv[0], aKv[1]);
@@ -33,7 +32,7 @@ public class ExcelKVConverter implements AbstractExcelColumnConverter<ExcelKVCon
     }
 
     @Override
-    public Object convert(Object value) {
+    public Object convert(Object value) throws ExcelConvertException {
         if (value == null) {
             return null;
         }

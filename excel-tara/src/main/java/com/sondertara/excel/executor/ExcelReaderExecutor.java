@@ -4,11 +4,10 @@ import com.sondertara.excel.context.ExcelRawReaderContext;
 import com.sondertara.excel.exception.ExcelReaderException;
 import com.sondertara.excel.meta.model.AnnotationSheet;
 import com.sondertara.excel.meta.model.ExcelRowDef;
+import com.sondertara.excel.meta.model.ExcelSheetDef;
 import com.sondertara.excel.processor.ExcelPerRowProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
 
 /**
  * @author huangxiaohu
@@ -17,7 +16,7 @@ public class ExcelReaderExecutor<T> extends AbstractExcelReaderExecutor<T> imple
 
     private static final Logger logger = LoggerFactory.getLogger(ExcelReaderExecutor.class);
 
-    public ExcelReaderExecutor(ExcelRawReaderContext<List<T>> readerContext) {
+    public ExcelReaderExecutor(ExcelRawReaderContext<T> readerContext) {
         super(readerContext);
     }
 
@@ -25,10 +24,14 @@ public class ExcelReaderExecutor<T> extends AbstractExcelReaderExecutor<T> imple
         row.setSheetIndex(curSheetIndex);
 
         this.curRowIndex = row.getRowIndex();
-        this.curSheet = (AnnotationSheet) readerContext.getSheetDefinitions().get(curSheetIndex);
         if (this.curSheet == null) {
-            this.curSheet = (AnnotationSheet) readerContext.getSheetDefinitions().get(curSheetIndex + 1);
+            this.curSheet = (AnnotationSheet) readerContext.getSheetDefinitions().get(curSheetIndex);
         }
+    }
+
+    @Override
+    public void processSheet(ExcelSheetDef curExcelSheet) {
+        this.date1904 = curExcelSheet.isDate1904();
     }
 
     @Override
@@ -100,6 +103,7 @@ public class ExcelReaderExecutor<T> extends AbstractExcelReaderExecutor<T> imple
         try {
             super.format(row);
         } catch (Throwable e) {
+            logger.error("Sheet[{}],row[{}],parse error:{}", this.curSheetIndex, this.curRowIndex, e.getMessage(), e);
             throw new ExcelReaderException("Sheet[{}],row[{}],parse error:{}", this.curSheetIndex, this.curRowIndex, e.getMessage(), e);
         } finally {
             logger.debug("finish format and assign value! [cost:{}ms]", (System.currentTimeMillis() - startTimeMillis));
@@ -112,11 +116,11 @@ public class ExcelReaderExecutor<T> extends AbstractExcelReaderExecutor<T> imple
     }
 
     @Override
-    public List<T> execute() {
+    public void execute() {
         logger.debug("start read!");
         long startTimeMillis = System.currentTimeMillis();
         try {
-            return super.execute();
+            super.execute();
         } finally {
             logger.debug("finish read![total cost:{}ms]", (System.currentTimeMillis() - startTimeMillis));
         }

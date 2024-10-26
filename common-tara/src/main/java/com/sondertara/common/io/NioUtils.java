@@ -1,10 +1,11 @@
 package com.sondertara.common.io;
 
 
+import com.sondertara.common.base.Assert;
+import com.sondertara.common.text.StringUtils;
 import com.sondertara.common.exception.IORuntimeException;
 import com.sondertara.common.io.copy.ChannelCopier;
-import com.sondertara.common.lang.Assert;
-import com.sondertara.common.util.StringUtils;
+import com.sondertara.common.io.stream.FastByteArrayOutputStream;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,8 +22,7 @@ import java.nio.charset.StandardCharsets;
  * NIO相关工具封装，主要针对Channel读写、拷贝等封装
  *
  * @author looly
- * @since 5.5.3
- */
+ *  */
 public class NioUtils {
 
 	/**
@@ -42,6 +42,7 @@ public class NioUtils {
 	 * 数据流末尾
 	 */
 	public static final int EOF = -1;
+
 
 	/**
 	 * 拷贝流 thanks to: https://github.com/venusdrogon/feilong-io/blob/master/src/main/java/com/feilong/io/IOWriteUtil.java<br>
@@ -72,7 +73,13 @@ public class NioUtils {
 	 * @since 5.7.8
 	 */
 	public static long copyByNIO(InputStream in, OutputStream out, int bufferSize, long count, StreamProgress streamProgress) throws IORuntimeException {
-		return copy(Channels.newChannel(in), Channels.newChannel(out), bufferSize, count, streamProgress);
+		final long copySize = copy(Channels.newChannel(in), Channels.newChannel(out), bufferSize, count, streamProgress);
+		try {
+			out.flush();
+		} catch (IOException e) {
+			throw new IORuntimeException(e);
+		}
+		return copySize;
 	}
 
 	/**
@@ -116,9 +123,10 @@ public class NioUtils {
 	 * @param outChannel 输出通道
 	 * @return 输入通道的字节数
 	 * @throws IOException 发生IO错误
-	 * @link <a href="http://androidxref.com/6.0.1_r10/xref/libcore/luni/src/main/java/java/nio/FileChannelImpl.java">...</a>
-	 * @link <a href="http://androidxref.com/7.0.0_r1/xref/libcore/ojluni/src/main/java/sun/nio/ch/FileChannelImpl.java">...</a>
-	 * @link <a href="http://androidxref.com/7.0.0_r1/xref/libcore/ojluni/src/main/native/FileChannelImpl.c">...</a>
+	 * @link http://androidxref.com/6.0.1_r10/xref/libcore/luni/src/main/java/java/nio/FileChannelImpl.java
+	 * @link http://androidxref.com/7.0.0_r1/xref/libcore/ojluni/src/main/java/sun/nio/ch/FileChannelImpl.java
+	 * @link http://androidxref.com/7.0.0_r1/xref/libcore/ojluni/src/main/native/FileChannelImpl.c
+	 * @author z8g
 	 * @since 5.7.21
 	 */
 	private static long copySafely(FileChannel inChannel, FileChannel outChannel) throws IOException {
@@ -226,17 +234,6 @@ public class NioUtils {
 		return read(fileChannel, StandardCharsets.UTF_8);
 	}
 
-	/**
-	 * 从FileChannel中读取内容，读取完毕后并不关闭Channel
-	 *
-	 * @param fileChannel 文件管道
-	 * @param charsetName 字符集
-	 * @return 内容
-	 * @throws IORuntimeException IO异常
-	 */
-	public static String read(FileChannel fileChannel, String charsetName) throws IORuntimeException {
-		return read(fileChannel,Charset.forName(charsetName));
-	}
 
 	/**
 	 * 从FileChannel中读取内容

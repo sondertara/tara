@@ -1,11 +1,15 @@
 package com.sondertara.common.bean.copier;
 
 import com.sondertara.common.bean.exception.BeanCopyException;
+import com.sondertara.common.collection.Lists;
+import com.sondertara.common.collection.Sets;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 class CollectionCopier extends AbstractCopier {
     private final boolean isSet;
@@ -20,22 +24,23 @@ class CollectionCopier extends AbstractCopier {
 
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public void copy(Object source, Object target) {
+    public void copy(Object source, Object target, String... ignoreProperties) {
         try {
+            Set<String> ignoredSet = Arrays.stream(ignoreProperties).collect(Collectors.toSet());
+            if (ignoredSet.contains(fromField.getName())) {
+                return;
+            }
             Collection fromColl = (Collection) fromField.get(source);
             if (fromColl == null) {
-                if (ignoreNull) {
-                    return;
-                }
                 toField.set(target, null);
                 return;
             }
             Collection toColl = (Collection) toField.get(target);
             if (toColl == null) {
                 if (isSet) {
-                    toColl = new HashSet();
+                    toColl = Sets.asSet(null, Sets.SetType.ofSet((Set) fromField.get(source)));
                 } else {
-                    toColl = new ArrayList();
+                    toColl = Lists.asList(null, Lists.ListType.ofList((List) fromField.get(source)));
                 }
                 toField.set(target, toColl);
             }

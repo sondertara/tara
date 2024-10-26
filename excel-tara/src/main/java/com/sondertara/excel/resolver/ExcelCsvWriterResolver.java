@@ -2,7 +2,6 @@ package com.sondertara.excel.resolver;
 
 import com.sondertara.common.io.FileUtils;
 import com.sondertara.excel.common.constants.Constants;
-import com.sondertara.excel.entity.ExcelCellEntity;
 import com.sondertara.excel.entity.ExcelWriteSheetEntity;
 import com.sondertara.excel.exception.ExcelTaraException;
 import com.sondertara.excel.function.ExportFunction;
@@ -15,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -39,7 +40,7 @@ public class ExcelCsvWriterResolver {
         this.fileName = fileName;
     }
 
-    public String createFile(ExportFunction<?> exportFunction) {
+    public Path createFile(ExportFunction<?> exportFunction) {
         try {
             CsvGenerateTask<?> csvGenerateTask = new CsvGenerateTask<>(exportFunction, excelEntity, fileName);
             csvGenerateTask.start();
@@ -47,8 +48,7 @@ public class ExcelCsvWriterResolver {
             generateCsv();
             logger.info("CSV exporting has been completed...");
             // 返回文件path
-            final String workPath = Constants.FILE_PATH + File.separator;
-            return workPath + fileName + ".csv";
+          return   Paths.get(Constants.FILE_PATH,fileName+".csv");
         } catch (Exception e) {
             throw new ExcelTaraException(e);
         }
@@ -84,7 +84,7 @@ public class ExcelCsvWriterResolver {
             PrintWriter printWriter = new PrintWriter(csvFile, Constants.CHARSET);
 
             try (CsvWriter csv = CsvWriter.builder().quoteStrategy(QuoteStrategy.REQUIRED).build(printWriter)) {
-                csv.writeRow(excelEntity.getPropertyList().stream().map(ExcelCellEntity::getColumnName).toArray(String[]::new));
+                csv.writeRow(excelEntity.getPropertyList().stream().map(s->s.getTitle(0)).toArray(String[]::new));
             }
             for (File file : collect) {
                 if (file.getName().endsWith("csv")) {

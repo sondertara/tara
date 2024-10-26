@@ -1,6 +1,5 @@
 package com.sondertara.excel.meta.celltype;
 
-import org.apache.commons.lang3.StringUtils;
 import org.xml.sax.Attributes;
 
 import java.io.Serializable;
@@ -24,6 +23,6 @@ public interface ExcelCellType extends Serializable {
         for (int i = 0; i < length; i++) {
             attrs.add(attributes.getQName(i) + "=" + attributes.getValue(i));
         }
-        return StringUtils.join(attrs);
+        return String.join("", attrs);
     }
 }

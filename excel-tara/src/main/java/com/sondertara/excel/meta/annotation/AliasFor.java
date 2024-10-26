@@ -171,8 +171,7 @@ import java.lang.annotation.Target;
  * as the reference manual for details.
  *
  * @author Sam Brannen
- * @since 4.2
- */
+ *  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 @Documented

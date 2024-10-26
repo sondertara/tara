@@ -7,8 +7,7 @@ import java.io.StringReader;
 /**
  * @author whimthen
  * @version 1.0.0
- * @since 1.0.0
- */
+ *  */
 public class CharacterReader {
 
     private static final int BUFFER_SIZE = 1024;

@@ -12,4 +12,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ExcelDataFormat {
     String value() default "";
+
+    /**
+     * 类型: 0: date
+     *
+     */
+    int type() default 0;
 }

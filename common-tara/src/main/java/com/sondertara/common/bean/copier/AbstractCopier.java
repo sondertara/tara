@@ -1,9 +1,12 @@
 package com.sondertara.common.bean.copier;
 
 import com.sondertara.common.bean.exception.BeanCopyException;
-import com.sondertara.common.convert.TypeConverter;
+import com.sondertara.common.function.TypeConverter;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author huangxiaohu
@@ -13,25 +16,21 @@ public abstract class AbstractCopier implements Copier {
     protected Field toField;
     protected TypeConverter<?> converter;
 
-    protected boolean ignoreNull = false;
 
     public AbstractCopier(Field fromField, Field toField) {
         this.fromField = fromField;
         this.toField = toField;
     }
 
-    public void setIgnoreNull(boolean ignoreNull) {
-        this.ignoreNull = ignoreNull;
-    }
-
     @Override
-    public void copy(Object source, Object target) {
+    public void copy(Object source, Object target, String... ignoreProperties) {
         try {
             Object value = fromField.get(source);
+            Set<String> set = Arrays.stream(ignoreProperties).collect(Collectors.toSet());
+            if (set.contains(fromField.getName())) {
+                return;
+            }
             if (value == null) {
-                if (ignoreNull) {
-                    return;
-                }
                 toField.set(target, null);
                 return;
             }

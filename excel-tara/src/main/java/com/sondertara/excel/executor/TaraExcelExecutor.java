@@ -3,7 +3,8 @@ package com.sondertara.excel.executor;
 /**
  * @author huangxiaohu
  */
-public interface TaraExcelExecutor<T> {
+@FunctionalInterface
+public interface TaraExcelExecutor{
 
-    T execute();
+    void execute();
 }

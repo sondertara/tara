@@ -1,7 +1,7 @@
 package com.sondertara.excel.exception;
 
-import com.sondertara.common.util.StringFormatter;
-import org.apache.commons.lang3.exception.ExceptionUtils;
+import com.sondertara.common.text.StringUtils;
+import com.sondertara.common.exception.ExceptionUtils;
 
 public class ExcelAnnotaionReaderException extends ExcelReaderException {
 
@@ -72,12 +72,12 @@ public class ExcelAnnotaionReaderException extends ExcelReaderException {
 
 
     public String getShortMessage() {
-        return String.format("sheet:[ %d ], row:[ %d ], col:[ %d ], cellValue: [ %s ], message:[ %s ]", this.sheetIndex,
+        return String.format("sheet:[%d], row:[%d], col:[%d], cellValue: [%s], message:[%s]", this.sheetIndex,
                 this.rowIndex, this.colIndex, this.cellValue, this.message);
     }
 
     public String getHumaneMessage() {
-        return StringFormatter.format("第{}个Sheet页的第{}行第{}列[{}]的数据[{}]读取异常! 可能原因:{}\n异常堆栈:{}", this.sheetIndex,
+        return StringUtils.format("第{}个Sheet页的第{}行第{}列[{}]的数据[{}]读取异常! 可能原因:{}\n异常堆栈:{}", this.sheetIndex,
                 this.rowIndex, this.colIndex, this.abcPosition, this.cellValue, this.message,
                 (this.cause == null ? "" : ExceptionUtils.getStackTrace(this.cause)));
     }
@@ -86,4 +86,5 @@ public class ExcelAnnotaionReaderException extends ExcelReaderException {
     public String toString() {
         return getHumaneMessage();
     }
+
 }

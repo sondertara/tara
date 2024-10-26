@@ -1,11 +1,11 @@
 package com.sondertara.common.io.file;
 
 
+import com.sondertara.common.base.Assert;
+import com.sondertara.common.text.StringUtils;
 import com.sondertara.common.exception.IORuntimeException;
 import com.sondertara.common.io.FileUtils;
-import com.sondertara.common.io.IoUtils;
-import com.sondertara.common.lang.Assert;
-import com.sondertara.common.util.StringUtils;
+import com.sondertara.common.io.IOUtils;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
@@ -124,7 +124,7 @@ public class FileWriter extends FileWrapper {
         } catch (IOException e) {
             throw new IORuntimeException(e);
         } finally {
-            IoUtils.close(writer);
+            IOUtils.close(writer);
         }
         return file;
     }
@@ -183,7 +183,6 @@ public class FileWriter extends FileWrapper {
      * @param isAppend 是否追加
      * @return 目标文件
      * @throws IORuntimeException IO异常
-     * @since 3.1.0
      */
     public <T> File writeLines(Iterable<T> list, boolean isAppend) throws IORuntimeException {
         try (PrintWriter writer = getPrintWriter(isAppend)) {
@@ -217,7 +216,6 @@ public class FileWriter extends FileWrapper {
      * @param isAppend    是否追加
      * @return 目标文件
      * @throws IORuntimeException IO异常
-     * @since 4.0.5
      */
     public File writeMap(Map<?, ?> map, String kvSeparator, boolean isAppend) throws IORuntimeException {
         if (null == kvSeparator) {
@@ -300,19 +298,18 @@ public class FileWriter extends FileWrapper {
      * @param isCloseIn 是否关闭输入流
      * @return dest
      * @throws IORuntimeException IO异常
-     * @since 5.5.2
      */
     public File writeFromStream(InputStream in, boolean isCloseIn) throws IORuntimeException {
         FileOutputStream out = null;
         try {
             out = new FileOutputStream(FileUtils.touch(file));
-            IoUtils.copy(in, out);
+            IOUtils.copy(in, out);
         } catch (IOException e) {
             throw new IORuntimeException(e);
         } finally {
-            IoUtils.close(out);
+            IOUtils.close(out);
             if (isCloseIn) {
-                IoUtils.close(in);
+                IOUtils.close(in);
             }
         }
         return file;
@@ -365,7 +362,7 @@ public class FileWriter extends FileWrapper {
      */
     private void checkFile() throws IORuntimeException {
         Assert.notNull(file, "File to write content is null !");
-        if (this.file.exists() && false == file.isFile()) {
+        if (this.file.exists() && !file.isFile()) {
             throw new IORuntimeException("File [{}] is not a file !", this.file.getAbsoluteFile());
         }
     }
@@ -374,7 +371,6 @@ public class FileWriter extends FileWrapper {
      * 打印新行
      *
      * @param writer Writer
-     * @since 4.0.5
      */
     private void printNewLine(PrintWriter writer) {
         writer.println();

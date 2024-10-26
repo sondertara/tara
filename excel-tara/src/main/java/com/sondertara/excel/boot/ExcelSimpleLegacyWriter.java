@@ -1,9 +1,8 @@
 package com.sondertara.excel.boot;
 
+import com.sondertara.common.collection.list.Partition;
+import com.sondertara.common.datetime.DatePattern;
 import com.sondertara.common.exception.TaraException;
-import com.sondertara.common.lang.Partition;
-import com.sondertara.common.time.DatePattern;
-import com.sondertara.excel.base.TaraExcelConfig;
 import com.sondertara.excel.common.constants.Constants;
 import com.sondertara.excel.resolver.ExcelDefaultWriterResolver;
 import com.sondertara.excel.utils.ExcelResponseUtils;
@@ -13,7 +12,6 @@ import org.apache.poi.xssf.streaming.SXSSFCell;
 import org.apache.poi.xssf.streaming.SXSSFRow;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.OutputStream;
@@ -29,6 +27,8 @@ import java.util.List;
  */
 @Slf4j
 public class ExcelSimpleLegacyWriter extends ExcelSimpleWriter<SXSSFWorkbook> {
+
+    private volatile boolean notSetColWidth = true;
 
     public ExcelSimpleLegacyWriter(SXSSFWorkbook workbook) {
         super(workbook);
@@ -47,23 +47,23 @@ public class ExcelSimpleLegacyWriter extends ExcelSimpleWriter<SXSSFWorkbook> {
         if (log.isDebugEnabled()) {
             log.debug("Write workbook start[{}]", Thread.currentThread().getName());
         }
-        ExcelDefaultWriterResolver resolver = new ExcelDefaultWriterResolver();
+        ExcelDefaultWriterResolver resolver = new ExcelDefaultWriterResolver(maxColWidth);
         SXSSFSheet existSheet = getSheet();
         int lastRowNum = existSheet.getLastRowNum();
         LinkedList<Object[]> exitData = new LinkedList<>(mapList);
-        for (int i = 0; i < Math.min(mapList.size(), TaraExcelConfig.CONFIG.getDefaultRowPeerSheet() - lastRowNum); i++) {
+        for (int i = 0; i < Math.min(mapList.size(), mexSheetCount - lastRowNum); i++) {
             createCell(existSheet, lastRowNum + i + 1, exitData.removeFirst(), resolver);
         }
         if (exitData.isEmpty()) {
             return;
         }
-        Partition<Object[]> partition = new Partition<>(exitData, TaraExcelConfig.CONFIG.getDefaultRowPeerSheet());
+        Partition<Object[]> partition = new Partition<>(exitData, mexSheetCount);
         for (List<Object[]> objects : partition) {
             SXSSFSheet newSheet = createSheet(sheetIndex.incrementAndGet());
             for (int k = 0; k < objects.size(); k++) {
                 createCell(newSheet, k + 1, objects.get(k), resolver);
             }
-            resolver.sizeColumnWidth(newSheet, titles.size());
+            resolver.sizeColumnsWidth(newSheet, titles.size());
         }
         exitData.clear();
         if (log.isDebugEnabled()) {
@@ -92,7 +92,6 @@ public class ExcelSimpleLegacyWriter extends ExcelSimpleWriter<SXSSFWorkbook> {
     public void to(OutputStream out) {
         try (SXSSFWorkbook wb = generate()) {
             wb.write(out);
-            wb.dispose();
         } catch (Exception e) {
             throw new TaraException("Write workbook to stream error", e);
         }
@@ -125,11 +124,11 @@ public class ExcelSimpleLegacyWriter extends ExcelSimpleWriter<SXSSFWorkbook> {
      * @return sheet
      */
     private SXSSFSheet createSheet(int index) {
-        ExcelDefaultWriterResolver resolver = new ExcelDefaultWriterResolver();
+        ExcelDefaultWriterResolver resolver = new ExcelDefaultWriterResolver(maxColWidth);
         SXSSFSheet sheet = workbook.createSheet(sheetName + "_" + (index + 1));
         SXSSFRow headerRow = sheet.createRow(0);
         createHeader(headerRow, resolver);
-        resolver.sizeColumnWidth(sheet, titles.size());
+        resolver.sizeColumnsWidth(sheet, titles.size());
         return sheet;
     }
 
@@ -160,11 +159,8 @@ public class ExcelSimpleLegacyWriter extends ExcelSimpleWriter<SXSSFWorkbook> {
      * @param resolver  Excel resolver
      */
     private void createHeader(SXSSFRow headerRow, ExcelDefaultWriterResolver resolver) {
-        CellStyle headCellStyle = null;
-        if (TaraExcelConfig.CONFIG.isOpenAutoColWidth()) {
-            headerRow.setHeight((short) 400);
-            headCellStyle = resolver.getHeaderCellStyle(workbook);
-        }
+        CellStyle headCellStyle = resolver.getHeaderCellStyle(workbook);
+        headerRow.setHeight((short) 400);
         for (int j = 0; j < titles.size(); j++) {
             SXSSFCell cell = headerRow.createCell(j);
             if (Constants.OPEN_CELL_STYLE && null != headCellStyle) {

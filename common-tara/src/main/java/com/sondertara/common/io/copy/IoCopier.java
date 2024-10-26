@@ -1,7 +1,7 @@
 package com.sondertara.common.io.copy;
 
 
-import com.sondertara.common.io.IoUtils;
+import com.sondertara.common.io.IOUtils;
 import com.sondertara.common.io.StreamProgress;
 
 /**
@@ -11,8 +11,7 @@ import com.sondertara.common.io.StreamProgress;
  * @param <S> 拷贝源类型，如InputStream、Reader等
  * @param <T> 拷贝目标类型，如OutputStream、Writer等
  * @author looly
- * @since 5.7.8
- */
+ *  */
 public abstract class IoCopier<S, T> {
 
 	protected final int bufferSize;
@@ -34,12 +33,12 @@ public abstract class IoCopier<S, T> {
 	/**
 	 * 构造
 	 *
-	 * @param bufferSize 缓存大小，&lt; 0 表示默认{@link IoUtils#DEFAULT_BUFFER_SIZE}
+	 * @param bufferSize 缓存大小，&lt; 0 表示默认{@link IOUtils#DEFAULT_BUFFER_SIZE}
 	 * @param count      拷贝总数，-1表示无限制
 	 * @param progress   进度条
 	 */
 	public IoCopier(int bufferSize, long count, StreamProgress progress) {
-		this.bufferSize = bufferSize > 0 ? bufferSize : IoUtils.DEFAULT_BUFFER_SIZE;
+		this.bufferSize = bufferSize > 0 ? bufferSize : IOUtils.DEFAULT_BUFFER_SIZE;
 		this.count = count <= 0 ? Long.MAX_VALUE : count;
 		this.progress = progress;
 	}
@@ -68,8 +67,7 @@ public abstract class IoCopier<S, T> {
 	 *
 	 * @param flushEveryBuffer 是否每次写出一个buffer内容就执行flush
 	 * @return this
-	 * @since 5.7.18
-	 */
+	 * 	 */
 	public IoCopier<S, T> setFlushEveryBuffer(boolean flushEveryBuffer){
 		this.flushEveryBuffer = flushEveryBuffer;
 		return this;

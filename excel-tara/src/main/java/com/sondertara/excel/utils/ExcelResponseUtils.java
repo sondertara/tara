@@ -1,7 +1,7 @@
 package com.sondertara.excel.utils;
 
 import com.sondertara.common.exception.TaraException;
-import com.sondertara.common.util.StringUtils;
+import com.sondertara.common.text.StringUtils;
 import com.sondertara.excel.common.constants.Constants;
 import com.sondertara.excel.exception.ExcelException;
 
@@ -24,12 +24,12 @@ public class ExcelResponseUtils {
      * @param fileName
      * @return
      */
-    public static HttpServletResponse getBuiltinResponse(HttpServletResponse response, String fileName) {
+    public static void wrapBuiltinResponse(HttpServletResponse response, String fileName) {
         response.setContentType(Constants.OCTET_STREAM_CONTENT_TYPE);
 
         if (StringUtils.isBlank(fileName)) {
             fileName = "template.xlsx";
-        } else if (!StringUtils.endWithAny(fileName, Constants.Excel_FILE_SUFFIX)) {
+        } else if (!StringUtils.endWithAny(fileName, Constants.EXCEL_FILE_SUFFIX)) {
             fileName = fileName + ".xlsx";
         }
 
@@ -38,9 +38,9 @@ public class ExcelResponseUtils {
         } catch (UnsupportedEncodingException e) {
             throw new ExcelException("文件名编码转换异常！");
         }
-
+        response.addHeader("Pragma","on-cache");
+        response.addHeader("Cache-Control","on-cache");
         response.setHeader("Content-Disposition", "attachment; filename=" + fileName + "; filename*=utf-8''" + fileName);
-        return response;
     }
 
     public static void writeResponse(HttpServletResponse httpServletResponse, String fileName, Consumer<OutputStream> consumer) {
@@ -48,15 +48,21 @@ public class ExcelResponseUtils {
             if (!fileName.endsWith(Constants.CSV_SUFFIX)) {
                 int indexOf = fileName.lastIndexOf(".");
                 if (indexOf > 0) {
-                    fileName = fileName.substring(0, indexOf) + Constants.Excel_FILE_SUFFIX[0];
+                    fileName = fileName.substring(0, indexOf) + Constants.EXCEL_FILE_SUFFIX[0];
                 } else {
-                    fileName = fileName + Constants.Excel_FILE_SUFFIX[0];
+                    fileName = fileName + Constants.EXCEL_FILE_SUFFIX[0];
                 }
             }
+            try {
+                fileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8.toString());
+            } catch (UnsupportedEncodingException e) {
+                throw new ExcelException("文件名编码转换异常！");
+            }
+            httpServletResponse.setCharacterEncoding(StandardCharsets.UTF_8.name());
             httpServletResponse.setContentType(Constants.OCTET_STREAM_CONTENT_TYPE);
-            String s = new String(fileName.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1);
-            httpServletResponse.setHeader("Content-disposition", "attachment; filename=" + s);
-            httpServletResponse.flushBuffer();
+            httpServletResponse.setHeader("Content-disposition", "attachment; filename=" + fileName + ";filename*=utf-8''" + fileName);
+            httpServletResponse.addHeader("Pragma","on-cache");
+            httpServletResponse.addHeader("Cache-Control","on-cache");
             consumer.accept(out);
         } catch (Exception e) {
             throw new TaraException("Download Excel error", e);

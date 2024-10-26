@@ -1,9 +1,9 @@
 package com.sondertara.common.io.copy;
 
+import com.sondertara.common.base.Assert;
 import com.sondertara.common.exception.IORuntimeException;
-import com.sondertara.common.io.IoUtils;
+import com.sondertara.common.io.IOUtils;
 import com.sondertara.common.io.StreamProgress;
-import com.sondertara.common.lang.Assert;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,15 +13,14 @@ import java.io.OutputStream;
  * {@link InputStream} 向 {@link OutputStream} 拷贝
  *
  * @author looly
- * @since 5.7.8
- */
+ *  */
 public class StreamCopier extends IoCopier<InputStream, OutputStream> {
 
 	/**
 	 * 构造
 	 */
 	public StreamCopier() {
-		this(IoUtils.DEFAULT_BUFFER_SIZE);
+		this(IOUtils.DEFAULT_BUFFER_SIZE);
 	}
 
 	/**

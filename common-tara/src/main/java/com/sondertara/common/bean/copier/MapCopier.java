@@ -1,11 +1,13 @@
-
 package com.sondertara.common.bean.copier;
 
 import com.sondertara.common.bean.exception.BeanCopyException;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 class MapCopier extends AbstractCopier {
 
@@ -18,13 +20,15 @@ class MapCopier extends AbstractCopier {
 
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public void copy(Object source, Object target) {
+    public void copy(Object source, Object target,String...ignoreProperties) {
         try {
             Map fromMap = (Map) fromField.get(source);
+            Set<String> ignoredSet = Arrays.stream(ignoreProperties).collect(Collectors.toSet());
+            if (ignoredSet.contains(fromField.getName())){
+                return;
+            }
             if (fromMap == null) {
-                if (ignoreNull) {
-                    return;
-                }
+
                 toField.set(target, null);
                 return;
             }

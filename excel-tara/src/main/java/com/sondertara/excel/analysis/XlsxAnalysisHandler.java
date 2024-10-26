@@ -1,6 +1,8 @@
 package com.sondertara.excel.analysis;
 
+import com.sondertara.common.text.StringUtils;
 import com.sondertara.excel.common.constants.ExcelConstants;
+import com.sondertara.excel.lifecycle.ExcelReadListener;
 import com.sondertara.excel.meta.celltype.ExcelBooleanCellType;
 import com.sondertara.excel.meta.celltype.ExcelCellType;
 import com.sondertara.excel.meta.celltype.ExcelDateCellType;
@@ -11,10 +13,10 @@ import com.sondertara.excel.meta.celltype.ExcelNumberCellType;
 import com.sondertara.excel.meta.celltype.ExcelStringCellType;
 import com.sondertara.excel.meta.model.ExcelCellDef;
 import com.sondertara.excel.meta.model.ExcelRowDef;
+import com.sondertara.excel.meta.model.ExcelSheetDef;
 import com.sondertara.excel.processor.ExcelPerRowProcessor;
-import com.sondertara.excel.support.callback.RowReadExCallback;
 import com.sondertara.excel.utils.ExcelXmlCodecUtils;
-import org.apache.commons.lang3.StringUtils;
+import lombok.SneakyThrows;
 import org.apache.poi.xssf.model.SharedStrings;
 import org.apache.poi.xssf.model.StylesTable;
 import org.xml.sax.Attributes;
@@ -23,6 +25,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author huangxiaohu
@@ -35,17 +38,23 @@ public class XlsxAnalysisHandler extends DefaultHandler {
     private String tagValue;
 
     private final List<String> sheetNames = new ArrayList<>();
-    private ExcelRowDef curExcelRow;
-    private ExcelCellDef curExcelCell;
+    private volatile ExcelRowDef curExcelRow;
+    private volatile ExcelCellDef curExcelCell;
+
+    private volatile ExcelSheetDef curExcelSheet;
+
     private final List<ExcelCellType> excelCellTypes = new ArrayList<>();
-    private final RowReadExCallback rowReadExceptionCallback;
+    private final ExcelReadListener<?> excelReadListener;
+
+    private final AtomicInteger sheetIndex = new AtomicInteger(0);
+    private boolean date1904 = false;
 
     public XlsxAnalysisHandler(final StylesTable stylesTable, final SharedStrings sst,
-                               final ExcelPerRowProcessor perRowProcessor, final RowReadExCallback rowReadExceptionCallback) {
+                               final ExcelPerRowProcessor perRowProcessor, final ExcelReadListener<?> excelReadListener) {
         this.sst = sst;
         this.stylesTable = stylesTable;
         this.perRowProcessor = perRowProcessor;
-        this.rowReadExceptionCallback = rowReadExceptionCallback;
+        this.excelReadListener = excelReadListener;
 
         registerExcelCellTypes();
     }
@@ -67,13 +76,29 @@ public class XlsxAnalysisHandler extends DefaultHandler {
     public void startElement(final String uri, final String localName, final String name, final Attributes attributes)
             throws SAXException {
 
+        if ("workbookPr".equals(localName)) {
+            String date1904Value = attributes.getValue("date1904");
+            this.date1904 = Boolean.parseBoolean(date1904Value);
+        }
         if (ExcelConstants.DIMENSION_TAG.equals(localName)) {
             String sheetName = attributes.getValue("name");
+            if (null == this.curExcelSheet) {
+                int sheetIndex = this.sheetIndex.getAndIncrement();
+                this.curExcelSheet = new ExcelSheetDef();
+                this.curExcelSheet.setSheetIndex(sheetIndex);
+                this.curExcelSheet.setDate1904(this.date1904);
+            }
+            curExcelSheet.setSheetName(sheetName);
             sheetNames.add(sheetName);
+            this.perRowProcessor.processSheet(this.curExcelSheet);
         }
         // 总行数
         if (ExcelConstants.DIMENSION_TAG.equals(name)) {
             final String refAttr = attributes.getValue(ExcelConstants.DIMENSION_REF_ATTR);
+            if (null == this.curExcelSheet) {
+                this.curExcelSheet = new ExcelSheetDef();
+            }
+            this.curExcelSheet.setTotalRow(ExcelXmlCodecUtils.getTotalRow(refAttr));
             this.totalRow = ExcelXmlCodecUtils.getTotalRow(refAttr);
             return;
         }
@@ -81,7 +106,7 @@ public class XlsxAnalysisHandler extends DefaultHandler {
         // 行
         if (ExcelConstants.ROW_TAG.equals(name)) {
             this.curExcelRow = new ExcelRowDef();
-            this.curExcelRow.setRowIndex(Integer.valueOf(attributes.getValue(ExcelConstants.ROW_INDEX_ATTR)));
+            this.curExcelRow.setRowIndex(Integer.parseInt(attributes.getValue(ExcelConstants.ROW_INDEX_ATTR)));
         }
 
         // 单元格
@@ -104,6 +129,7 @@ public class XlsxAnalysisHandler extends DefaultHandler {
 
     }
 
+    @SneakyThrows
     @Override
     public void endElement(final String uri, final String localName, final String name) {
 
@@ -116,7 +142,7 @@ public class XlsxAnalysisHandler extends DefaultHandler {
             try {
                 this.perRowProcessor.processPerRow(this.curExcelRow);
             } catch (final Exception ex) {
-                rowReadExceptionCallback.call(this.curExcelRow, ex);
+                excelReadListener.onRowException(ex, this.curExcelRow);
             }
 
         }
@@ -129,6 +155,10 @@ public class XlsxAnalysisHandler extends DefaultHandler {
                 this.curExcelCell.setCellValue(StringUtils.trim(curExcelCell.getCellType().getValue(tagValue)));
             }
             this.curExcelRow.addExcelCell(this.curExcelCell);
+        }
+        //sheet
+        if (ExcelConstants.SHEET_TAG.equals(name)) {
+            excelReadListener.doAfterSheetAnalysed(this.curExcelSheet);
         }
     }
 

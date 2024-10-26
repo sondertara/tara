@@ -2,7 +2,7 @@
 package com.sondertara.common.bean.copier;
 
 import com.sondertara.common.bean.exception.BeanAnalysisException;
-import com.sondertara.common.convert.TypeConverter;
+import com.sondertara.common.function.TypeConverter;
 
 import java.lang.reflect.Type;
 

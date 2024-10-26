@@ -14,8 +14,8 @@ public interface ExportFunction<T> {
      * Query Page Data
      * the index is start from 0
      *
-     * @param index page
+     * @param page page
      * @return page
      */
-    PageResult<T> query(Integer index);
+    PageResult<T> query(final int page);
 }

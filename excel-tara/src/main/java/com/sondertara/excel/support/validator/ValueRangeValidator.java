@@ -1,10 +1,9 @@
 package com.sondertara.excel.support.validator;
 
+import com.sondertara.common.text.StringUtils;
+import com.sondertara.common.datetime.LocalDateTimeUtils;
 import com.sondertara.common.regex.PatternPool;
-import com.sondertara.common.util.LocalDateTimeUtils;
-import com.sondertara.common.util.RegexUtils;
-import com.sondertara.common.util.StringFormatter;
-import com.sondertara.common.util.StringUtils;
+import com.sondertara.common.regex.RegexUtils;
 import com.sondertara.excel.enums.FieldRangeType;
 import com.sondertara.excel.exception.ExcelValidationException;
 import com.sondertara.excel.meta.annotation.validation.ExcelRangeRule;
@@ -45,39 +44,39 @@ public class ValueRangeValidator implements AbstractExcelColumnValidator<ExcelRa
         switch (rangeType) {
             case RANGE_CLOSE:
                 if (illegalLeft(current, left, true)) {
-                    message = StringFormatter.format("Cell value[{}] must greater than min[{}]", current, min);
+                    message = StringUtils.format("Cell value[{}] must greater than min[{}]", current, min);
                 } else {
                     if (illegalRight(current, right, true)) {
-                        message = StringFormatter.format("Cell value[{}] must less than max[{}]", current, max);
+                        message = StringUtils.format("Cell value[{}] must less than max[{}]", current, max);
                     }
                 }
                 break;
             case RANGE_RIGHT_OPEN:
                 if (illegalLeft(current, left, true)) {
-                    message = StringFormatter.format("Cell value[{}] must greater than min[{}]", current, min);
+                    message = StringUtils.format("Cell value[{}] must greater than min[{}]", current, min);
                 } else {
                     if (illegalRight(current, right, false)) {
-                        message = StringFormatter.format("Cell value[{}] must less than max[{}]", current, max);
+                        message = StringUtils.format("Cell value[{}] must less than max[{}]", current, max);
 
                     }
                 }
                 break;
             case RANGE_LEFT_OPEN:
                 if (illegalLeft(current, left, false)) {
-                    message = StringFormatter.format("Cell value[{}] must greater than min[{}]", current, min);
+                    message = StringUtils.format("Cell value[{}] must greater than min[{}]", current, min);
                 } else {
                     if (illegalRight(current, right, true)) {
-                        message = StringFormatter.format("Cell value[{}] must less than max[{}]", current, max);
+                        message = StringUtils.format("Cell value[{}] must less than max[{}]", current, max);
 
                     }
                 }
                 break;
             case RANGE_OPEN:
                 if (illegalLeft(current, left, false)) {
-                    message = StringFormatter.format("Cell value[{}] must greater than min[{}]", current, min);
+                    message = StringUtils.format("Cell value[{}] must greater than min[{}]", current, min);
                 } else {
                     if (illegalRight(current, right, false)) {
-                        message = StringFormatter.format("Cell value[{}] must less than max[{}]", current, max);
+                        message = StringUtils.format("Cell value[{}] must less than max[{}]", current, max);
 
                     }
                 }
@@ -119,8 +118,8 @@ public class ValueRangeValidator implements AbstractExcelColumnValidator<ExcelRa
                     left = new BigDecimal(min);
                     current = new BigDecimal(value);
                 } else {
-                    left = LocalDateTimeUtils.parseDate(max);
-                    current = LocalDateTimeUtils.parseDate(value);
+                    left = LocalDateTimeUtils.parse(max);
+                    current = LocalDateTimeUtils.parse(value);
                 }
             }
             if (StringUtils.isNotBlank(max)) {
@@ -130,14 +129,14 @@ public class ValueRangeValidator implements AbstractExcelColumnValidator<ExcelRa
                         current = new BigDecimal(value);
                     }
                 } else {
-                    right = LocalDateTimeUtils.parseDate(max);
+                    right = LocalDateTimeUtils.parse(max);
                     if (null == current) {
-                        current = LocalDateTimeUtils.parseDate(value);
+                        current = LocalDateTimeUtils.parse(value);
                     }
                 }
             }
         } catch (Exception e) {
-            String message = StringFormatter.format("Excel cell not match the range,the range min[{}],max[{}],the value[{}]", min, max, value);
+            String message = StringUtils.format("Excel cell not match the range,the range min[{}],max[{}],the value[{}]", min, max, value);
             throw new ExcelValidationException(message);
         }
     }

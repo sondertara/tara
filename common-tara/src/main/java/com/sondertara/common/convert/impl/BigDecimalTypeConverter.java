@@ -1,14 +1,18 @@
 package com.sondertara.common.convert.impl;
 
-import com.sondertara.common.convert.AbstractTypeConverter;
-import org.apache.commons.lang3.StringUtils;
+import com.sondertara.common.text.StringUtils;
+import com.sondertara.common.function.TypeConverter;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-public class BigDecimalTypeConverter extends AbstractTypeConverter<BigDecimal> {
+/**
+ * @author huangxiaohu
+ */
+public class BigDecimalTypeConverter implements TypeConverter<BigDecimal> {
+
     @Override
-    protected BigDecimal convertInternal(Object value) {
+    public BigDecimal apply(Object value) {
         if (value instanceof Long) {
             return new BigDecimal((Long) value);
         } else if (value instanceof Integer) {
@@ -18,7 +22,7 @@ public class BigDecimalTypeConverter extends AbstractTypeConverter<BigDecimal> {
         } else if (value instanceof Boolean) {
             return new BigDecimal((boolean) value ? 1 : 0);
         }
-        final String sValue = convertToStr(value);
+        final String sValue = TypeConverter.convertToStr(value);
         if (StringUtils.isBlank(sValue)) {
             return null;
         }

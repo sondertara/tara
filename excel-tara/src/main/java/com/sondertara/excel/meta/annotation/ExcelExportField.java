@@ -1,6 +1,6 @@
 package com.sondertara.excel.meta.annotation;
 
-import com.sondertara.excel.common.constants.Constants;
+import com.sondertara.excel.common.constants.ExcelExportConstants;
 import com.sondertara.excel.meta.style.CellStyleBuilder;
 import com.sondertara.excel.meta.style.DefaultDataCellStyleBuilder;
 import com.sondertara.excel.meta.style.DefaultTitleCellStyleBuilder;
@@ -28,7 +28,7 @@ public @interface ExcelExportField {
      * @return column name
      */
     @AliasFor("colName")
-    String value() default "";
+    String[] value() default {};
 
     /**
      * 标题
@@ -37,10 +37,10 @@ public @interface ExcelExportField {
      * @return column name
      */
     @AliasFor("value")
-    String colName() default "";
+    String[] colName() default {};
 
     /**
-     * the colIndex ,begin is 1
+     * the colIndex ( 1 based)
      * 列索引（从1开始）
      *
      * @return the colIndex
@@ -58,7 +58,7 @@ public @interface ExcelExportField {
      * the cell type
      *
      * @return the CellType
-     * @see com.sondertara.excel.utils.ExcelFieldUtils#setCellValue(Cell, Object, Field, ExcelExportField, ExcelDefaultWriterResolver)
+     * @see com.sondertara.excel.utils.ExcelFieldUtils#setCellValue(Cell, Object, Field, com.sondertara.excel.entity.ExcelCellEntity, ExcelDefaultWriterResolver)
      */
     CellType cellType() default CellType.STRING;
 
@@ -100,7 +100,7 @@ public @interface ExcelExportField {
      * is auto merge same cell value
      * 是否自动合并相同值的单元格
      *
-     * @return  is auto merge same cell value
+     * @return is auto merge same cell value
      */
     boolean autoMerge() default false;
 
@@ -110,6 +110,5 @@ public @interface ExcelExportField {
      *
      * @return the custom column width
      */
-    int colWidth() default Constants.DEFAULT_COL_WIDTH;
-
+    int colWidth() default ExcelExportConstants.DEFAULT_COL_WIDTH;
 }

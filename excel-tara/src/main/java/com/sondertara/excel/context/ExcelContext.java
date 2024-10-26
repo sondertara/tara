@@ -4,6 +4,7 @@ import com.sondertara.excel.executor.TaraExcelExecutor;
 
 /**
  * Excel Context
+ *
  * @author huangxiaohu
  */
 public interface ExcelContext<T> {
@@ -14,6 +15,11 @@ public interface ExcelContext<T> {
      *
      * @return the executor
      */
-    TaraExcelExecutor<T> getExecutor();
+    TaraExcelExecutor getExecutor();
+
+
+    default T getResult() {
+        return null;
+    }
 
 }

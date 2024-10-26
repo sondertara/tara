@@ -1,9 +1,10 @@
 package com.sondertara.excel.meta.model;
 
-import com.sondertara.common.util.StringUtils;
+import com.sondertara.common.text.StringUtils;
 import com.sondertara.excel.enums.ExcelColBindType;
 import com.sondertara.excel.enums.ExcelDataType;
 import com.sondertara.excel.function.ExportFunction;
+import com.sondertara.excel.meta.annotation.ExcelComplexHeader;
 import lombok.Getter;
 
 import java.lang.annotation.Annotation;
@@ -19,20 +20,29 @@ import java.util.stream.Collectors;
 public class AnnotationSheet extends TaraSheet implements Comparable<AnnotationSheet> {
     protected Class<?> mappingClass;
     protected ExportFunction<?> queryFunction;
-    protected int firstDataRow;
+
+    private int lastColIndex;
+
+    protected boolean useComplexHeader = false;
 
     protected int order = 0;
     protected ExcelDataType excelDataType;
 
-    protected boolean autoColWidth = false;
+    protected ExcelColBindType bindType = ExcelColBindType.DEF_ORDER;
 
-    protected ExcelColBindType bindType = ExcelColBindType.ORDER;
+    /**
+     * columns : key is colIndex (0 based)
+     */
 
     protected final Map<Integer, Field> colFields = new HashMap<>();
 
     public AnnotationSheet(Class<?> mappingClass) {
         super(0);
         this.mappingClass = mappingClass;
+        ExcelComplexHeader complexHeader = getAnnotation(ExcelComplexHeader.class);
+        if (null != complexHeader) {
+            useComplexHeader = true;
+        }
     }
 
     public <A extends Annotation> A getAnnotation(Class<A> clazz) {
@@ -59,6 +69,9 @@ public class AnnotationSheet extends TaraSheet implements Comparable<AnnotationS
             Field field = fieldHashMap.get(tmpIndex);
             this.getTitles().put(colIndex, title);
             this.colFields.put(colIndex, field);
+            if (lastColIndex < colIndex) {
+                lastColIndex = colIndex;
+            }
         }
     }
 
@@ -66,4 +79,6 @@ public class AnnotationSheet extends TaraSheet implements Comparable<AnnotationS
     public int compareTo(AnnotationSheet o) {
         return this.order - o.order;
     }
+
+
 }

@@ -14,6 +14,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CellRange {
     /**
+     * 行号  1 based
      * @return
      */
     int firstRow();

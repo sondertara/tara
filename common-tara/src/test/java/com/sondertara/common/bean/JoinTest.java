@@ -1,9 +1,9 @@
 package com.sondertara.common.bean;
 
-import com.sondertara.common.function.JoinFunction;
+import com.sondertara.common.collection.CollectionUtils;
+import com.sondertara.common.function.Function3;
 import com.sondertara.common.function.KeyExtractor;
-import com.sondertara.common.lang.Join;
-import com.sondertara.common.lang.Pair;
+import com.sondertara.common.struct.Pair;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -25,9 +25,9 @@ public class JoinTest {
 
     KeyExtractor<Long, Pair<Long, Integer>> keyExtractor2 = value -> value.getKey();
 
-    JoinFunction<Long, String, Pair<Long, Integer>, String> joinFunction = new JoinFunction<Long, String, Pair<Long, Integer>, String>() {
+    Function3<Long, String, Pair<Long, Integer>, String> joinFunction = new Function3<Long, String, Pair<Long, Integer>, String>() {
         @Override
-        public String compute(Long key, String person, Pair<Long, Integer> agePair) {
+        public String apply(Long key, String person, Pair<Long, Integer> agePair) {
             return person.split("-")[1] + " is " + agePair.getValue() + " years old";
         }
     };
@@ -40,13 +40,13 @@ public class JoinTest {
 
     @Test
     public void testLoopJoin() {
-        Map<Long, String> statements = Join.loopJoin(people, ages, keyExtractor1, keyExtractor2, joinFunction);
+        Map<Long, String> statements = CollectionUtils.loopJoin(people, ages, keyExtractor1, keyExtractor2, joinFunction);
         checkResults(statements);
     }
 
     @Test
     public void testHashJoin() {
-        Map<Long, String> statements = Join.hashJoin(people, ages, keyExtractor1, keyExtractor2, joinFunction);
+        Map<Long, String> statements = CollectionUtils.hashJoin(people, ages, keyExtractor1, keyExtractor2, joinFunction);
         checkResults(statements);
     }
 
@@ -62,7 +62,7 @@ public class JoinTest {
             agesMap.put((long) i + 1, ages.get(i));
         }
 
-        Map<Long, String> statements = Join.mapsJoin(peopleMap, agesMap, joinFunction);
+        Map<Long, String> statements = CollectionUtils.mapsJoin(peopleMap, agesMap, joinFunction);
         checkResults(statements);
     }
 }

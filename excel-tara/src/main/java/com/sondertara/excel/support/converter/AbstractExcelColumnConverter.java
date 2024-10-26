@@ -1,5 +1,7 @@
 package com.sondertara.excel.support.converter;
 
+import com.sondertara.excel.exception.ExcelConvertException;
+
 import java.lang.annotation.Annotation;
 
 /**
@@ -13,5 +15,5 @@ public interface AbstractExcelColumnConverter<A extends Annotation, T> {
 
     void initialize(A annotation);
 
-    T convert(Object value);
+    T convert(Object value) throws ExcelConvertException;
 }

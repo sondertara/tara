@@ -17,7 +17,8 @@
 package com.sondertara.common.bean;
 
 
-import org.apache.commons.lang3.reflect.MethodUtils;
+
+import com.sondertara.common.reflect.ClassUtils;
 
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
@@ -42,8 +43,7 @@ import java.util.Map;
  * required by the {@code BeanUtils} library is also stored here.
  * </p>
  *
- * @since 1.9.1
- */
+ *  */
 class BeanIntrospectionData {
 	/** An array with property descriptors for the managed bean class. */
 	private final PropertyDescriptor[] descriptors;
@@ -116,7 +116,7 @@ class BeanIntrospectionData {
 		if (method == null) {
 			final String methodName = writeMethodNames.get(desc.getName());
 			if (methodName != null) {
-				method = MethodUtils.getAccessibleMethod(beanCls, methodName,
+				method = ClassUtils.getDeclaredMethod(beanCls, methodName,
 						desc.getPropertyType());
 				if (method != null) {
 					try {

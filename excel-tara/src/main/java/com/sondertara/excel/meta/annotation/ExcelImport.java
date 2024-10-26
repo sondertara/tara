@@ -24,23 +24,23 @@ public @interface ExcelImport {
 
     /**
      * point the data row num start,begin is 1
-     * 起始数据行(从1开始)
+     * 起始数据行(从2开始)
      *
      * @return the data row index
      */
-    int firstDataRow() default 2;
+    int firstDataRow() default 1;
 
 
     /**
      * 数据绑定类型
      * data bind type,default order is the field definition order is class
      * If {@link ExcelColBindType#COL_INDEX} the value {@link ExcelImportField#colIndex()} must be set.
-     * If {@link ExcelColBindType#ORDER} the colIndex is the order field definition order.
+     * If {@link ExcelColBindType#DEF_ORDER} the colIndex is the order field definition order.
      * If {@link ExcelColBindType#TITLE} the value {@link ExcelImportField#title()} must be set,and colIndex will calculate by the title in Excel
      *
      * @return the type of data bind
      * @see ExcelColBindType
      */
-    ExcelColBindType bindType() default ExcelColBindType.ORDER;
+    ExcelColBindType bindType() default ExcelColBindType.DEF_ORDER;
 
 }

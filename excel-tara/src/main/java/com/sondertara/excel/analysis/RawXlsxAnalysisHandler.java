@@ -1,5 +1,6 @@
 package com.sondertara.excel.analysis;
 
+import com.sondertara.common.text.StringUtils;
 import com.sondertara.excel.common.constants.ExcelConstants;
 import com.sondertara.excel.meta.celltype.ExcelBooleanCellType;
 import com.sondertara.excel.meta.celltype.ExcelCellType;
@@ -15,7 +16,6 @@ import com.sondertara.excel.meta.model.TaraSheet;
 import com.sondertara.excel.meta.model.TaraWorkbook;
 import com.sondertara.excel.utils.ExcelXmlCodecUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.xssf.model.SharedStrings;
 import org.apache.poi.xssf.model.StylesTable;
@@ -95,7 +95,7 @@ public class RawXlsxAnalysisHandler extends DefaultHandler implements ExcelReadL
 
         // 行
         if (ExcelConstants.ROW_TAG.equals(name)) {
-            this.rowIndex = Integer.parseInt(attributes.getValue(ExcelConstants.ROW_INDEX_ATTR));
+            this.rowIndex = Integer.parseInt(attributes.getValue(ExcelConstants.ROW_INDEX_ATTR))-1;
             this.curExcelRow = new TaraRow(rowIndex, rowIndex);
         }
 

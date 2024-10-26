@@ -2,25 +2,30 @@ package com.sondertara.excel.boot;
 
 import com.sondertara.excel.context.AnnotationExcelWriterContext;
 import com.sondertara.excel.resolver.builder.AbstractExcelWriter;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 /**
  * @author huangxiaohu
  */
-public class ExcelTemplateWriter extends AbstractExcelWriter<Workbook> {
+public class ExcelTemplateWriter extends AbstractExcelWriter<SXSSFWorkbook> {
 
-    public ExcelTemplateWriter(Class<?> ...excelClass) {
+
+    public ExcelTemplateWriter() {
         super(new AnnotationExcelWriterContext());
-       this.getWriterContext().addMapper(excelClass);
     }
 
-    public static ExcelTemplateWriter mapper(Class<?> ...excelClass) {
-        return new ExcelTemplateWriter(excelClass);
+    public static ExcelTemplateWriter create() {
+        return new ExcelTemplateWriter();
+    }
+
+    public ExcelTemplateWriter mapping(Class<?>... excelClass) {
+        this.getWriterContext().addMapper(excelClass);
+        return this;
     }
 
     @Override
-    public Workbook generate() {
-        return this.getWriterContext().getExecutor().execute();
+    public SXSSFWorkbook generate() {
+        return this.getWriterContext().getResult();
 
     }
 

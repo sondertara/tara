@@ -1,10 +1,10 @@
 package com.sondertara.excel.antlr.tablemodel;
 
-import com.sondertara.excel.meta.model.TaraCell;
+import com.sondertara.excel.antlr.ExcelHelper;
 import com.sondertara.excel.antlr.parser.VariableParserBaseVisitor;
 import com.sondertara.excel.antlr.parser.VariableParserLexer;
 import com.sondertara.excel.antlr.parser.VariableParserParser;
-import com.sondertara.excel.antlr.ExcelHelper;
+import com.sondertara.excel.meta.model.TaraCell;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -203,30 +203,30 @@ public class SheetTable implements Iterable<TaraCell> {
      */
     public Row appendRow(Row srcRow) {
 
-        lastRowNum++;
+
         Row descRow = srcRow.copy();
 
         // update row num
-        descRow.setRowNum(lastRowNum);
-        descRow.iterator().forEachRemaining(TaraCell -> {
-            TaraCell.setRow(lastRowNum);
+        descRow.setRowNum(lastRowNum++);
+        descRow.iterator().forEachRemaining(taraCell -> {
+            taraCell.setRowIndex(lastRowNum);
 
             int srcRowNum = srcRow.getRowNum();
             int descRowNum = descRow.getRowNum();
             int subtractRowNum = descRowNum - srcRowNum;
 
-            MergedRegion mergedRegion = TaraCell.getMergedRegion();
+            MergedRegion mergedRegion = taraCell.getMergedRegion();
             if (mergedRegion != null) {
                 // update row num
-                mergedRegion.setFirstRowNum(descRowNum);
-                mergedRegion.setLastRowNum(mergedRegion.getLastRowNum() + subtractRowNum);
-                TaraCell.setMergedRegion(mergedRegion);
+                mergedRegion.setFirstRow(descRowNum);
+                mergedRegion.setLastRow(mergedRegion.getLastRow() + subtractRowNum);
+                taraCell.setMergedRegion(mergedRegion);
             }
 
             // update formula row num
-            if (TaraCell.getCellType().equals(CellType.FORMULA) && TaraCell.getValue() != null) {
+            if (taraCell.getCellType().equals(CellType.FORMULA) && taraCell.getValue() != null) {
 
-                String oldFormula = TaraCell.getValue().toString();
+                String oldFormula = taraCell.getValue().toString();
 
                 // lexical analysis
                 VariableParserLexer lexer = new VariableParserLexer(CharStreams.fromString(oldFormula));
@@ -281,7 +281,7 @@ public class SheetTable implements Iterable<TaraCell> {
                         return nameTest;
                     }
                 });
-                TaraCell.setFormula(newFormula);
+                taraCell.setFormula(newFormula);
             }
         });
 
@@ -308,7 +308,7 @@ public class SheetTable implements Iterable<TaraCell> {
      * @param mergedRegion 合并类
      */
     public void mergeCell(MergedRegion mergedRegion) {
-        int firstRowNum = mergedRegion.getFirstRowNum();
+        int firstRowNum = mergedRegion.getFirstRow();
         String firstColName = mergedRegion.getFirstColName();
         Row row = rowMap.get(firstRowNum);
         TaraCell TaraCell = row.getCell(firstColName);

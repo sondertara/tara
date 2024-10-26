@@ -3,11 +3,27 @@ package com.sondertara.excel.context;
 import com.sondertara.excel.executor.ExcelCsvWriterExecutor;
 import com.sondertara.excel.executor.TaraExcelExecutor;
 
-public class AnnotationCsvWriterContext extends BaseAnnotationExcelWriterContext<String> {
+import java.nio.file.Path;
+import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * @author huangxiaohu
+ */
+public class AnnotationCsvWriterContext extends BaseAnnotationExcelWriterContext<Path> {
+
+
+    private final AtomicReference<Path> reference = new AtomicReference<>();
 
     @Override
-    public TaraExcelExecutor<String> getExecutor() {
-        return new ExcelCsvWriterExecutor(this.getSheetDefinitions());
+    public Path getResult() {
+        if (null == reference.get()) {
+            getExecutor().execute();
+        }
+        return reference.get();
+    }
+
+    @Override
+    public TaraExcelExecutor getExecutor() {
+        return new ExcelCsvWriterExecutor(reference, this.getSheetDefinitions());
     }
 }

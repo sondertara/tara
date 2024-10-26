@@ -16,8 +16,6 @@
  */
 package com.sondertara.common.bean.expression;
 
-import com.sondertara.common.bean.PropertyUtilsBean;
-
 /**
  * Property Name Expression Resolver.
  * <p>
@@ -77,8 +75,7 @@ import com.sondertara.common.bean.PropertyUtilsBean;
  *
  * @version $Id$
  * @see PropertyUtilsBean#setResolver(Resolver)
- * @since 1.8.0
- */
+ *  */
 public interface Resolver {
 
   /**

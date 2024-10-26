@@ -1,9 +1,9 @@
 package com.sondertara.common.io.copy;
 
+import com.sondertara.common.base.Assert;
 import com.sondertara.common.exception.IORuntimeException;
-import com.sondertara.common.io.IoUtils;
+import com.sondertara.common.io.IOUtils;
 import com.sondertara.common.io.StreamProgress;
-import com.sondertara.common.lang.Assert;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,15 +16,14 @@ import java.nio.channels.WritableByteChannel;
  * {@link ReadableByteChannel} 向 {@link WritableByteChannel} 拷贝
  *
  * @author looly
- * @since 5.7.8
- */
+ *  */
 public class ChannelCopier extends IoCopier<ReadableByteChannel, WritableByteChannel> {
 
 	/**
 	 * 构造
 	 */
 	public ChannelCopier() {
-		this(IoUtils.DEFAULT_BUFFER_SIZE);
+		this(IOUtils.DEFAULT_BUFFER_SIZE);
 	}
 
 	/**

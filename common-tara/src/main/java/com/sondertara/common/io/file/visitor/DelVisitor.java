@@ -11,8 +11,7 @@ import java.nio.file.attribute.BasicFileAttributes;
  * 删除操作的FileVisitor实现，用于递归遍历删除文件夹
  *
  * @author huangxiaohu
- * @since 5.5.1
- */
+ *  */
 public class DelVisitor extends SimpleFileVisitor<Path> {
 
 	public static DelVisitor INSTANCE = new DelVisitor();

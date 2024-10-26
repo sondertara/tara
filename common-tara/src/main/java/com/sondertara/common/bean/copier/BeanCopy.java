@@ -1,10 +1,16 @@
 package com.sondertara.common.bean.copier;
 
 import com.sondertara.common.bean.exception.BeanAnalysisException;
+import com.sondertara.common.reflect.ClassUtils;
 
+import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 
 /**
  * Copy properties from an instance of AClass to an instance of BClass,
@@ -24,30 +30,44 @@ import java.util.Objects;
 @SuppressWarnings("unchecked")
 public class BeanCopy {
 
+
     /**
      * Copy properties of source to a new instance of targetCls
      */
-    public static <R> R copy(Object source, Class<R> targetCls) {
-        return (R) BeanCopierRegistry.prepare(source.getClass(), targetCls).topCopyWithoutTopConverter(source);
+    public static <R> R copy(Object source, Class<R> targetCls, String... ignoreProperties) {
+        return (R) BeanCopierRegistry.prepare(source.getClass(), targetCls).topCopyWithoutTopConverter(source, ignoreProperties);
     }
 
-    public static <R> R copyIgnoreNull(Object source, Class<R> targetCls) {
+    /**
+     * /**
+     * Copy properties of source to a new instance of targetCls,property which has null value will be ignored.
+     */
+    public static <R> R copyIgnoreNull(Object source, Class<R> targetCls, String... ignoreProperties) {
+        Set<String> nullProperties = findNullProperties(source);
+        boolean b = nullProperties.addAll(Arrays.asList(ignoreProperties));
         BeanCopier beanCopier = BeanCopierRegistry.prepare(source.getClass(), targetCls);
-        beanCopier.setIgnoreNull(true);
-        return (R) beanCopier.topCopyWithoutTopConverter(source);
+        return (R) beanCopier.topCopyWithoutTopConverter(source, nullProperties.toArray(new String[0]));
     }
 
     /**
      * <b>Caution:</b> Ignores the converter of source->target (if any)
      */
-    public static void copyTo(Object source, Object target) {
-        BeanCopierRegistry.prepare(source.getClass(), target.getClass()).topCopyWithoutTopConverter(source, target);
+    public static void copyTo(Object source, Object target, String... ignoreProperties) {
+        BeanCopierRegistry.prepare(source.getClass(), target.getClass()).topCopyWithoutTopConverter(source, target, ignoreProperties);
     }
 
-    public static void copyToIgnoreNull(Object source, Object target) {
-        BeanCopier copier = BeanCopierRegistry.prepare(source.getClass(), target.getClass());
-        copier.setIgnoreNull(true);
-        copier.topCopyWithoutTopConverter(source, target);
+    public static void copyToIgnoreNull(Object source, Object target, String... ignoreProperties) {
+        if (Utils.isBuiltin(source.getClass()) || Utils.isBuiltin(target.getClass())) {
+            //必须是java bean
+            throw new IllegalArgumentException("The object must be java bean, java build in object is not allowed");
+        }
+        try {
+            Set<String> nullProperties = findNullProperties(source);
+            nullProperties.addAll(Arrays.asList(ignoreProperties));
+            BeanCopier copier = BeanCopierRegistry.prepare(source.getClass(), target.getClass());
+            copier.topCopyWithoutTopConverter(source, target, nullProperties.toArray(new String[0]));
+        } finally {
+        }
     }
 
     /**
@@ -72,4 +92,19 @@ public class BeanCopy {
             results.put(source.getKey(), elemCopier.topCopyWithoutTopConverter(source.getValue()));
         }
     }
+
+
+    private static Set<String> findNullProperties(Object object) {
+        return ClassUtils.getFields(object.getClass(), field -> {
+            try {
+                if (!field.isAccessible()) {
+                    field.setAccessible(true);
+                }
+                return null == field.get(object);
+            } catch (IllegalAccessException e) {
+                throw new BeanAnalysisException(e);
+            }
+        }).stream().map(Field::getName).collect(Collectors.toSet());
+    }
+
 }

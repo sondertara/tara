@@ -15,7 +15,7 @@ public interface ExcelRawWriterContext<T> extends ExcelWriterContext<T> {
      *
      * @return the map
      */
-   Map<String, ? extends TaraSheet> getSheetDefinitions();
+    Map<String, ? extends TaraSheet> getSheetDefinitions();
 
     /**
      * 添加数据
@@ -30,16 +30,15 @@ public interface ExcelRawWriterContext<T> extends ExcelWriterContext<T> {
      *
      * @param clazz 模型类
      */
-    void addMapper(Class<?> ...clazz);
+    void addMapper(Class<?>... clazz);
 
 
     /**
      * add query for Excel class
      *
-     * @param excelClass class
-     * @param function   the query function
+     * @param function the query function
      */
 
-   void addMapper(Class<?> excelClass, ExportFunction<?> function);
+    void addData(Class<?> clazz, ExportFunction<?> function);
 
 }

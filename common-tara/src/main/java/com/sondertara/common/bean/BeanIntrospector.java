@@ -33,9 +33,9 @@ import java.beans.IntrospectionException;
  * code bases using non-standard conventions for accessing properties.
  * </p>
  *
+ * @author huangxiaohu.1ih
  * @version $Id$
- * @since 1.9
- */
+ *  */
 public interface BeanIntrospector {
 	/**
 	 * Performs introspection on a Java class. The current class to be inspected
