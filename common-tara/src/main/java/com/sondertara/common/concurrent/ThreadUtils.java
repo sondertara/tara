@@ -1,0 +1,522 @@
+package com.sondertara.common.concurrent;
+
+import com.sondertara.common.exception.ExceptionMessage;
+import com.sondertara.common.exception.IllegalParameterException;
+import org.slf4j.Logger;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
+
+/**
+ * Thread utils.
+ *
+ * @author <a href="mailto:liaochuntao@live.com">liaochuntao</a>
+ */
+public final class ThreadUtils {
+    private static final int THREAD_MULTIPLE = 2;
+
+
+    /**
+     * Sleep.
+     *
+     * @param millis sleep millisecond
+     */
+    public static void sleep(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    public static void countDown(CountDownLatch latch) {
+        Objects.requireNonNull(latch, "latch");
+        latch.countDown();
+    }
+
+    /**
+     * Await count down latch.
+     *
+     * @param latch count down latch
+     */
+    public static void latchAwait(CountDownLatch latch) {
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    /**
+     * Await count down latch with timeout.
+     *
+     * @param latch count down latch
+     * @param time  timeout time
+     * @param unit  time unit
+     */
+    public static void latchAwait(CountDownLatch latch, long time, TimeUnit unit) {
+        try {
+            latch.await(time, unit);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    /**
+     * Through the number of cores, calculate the appropriate number of threads; 1.5-2 times the
+     * number of CPU cores.
+     *
+     * @return thread count
+     */
+    public static int getSuitableThreadCount() {
+        final int coreCount = Runtime.getRuntime().availableProcessors();
+        int workerCount = 1;
+        while (workerCount < coreCount * THREAD_MULTIPLE) {
+            workerCount <<= 1;
+        }
+        return workerCount;
+    }
+
+    public static void shutdownThreadPool(ExecutorService executor) {
+        shutdownThreadPool(executor,1, null);
+    }
+
+    public static void shutdownThreadPool(ExecutorService executor,int timeoutSecs) {
+        shutdownThreadPool(executor,timeoutSecs, null);
+    }
+
+    /**
+     * Shutdown thread pool.
+     *
+     * @param executor thread pool
+     * @param logger   logger
+     */
+    public static void shutdownThreadPool(ExecutorService executor, int timeoutSecs,Logger logger) {
+        if (null == executor) {
+            return;
+        }
+        executor.shutdown();
+        int retry = 3;
+        while (retry > 0) {
+            retry--;
+            try {
+                if (executor.awaitTermination(timeoutSecs, TimeUnit.SECONDS)) {
+                    return;
+                }
+            } catch (InterruptedException e) {
+                executor.shutdownNow();
+                Thread.interrupted();
+            } catch (Throwable ex) {
+                if (logger != null) {
+                    logger.error("ThreadPoolManager shutdown executor has error : {}", ex.getMessage(), ex);
+                }
+            }
+        }
+        executor.shutdownNow();
+    }
+
+    public static void addShutdownHook(Runnable runnable) {
+        Runtime.getRuntime().addShutdownHook(new Thread(runnable));
+    }
+
+
+    /**
+     * 获取需要创建线程数
+     * <p>
+     * 线程分工原则：<br>
+     * 计算密集型尽量少创建线程，多分段处理;<br>
+     * IO密集型尽量多创建线程
+     * </p>
+     *
+     * @param blockRate 阻塞率，小数，取值范围：[0,1) ,即0到1之间包含0，不包含1
+     */
+    public static int getAvailableThreadNum(float blockRate) {
+
+        if (blockRate >= 1 || blockRate < 0) {
+            throw new IllegalParameterException(new ExceptionMessage("The parameter blockRate is invalid,the valid value scope is [{1},{2}), but given : {0}。", blockRate, 0, 1));
+        }
+        int cpuCoreNum = Runtime.getRuntime().availableProcessors();
+        return (int) (cpuCoreNum / (1 - blockRate));
+    }
+
+    /**
+     * Finds the active thread with the specified id if it belongs to the specified thread group.
+     *
+     * @param threadId    The thread id
+     * @param threadGroup The thread group
+     * @return The thread which belongs to a specified thread group and the thread's id match the specified id.
+     * {@code null} is returned if no such thread exists
+     * @throws IllegalArgumentException if the specified id is zero or negative or the group is null
+     * @throws SecurityException        if the current thread cannot access the system thread group
+     * @throws SecurityException        if the current thread cannot modify
+     *                                  thread groups from this thread's thread group up to the system thread group
+     */
+    public static Thread findThreadById(final long threadId, final ThreadGroup threadGroup) {
+        Objects.requireNonNull(threadGroup, "The thread group must not be null");
+        final Thread thread = findThreadById(threadId);
+        if (thread != null && threadGroup.equals(thread.getThreadGroup())) {
+            return thread;
+        }
+        return null;
+    }
+
+    /**
+     * Finds the active thread with the specified id if it belongs to a thread group with the specified group name.
+     *
+     * @param threadId        The thread id
+     * @param threadGroupName The thread group name
+     * @return The threads which belongs to a thread group with the specified group name and the thread's id match the specified id.
+     * {@code null} is returned if no such thread exists
+     * @throws IllegalArgumentException if the specified id is zero or negative or the group name is null
+     * @throws SecurityException        if the current thread cannot access the system thread group
+     * @throws SecurityException        if the current thread cannot modify
+     *                                  thread groups from this thread's thread group up to the system thread group
+     */
+    public static Thread findThreadById(final long threadId, final String threadGroupName) {
+        Objects.requireNonNull(threadGroupName, "The thread group name must not be null");
+        final Thread thread = findThreadById(threadId);
+        if (thread != null && thread.getThreadGroup() != null && thread.getThreadGroup().getName().equals(threadGroupName)) {
+            return thread;
+        }
+        return null;
+    }
+
+    /**
+     * Finds active threads with the specified name if they belong to a specified thread group.
+     *
+     * @param threadName  The thread name
+     * @param threadGroup The thread group
+     * @return The threads which belongs to a thread group and the thread's name match the specified name,
+     * An empty collection is returned if no such thread exists. The collection returned is always unmodifiable.
+     * @throws IllegalArgumentException if the specified thread name or group is null
+     * @throws SecurityException        if the current thread cannot access the system thread group
+     * @throws SecurityException        if the current thread cannot modify
+     *                                  thread groups from this thread's thread group up to the system thread group
+     */
+    public static Collection<Thread> findThreadsByName(final String threadName, final ThreadGroup threadGroup) {
+        return findThreads(threadGroup, false, new NamePredicate(threadName));
+    }
+
+    /**
+     * Finds active threads with the specified name if they belong to a thread group with the specified group name.
+     *
+     * @param threadName      The thread name
+     * @param threadGroupName The thread group name
+     * @return The threads which belongs to a thread group with the specified group name and the thread's name match the specified name,
+     * An empty collection is returned if no such thread exists. The collection returned is always unmodifiable.
+     * @throws IllegalArgumentException if the specified thread name or group name is null
+     * @throws SecurityException        if the current thread cannot access the system thread group
+     * @throws SecurityException        if the current thread cannot modify
+     *                                  thread groups from this thread's thread group up to the system thread group
+     */
+    public static Collection<Thread> findThreadsByName(final String threadName, final String threadGroupName) {
+        Objects.requireNonNull(threadName, "The thread name must not be null");
+        Objects.requireNonNull(threadGroupName, "The thread group name must not be null");
+
+        final Collection<ThreadGroup> threadGroups = findThreadGroups(new NamePredicate(threadGroupName));
+
+        if (threadGroups.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        final Collection<Thread> result = new ArrayList<Thread>();
+        final NamePredicate threadNamePredicate = new NamePredicate(threadName);
+        for (final ThreadGroup group : threadGroups) {
+            result.addAll(findThreads(group, false, threadNamePredicate));
+        }
+        return Collections.unmodifiableCollection(result);
+    }
+
+    /**
+     * Finds active thread groups with the specified group name.
+     *
+     * @param threadGroupName The thread group name
+     * @return the thread groups with the specified group name or an empty collection if no such thread group exists. The collection returned is always unmodifiable.
+     * @throws IllegalArgumentException if group name is null
+     * @throws SecurityException        if the current thread cannot access the system thread group
+     * @throws SecurityException        if the current thread cannot modify
+     *                                  thread groups from this thread's thread group up to the system thread group
+     */
+    public static Collection<ThreadGroup> findThreadGroupsByName(final String threadGroupName) {
+        return findThreadGroups(new NamePredicate(threadGroupName));
+    }
+
+    /**
+     * Gets all active thread groups excluding the system thread group (A thread group is active if it has been not destroyed).
+     *
+     * @return all thread groups excluding the system thread group. The collection returned is always unmodifiable.
+     * @throws SecurityException if the current thread cannot access the system thread group
+     * @throws SecurityException if the current thread cannot modify
+     *                           thread groups from this thread's thread group up to the system thread group
+     */
+    public static Collection<ThreadGroup> getAllThreadGroups() {
+        return findThreadGroups(ALWAYS_TRUE_PREDICATE);
+    }
+
+    /**
+     * Gets the system thread group (sometimes also referred as "root thread group").
+     *
+     * @return the system thread group
+     * @throws SecurityException if the current thread cannot modify
+     *                           thread groups from this thread's thread group up to the system thread group
+     */
+    public static ThreadGroup getSystemThreadGroup() {
+        ThreadGroup threadGroup = Thread.currentThread().getThreadGroup();
+        while (threadGroup.getParent() != null) {
+            threadGroup = threadGroup.getParent();
+        }
+        return threadGroup;
+    }
+
+    /**
+     * Gets all active threads (A thread is active if it has been started and has not yet died).
+     *
+     * @return all active threads. The collection returned is always unmodifiable.
+     * @throws SecurityException if the current thread cannot access the system thread group
+     * @throws SecurityException if the current thread cannot modify
+     *                           thread groups from this thread's thread group up to the system thread group
+     */
+    public static Collection<Thread> getAllThreads() {
+        return findThreads(ALWAYS_TRUE_PREDICATE);
+    }
+
+    /**
+     * Finds active threads with the specified name.
+     *
+     * @param threadName The thread name
+     * @return The threads with the specified name or an empty collection if no such thread exists. The collection returned is always unmodifiable.
+     * @throws IllegalArgumentException if the specified name is null
+     * @throws SecurityException        if the current thread cannot access the system thread group
+     * @throws SecurityException        if the current thread cannot modify
+     *                                  thread groups from this thread's thread group up to the system thread group
+     */
+    public static Collection<Thread> findThreadsByName(final String threadName) {
+        return findThreads(new NamePredicate(threadName));
+    }
+
+    /**
+     * Finds the active thread with the specified id.
+     *
+     * @param threadId The thread id
+     * @return The thread with the specified id or {@code null} if no such thread exists
+     * @throws IllegalArgumentException if the specified id is zero or negative
+     * @throws SecurityException        if the current thread cannot access the system thread group
+     * @throws SecurityException        if the current thread cannot modify
+     *                                  thread groups from this thread's thread group up to the system thread group
+     */
+    public static Thread findThreadById(final long threadId) {
+        final Collection<Thread> result = findThreads(new ThreadIdPredicate(threadId));
+        return result.isEmpty() ? null : result.iterator().next();
+    }
+
+
+    /**
+     * A predicate for selecting threads.
+     */
+    // When breaking BC, replace this with Predicate<Thread>
+    public interface ThreadPredicate {
+
+        /**
+         * Evaluates this predicate on the given thread.
+         *
+         * @param thread the thread
+         * @return {@code true} if the thread matches the predicate, otherwise {@code false}
+         */
+        boolean test(Thread thread);
+    }
+
+    /**
+     * A predicate for selecting threadgroups.
+     */
+    // When breaking BC, replace this with Predicate<ThreadGroup>
+    public interface ThreadGroupPredicate {
+
+        /**
+         * Evaluates this predicate on the given threadgroup.
+         *
+         * @param threadGroup the threadgroup
+         * @return {@code true} if the threadGroup matches the predicate, otherwise {@code false}
+         */
+        boolean test(ThreadGroup threadGroup);
+    }
+
+    /**
+     * Predicate which always returns true.
+     */
+    public static final AlwaysTruePredicate ALWAYS_TRUE_PREDICATE = new AlwaysTruePredicate();
+
+    /**
+     * A predicate implementation which always returns true.
+     */
+    private static final class AlwaysTruePredicate implements ThreadPredicate, ThreadGroupPredicate {
+
+        private AlwaysTruePredicate() {
+        }
+
+        @Override
+        public boolean test(final ThreadGroup threadGroup) {
+            return true;
+        }
+
+        @Override
+        public boolean test(final Thread thread) {
+            return true;
+        }
+    }
+
+    /**
+     * A predicate implementation which matches a thread or threadgroup name.
+     */
+    public static class NamePredicate implements ThreadPredicate, ThreadGroupPredicate {
+
+        private final String name;
+
+        /**
+         * Predicate constructor
+         *
+         * @param name thread or threadgroup name
+         * @throws IllegalArgumentException if the name is {@code null}
+         */
+        public NamePredicate(final String name) {
+            super();
+            Objects.requireNonNull(name, "The name must not be null");
+            this.name = name;
+        }
+
+        @Override
+        public boolean test(final ThreadGroup threadGroup) {
+            return threadGroup != null && threadGroup.getName().equals(name);
+        }
+
+        @Override
+        public boolean test(final Thread thread) {
+            return thread != null && thread.getName().equals(name);
+        }
+    }
+
+    /**
+     * A predicate implementation which matches a thread id.
+     */
+    public static class ThreadIdPredicate implements ThreadPredicate {
+
+        private final long threadId;
+
+        /**
+         * Predicate constructor
+         *
+         * @param threadId the threadId to match
+         * @throws IllegalArgumentException if the threadId is zero or negative
+         */
+        public ThreadIdPredicate(final long threadId) {
+            super();
+            if (threadId <= 0) {
+                throw new IllegalArgumentException("The thread id must be greater than zero");
+            }
+            this.threadId = threadId;
+        }
+
+        @Override
+        public boolean test(final Thread thread) {
+            return thread != null && thread.getId() == threadId;
+        }
+    }
+
+    /**
+     * Select all active threads which match the given predicate.
+     *
+     * @param predicate the predicate
+     * @return An unmodifiable {@code Collection} of active threads matching the given predicate
+     * @throws IllegalArgumentException if the predicate is null
+     * @throws SecurityException        if the current thread cannot access the system thread group
+     * @throws SecurityException        if the current thread cannot modify
+     *                                  thread groups from this thread's thread group up to the system thread group
+     */
+    public static Collection<Thread> findThreads(final ThreadPredicate predicate) {
+        return findThreads(getSystemThreadGroup(), true, predicate);
+    }
+
+    /**
+     * Select all active threadgroups which match the given predicate.
+     *
+     * @param predicate the predicate
+     * @return An unmodifiable {@code Collection} of active threadgroups matching the given predicate
+     * @throws IllegalArgumentException if the predicate is null
+     * @throws SecurityException        if the current thread cannot access the system thread group
+     * @throws SecurityException        if the current thread cannot modify
+     *                                  thread groups from this thread's thread group up to the system thread group
+     */
+    public static Collection<ThreadGroup> findThreadGroups(final ThreadGroupPredicate predicate) {
+        return findThreadGroups(getSystemThreadGroup(), true, predicate);
+    }
+
+    /**
+     * Select all active threads which match the given predicate and which belongs to the given thread group (or one of its subgroups).
+     *
+     * @param group     the thread group
+     * @param recurse   if {@code true} then evaluate the predicate recursively on all threads in all subgroups of the given group
+     * @param predicate the predicate
+     * @return An unmodifiable {@code Collection} of active threads which match the given predicate and which belongs to the given thread group
+     * @throws IllegalArgumentException if the given group or predicate is null
+     * @throws SecurityException        if the current thread cannot modify
+     *                                  thread groups from this thread's thread group up to the system thread group
+     */
+    public static Collection<Thread> findThreads(final ThreadGroup group, final boolean recurse, final ThreadPredicate predicate) {
+        Objects.requireNonNull(group, "The group must not be null");
+        Objects.requireNonNull(predicate, "The predicate must not be null");
+
+        int count = group.activeCount();
+        Thread[] threads;
+        do {
+            threads = new Thread[count + (count / 2) + 1]; //slightly grow the array size
+            count = group.enumerate(threads, recurse);
+            //return value of enumerate() must be strictly less than the array size according to javadoc
+        } while (count >= threads.length);
+
+        final List<Thread> result = new ArrayList<Thread>(count);
+        for (int i = 0; i < count; ++i) {
+            if (predicate.test(threads[i])) {
+                result.add(threads[i]);
+            }
+        }
+        return Collections.unmodifiableCollection(result);
+    }
+
+    /**
+     * Select all active threadgroups which match the given predicate and which is a subgroup of the given thread group (or one of its subgroups).
+     *
+     * @param group     the thread group
+     * @param recurse   if {@code true} then evaluate the predicate recursively on all threadgroups in all subgroups of the given group
+     * @param predicate the predicate
+     * @return An unmodifiable {@code Collection} of active threadgroups which match the given predicate and which is a subgroup of the given thread group
+     * @throws IllegalArgumentException if the given group or predicate is null
+     * @throws SecurityException        if the current thread cannot modify
+     *                                  thread groups from this thread's thread group up to the system thread group
+     */
+    public static Collection<ThreadGroup> findThreadGroups(final ThreadGroup group, final boolean recurse, final ThreadGroupPredicate predicate) {
+        Objects.requireNonNull(group, "The group must not be null");
+        Objects.requireNonNull(predicate, "The predicate must not be null");
+
+        int count = group.activeGroupCount();
+        ThreadGroup[] threadGroups;
+        do {
+            threadGroups = new ThreadGroup[count + (count / 2) + 1]; //slightly grow the array size
+            count = group.enumerate(threadGroups, recurse);
+            //return value of enumerate() must be strictly less than the array size according to javadoc
+        } while (count >= threadGroups.length);
+
+        final List<ThreadGroup> result = new ArrayList<ThreadGroup>(count);
+        for (int i = 0; i < count; ++i) {
+            if (predicate.test(threadGroups[i])) {
+                result.add(threadGroups[i]);
+            }
+        }
+        return Collections.unmodifiableCollection(result);
+    }
+
+}

@@ -1,0 +1,18 @@
+package com.sondertara.common.function.predicate.matcher;
+
+import com.sondertara.common.function.Matcher;
+
+import java.util.function.Predicate;
+
+public class MatcherPredicateAdapter<I> implements Predicate<I> {
+    private Matcher<I, Boolean> matcher;
+
+    public MatcherPredicateAdapter(Matcher<I, Boolean> matcher) {
+        this.matcher = matcher;
+    }
+
+    @Override
+    public boolean test(I value) {
+        return matcher.matches(value);
+    }
+}

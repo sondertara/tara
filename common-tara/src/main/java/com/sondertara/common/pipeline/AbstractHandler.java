@@ -1,0 +1,17 @@
+package com.sondertara.common.pipeline;
+
+public class AbstractHandler implements Handler {
+    @Override
+    public void inbound(HandlerContext ctx) throws Throwable {
+        if (ctx.hasNext()) {
+            ctx.getNext().inbound();
+        }
+    }
+
+    @Override
+    public void outbound(HandlerContext ctx) throws Throwable {
+        if (ctx.hasPrev()) {
+            ctx.getPrev().outbound();
+        }
+    }
+}

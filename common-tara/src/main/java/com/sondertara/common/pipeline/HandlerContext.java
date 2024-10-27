@@ -1,0 +1,150 @@
+package com.sondertara.common.pipeline;
+
+import com.sondertara.common.struct.Holder;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+
+import java.util.Objects;
+
+public class HandlerContext {
+    @Nullable
+    private HandlerContext prev;
+    @Nullable
+    private HandlerContext next;
+    @NonNull
+    private Handler handler;
+
+    @NonNull
+    private Pipeline pipeline;
+
+    private boolean inbounded = false;
+    private boolean outbounded = false;
+    private boolean skiped = false;
+
+    public HandlerContext(Handler handler) {
+        Objects.requireNonNull(handler);
+        this.handler = handler;
+    }
+
+    public void setNext(HandlerContext next) {
+        this.next = next;
+    }
+
+    public void setPrev(HandlerContext prev) {
+        this.prev = prev;
+    }
+
+    public void inbound() throws Throwable {
+        if (isSkiped()) {
+            skipHandler(this, true);
+        }
+        getPipeline().setCurrentHandlerContext(this);
+        this.inbounded = true;
+        handler.inbound(this);
+    }
+
+    public static void skipHandler(HandlerContext ctx, boolean inbound) throws Throwable {
+        ctx.setSkiped(true);
+        if (inbound) {
+            if (ctx.hasNext()) {
+                ctx.getNext().inbound();
+            }
+        } else {
+            if (ctx.hasPrev()) {
+                ctx.getPrev().outbound();
+            }
+        }
+    }
+
+    public void outbound() throws Throwable {
+        if (isSkiped()) {
+            skipHandler(this, false);
+        }
+        getPipeline().setCurrentHandlerContext(this);
+        this.outbounded = true;
+        handler.outbound(this);
+    }
+
+    public boolean hasNext() {
+        return next != null;
+    }
+
+    public HandlerContext getNext() {
+        return next;
+    }
+
+    public boolean hasPrev() {
+        return prev != null;
+    }
+
+    public HandlerContext getPrev() {
+        return prev;
+    }
+
+    public void clear() {
+        clear(true);
+    }
+
+    public void clear(boolean removeHandler) {
+        this.next = null;
+        this.prev = null;
+        this.skiped = false;
+        this.outbounded = false;
+        this.inbounded = false;
+        if (removeHandler) {
+            this.handler = null;
+        }
+    }
+
+    Handler getHandler() {
+        return this.handler;
+    }
+
+    public Pipeline getPipeline() {
+        return this.pipeline;
+    }
+
+    public void setPipeline(Pipeline pipeline) {
+        this.pipeline = pipeline;
+    }
+
+    public boolean isInbounded() {
+        return inbounded;
+    }
+
+    public void setInbounded(boolean inbounded) {
+        this.inbounded = inbounded;
+    }
+
+    public boolean isOutbounded() {
+        return outbounded;
+    }
+
+    public void setOutbounded(boolean outbounded) {
+        this.outbounded = outbounded;
+    }
+
+    public boolean isSkiped() {
+        return skiped;
+    }
+
+    public void setSkiped(boolean skiped) {
+        this.skiped = skiped;
+    }
+
+    @Override
+    public String toString() {
+        return "HandlerContext{" +
+                "handler=" + handler +
+                ", pipeline=" + pipeline +
+                '}';
+    }
+
+    public Object getTarget() {
+        return this.pipeline.getTarget();
+    }
+
+    public Holder getCurrentValueHolder(){
+        return this.pipeline.getTargetHolder();
+    }
+}

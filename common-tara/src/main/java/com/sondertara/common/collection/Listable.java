@@ -1,0 +1,30 @@
+package com.sondertara.common.collection;
+
+import com.sondertara.common.base.EmptyEvalutible;
+
+import java.util.Collection;
+import java.util.Iterator;
+
+public interface Listable<E> extends Iterable<E>, EmptyEvalutible {
+    boolean add(E e);
+
+    /**
+     * 移除第一个
+     */
+    boolean remove(Object e);
+
+    boolean removeAll(Collection<?> collection);
+
+    void clear();
+
+    boolean addAll(Collection<? extends E> elements);
+
+    @Override
+    Iterator<E> iterator();
+
+    @Override
+    boolean isEmpty();
+
+    @Override
+    boolean isNull();
+}

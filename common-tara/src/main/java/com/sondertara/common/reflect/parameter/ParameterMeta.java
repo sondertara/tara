@@ -1,0 +1,61 @@
+package com.sondertara.common.reflect.parameter;
+
+import com.sondertara.common.base.Valid;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+
+public class ParameterMeta {
+    private Object executable;
+    private int index;
+    private int modifiers;
+    private String name;
+
+    public ParameterMeta(String name, int modifiers, Object executable, int index) {
+        this.name = name;
+        this.modifiers = modifiers;
+        Valid.isTrue(executable instanceof Method || executable instanceof Constructor);
+        this.executable = executable;
+        this.index = index;
+    }
+
+    public boolean isMethodParameter() {
+        return executable instanceof Method;
+    }
+
+    public boolean isConstructorParameter() {
+        return executable instanceof Constructor;
+    }
+
+    public Object getExecutable() {
+        return executable;
+    }
+
+    public void setExecutable(Object executable) {
+        this.executable = executable;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
+    }
+
+    public int getModifiers() {
+        return modifiers;
+    }
+
+    public void setModifiers(int modifiers) {
+        this.modifiers = modifiers;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+}

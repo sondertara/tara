@@ -1,0 +1,19 @@
+package com.sondertara.common.function;
+
+/**
+ * float supplier
+ *
+ * @author Jiahang Li
+ * @version 1.0.0
+ *  */
+@FunctionalInterface
+public interface FloatSupplier {
+
+    /**
+     * 获取 float 值
+     *
+     * @return float
+     */
+    float getAsFloat();
+
+}

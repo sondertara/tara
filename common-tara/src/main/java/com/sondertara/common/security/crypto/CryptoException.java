@@ -1,0 +1,63 @@
+/*
+ * Copyright (c) 2024 looly(loolly@aliyun.com)
+ * Hutool is licensed under Mulan PSL v2.
+ * You can use this software according to the terms and conditions of the Mulan PSL v2.
+ * You may obtain a copy of Mulan PSL v2 at:
+ *          https://license.coscl.org.cn/MulanPSL2
+ * THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OF ANY KIND,
+ * EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO NON-INFRINGEMENT,
+ * MERCHANTABILITY OR FIT FOR A PARTICULAR PURPOSE.
+ * See the Mulan PSL v2 for more details.
+ */
+
+package com.sondertara.common.security.crypto;
+
+import com.sondertara.common.exception.TaraException;
+
+/**
+ * 加密异常
+ * @author Looly
+ *
+ */
+public class CryptoException extends TaraException {
+	private static final long serialVersionUID = 8068509879445395353L;
+
+	/**
+	 * 构造
+	 *
+	 * @param e 异常
+	 */
+	public CryptoException(final Throwable e) {
+		super(e);
+	}
+
+	/**
+	 * 构造
+	 *
+	 * @param message 消息
+	 */
+	public CryptoException(final String message) {
+		super(message);
+	}
+
+	/**
+	 * 构造
+	 *
+	 * @param messageTemplate 消息模板
+	 * @param params          参数
+	 */
+	public CryptoException(final String messageTemplate, final Object... params) {
+		super(messageTemplate, params);
+	}
+
+	/**
+	 * 构造
+	 *
+	 * @param message 消息
+	 * @param cause   被包装的子异常
+	 */
+	public CryptoException(final String message, final Throwable cause) {
+		super(message, cause);
+	}
+
+}
